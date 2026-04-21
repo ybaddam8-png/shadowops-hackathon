@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ShadowOps WebSocket Contract",
+  "version": "3.0.0",
+  "description": "Inbound (frontend → backend) and outbound (backend → frontend) message schemas. Action space is now 4-way: ALLOW | BLOCK | FORK | QUARANTINE.",
+
+  "InboundMessage": {
+    "type": "object",
+    "required": ["domain", "action"],
+    "properties": {
+      "domain": {
+        "type": "string",
+        "enum": ["SOC", "GITHUB", "AWS"],
+        "description": "Target infrastructure domain."
+      },
+      "action": {
+        "type": "object",
+        "required": ["intent", "raw_payload"],
+        "properties": {
+          "intent": {
+            "type": "string",
+            "examples": [
+              "UPDATE_FIREWALL", "SUPPRESS_ALERT", "ISOLATE_SERVER",
+              "ADD_ALERT_RULE", "GENERATE_REPORT",
+              "MERGE_PR", "PUSH_CODE", "ADD_WEBHOOK",
+              "MODIFY_WORKFLOW", "ADD_COLLABORATOR",
+              "MODIFY_VPC", "UPDATE_IAM", "MODIFY_S3"
+            ]
+          },
+          "raw_payload": {
+            "type": "string",
+            "description": "The raw text payload the AI worker agent is attempting to execute."
+          }
+        }
+      }
+    }
+  },
+
+  "OutboundMessage": {
+    "type": "object",
+    "required": [
+      "domain",
+      "worker_action",
+      "supervisor_decision",
+      "environment_state",
+      "health_scores",
+      "quarantine_status"
+    ],
+    "properties": {
+      "domain": {
+        "type": "string",
+        "enum": ["SOC", "GITHUB", "AWS"]
+      },
+
+      "worker_action": {
+        "type": "object",
+        "required": ["intent", "raw_payload", "is_malicious"],
+        "properties": {
+          "intent":       { "type": "string" },
+          "raw_payload":  { "type": "string" },
+          "is_malicious": {
+            "type": "boolean",
+            "description": "Ground truth label resolved by heuristic classifier."
+          }
+        }
+      },
+
+      "supervisor_decision": {
+        "type": "object",
+        "required": ["action_taken", "risk_vector", "ambiguity_score", "quarantine_steps_remaining"],
+        "properties": {
+          "action_taken": {
+            "type": "string",
+            "enum": ["ALLOW", "BLOCK", "FORK", "QUARANTINE"],
+            "description": "4-way decision from the RL supervisor."
+          },
+          "risk_vector": {
+            "type": "array",
+            "items": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "minItems": 16,
+            "maxItems": 16,
+            "description": "16-dim feature vector: [injection, privilege, exfil, cli_cmd, social_eng, html_inject, bracket_override, payload_len, uppercase, special_chars, is_SOC, is_GITHUB, is_AWS, intent_risk, bracket_pat, entropy]."
+          },
+          "ambiguity_score": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "description": "How close the weighted risk is to 0.5. High ambiguity → QUARANTINE is rational. Score = 1 - |risk - 0.5| * 4."
+          },
+          "quarantine_steps_remaining": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3,
+            "description": "Steps remaining in the current QUARANTINE hold for this domain. 0 if no hold active."
+          }
+        }
+      },
+
+      "environment_state": {
+        "type": "object",
+        "required": ["is_shadow_active", "domain_data"],
+        "properties": {
+          "is_shadow_active": {
+            "type": "boolean",
+            "description": "True when FORK has been executed and the attacker is operating in the shadow clone."
+          },
+          "domain_data": {
+            "type": "object",
+            "description": "Full domain state snapshot. Shadow data when is_shadow_active=true, production data otherwise."
+          }
+        }
+      },
+
+      "health_scores": {
+        "type": "object",
+        "description": "Domain health 0–100. Decremented by false positives and breaches.",
+        "properties": {
+          "SOC":    { "type": "number", "minimum": 0, "maximum": 100 },
+          "GITHUB": { "type": "number", "minimum": 0, "maximum": 100 },
+          "AWS":    { "type": "number", "minimum": 0, "maximum": 100 }
+        }
+      },
+
+      "quarantine_status": {
+        "type": "object",
+        "description": "Per-domain quarantine state. Two distinct concepts: domain_quarantined (auto-triggered after 3 consecutive threat detections) and hold_active (current QUARANTINE action in progress).",
+        "additionalProperties": {
+          "type": "object",
+          "required": ["domain_quarantined", "hold_active", "hold_steps_remaining"],
+          "properties": {
+            "domain_quarantined": {
+              "type": "boolean",
+              "description": "Auto-quarantine: true for 30s after 3 consecutive threat detections."
+            },
+            "hold_active": {
+              "type": "boolean",
+              "description": "True when an agent-initiated QUARANTINE hold is in progress."
+            },
+            "hold_steps_remaining": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3,
+              "description": "Steps remaining in the current hold. 0 if no hold."
+            }
+          }
+        }
+      },
+
+      "quarantine_hold": {
+        "type": ["object", "null"],
+        "description": "Populated only when supervisor_decision.action_taken == QUARANTINE. Contains the live hold state and context signals.",
+        "properties": {
+          "active": { "type": "boolean" },
+          "steps_remaining": { "type": "integer", "minimum": 0, "maximum": 3 },
+          "context_signals": {
+            "type": "array",
+            "description": "Corroborating or exculpatory signals emitted each hold step.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hold_step":         { "type": "integer" },
+                "steps_remaining":   { "type": "integer" },
+                "context_signal":    { "type": "string" },
+                "signal_confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+              }
+            }
+          },
+          "latest_signal": {
+            "type": ["object", "null"],
+            "description": "Most recent context signal from this tick."
+          }
+        }
+      },
+
+      "forensic_log": {
+        "type": "array",
+        "description": "Last 5 FORK events for the forensic timeline.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "domain":    { "type": "string" },
+            "intent":    { "type": "string" },
+            "payload":   { "type": "string" },
+            "step":      { "type": "integer" },
+            "timestamp": { "type": "string", "format": "date-time" }
+          }
+        }
+      },
+
+      "incident_report": {
+        "type": ["object", "null"],
+        "description": "Full MITRE-mapped incident report. Non-null only when action_taken == FORK.",
+        "properties": {
+          "report_id":      { "type": "string" },
+          "timestamp":      { "type": "string", "format": "date-time" },
+          "domain":         { "type": "string" },
+          "intent":         { "type": "string" },
+          "severity":       { "type": "string", "enum": ["MEDIUM", "HIGH", "CRITICAL"] },
+          "confidence":     { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+          "mitre": {
+            "type": "object",
+            "properties": {
+              "tactic":         { "type": "string" },
+              "technique_id":   { "type": "string" },
+              "technique_name": { "type": "string" },
+              "confidence":     { "type": "number" }
+            }
+          },
+          "blast_radius":    { "type": "object" },
+          "cloudtrail":      { "type": "array" },
+          "recommendation":  { "type": "string" },
+          "payload_snippet": { "type": "string" }
+        }
+      }
+    }
+  }
+}

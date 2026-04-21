@@ -1,0 +1,21 @@
+# PyTorch (CUDA 12.1)
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch
+torchvision
+torchaudio
+
+# LLM Fine-Tuning & RL
+unsloth
+vllm
+trl
+transformers
+peft
+accelerate
+bitsandbytes
+datasets
+
+# OpenEnv Backend Server
+fastapi
+uvicorn
+websockets
+pydantic
