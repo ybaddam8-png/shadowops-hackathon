@@ -17,6 +17,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 TRAINING_DIR = BACKEND_DIR / "training"
 REPORTS_DIR = TRAINING_DIR / "reports"
 PLOTS_DIR = TRAINING_DIR / "plots"
+CURVE_REPORT_MD = REPORTS_DIR / "reward_curve_report.md"
 
 REAL_LOG_CANDIDATES = (
     TRAINING_DIR / "trainer_state.json",
@@ -80,6 +81,44 @@ def _extract_from_trainer_state(path: Path, data: dict[str, Any]) -> CurveSeries
     if not steps:
         return None
     return CurveSeries(steps, reward_mean, reward_std, completion_length, invalid_output_rate, [str(path)])
+
+
+def parse_trainer_state(path: Path) -> dict[str, Any]:
+    """Compatibility parser used by tests and downstream tooling."""
+    payload = _read_json(path)
+    history = payload.get("log_history")
+    points: dict[str, list[dict[str, float]]] = {
+        "reward_mean": [],
+        "reward_std": [],
+        "loss": [],
+        "grad_norm": [],
+        "completion_length": [],
+        "invalid_output_rate": [],
+    }
+    if not isinstance(history, list):
+        return {"points": points}
+    for row in history:
+        if not isinstance(row, dict):
+            continue
+        step = _safe_float(row.get("step"))
+        if step is None:
+            continue
+        metric_map = {
+            "reward_mean": row.get("reward_mean") or row.get("train/reward_mean") or row.get("rewards/reward_fn/mean"),
+            "reward_std": row.get("reward_std") or row.get("train/reward_std") or row.get("rewards/reward_fn/std"),
+            "loss": row.get("loss") or row.get("train/loss"),
+            "grad_norm": row.get("grad_norm"),
+            "completion_length": row.get("completion_length")
+            or row.get("train/completion_length")
+            or row.get("completions/mean_length"),
+            "invalid_output_rate": row.get("invalid_output_rate") or row.get("train/invalid_output_rate"),
+        }
+        for name, raw_value in metric_map.items():
+            value = _safe_float(raw_value)
+            if value is None:
+                continue
+            points[name].append({"step": step, "value": value})
+    return {"points": points}
 
 
 def _extract_from_metrics_jsonl(path: Path) -> CurveSeries | None:
@@ -174,6 +213,37 @@ def collect_real_curve_series() -> tuple[CurveSeries | None, list[str]]:
     return None, notes
 
 
+def collect_curve_data(paths: list[Path] | None = None) -> dict[str, Any]:
+    """Compatibility collector that reports available metric counts."""
+    source_files_used: list[str] = []
+    metrics_found = {
+        "reward_mean": 0,
+        "reward_std": 0,
+        "loss": 0,
+        "grad_norm": 0,
+        "completion_length": 0,
+        "invalid_output_rate": 0,
+    }
+    if paths is None:
+        paths = [TRAINING_DIR / "trainer_state.json"]
+    for path in paths:
+        if not path.exists():
+            continue
+        parsed = parse_trainer_state(path)
+        points = parsed.get("points", {})
+        source_files_used.append(str(path))
+        for metric in metrics_found:
+            metric_points = points.get(metric, [])
+            if isinstance(metric_points, list):
+                metrics_found[metric] += len(metric_points)
+    missing_metrics = [name for name, count in metrics_found.items() if count == 0]
+    return {
+        "source_files_used": source_files_used,
+        "metrics_found": metrics_found,
+        "missing_metrics": missing_metrics,
+    }
+
+
 def _plot_line(path: Path, x: list[float], y: list[float], title: str, y_label: str, color: str) -> None:
     fig, ax = plt.subplots(figsize=(8.6, 4.8))
     ax.plot(x, y, color=color, linewidth=2)
@@ -246,7 +316,7 @@ def _write_pending_stub_pngs() -> None:
     )
 
 
-def generate_reward_curves() -> dict[str, Any]:
+def generate_reward_curves(output_dir: Path | None = None) -> dict[str, Any]:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
     series, notes = collect_real_curve_series()
@@ -338,7 +408,7 @@ def generate_reward_curves() -> dict[str, Any]:
 
     report_json = REPORTS_DIR / "reward_curve_data.json"
     report_json.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    report_md = REPORTS_DIR / "reward_curve_report.md"
+    report_md = CURVE_REPORT_MD
     report_md.write_text(
         "\n".join(
             [
@@ -355,6 +425,12 @@ def generate_reward_curves() -> dict[str, Any]:
         ),
         encoding="utf-8",
     )
+    payload["generated_plot_paths"] = payload["plots"]
+    pending_warning = "No trainer_state.json or metrics.jsonl found; PENDING_REAL_TRAINING_LOGS."
+    payload["warning"] = pending_warning if payload["status"] == "PENDING_REAL_TRAINING_LOGS" else None
+    if output_dir is not None:
+        # Compatibility parameter: outputs remain in standard training folders.
+        output_dir.mkdir(parents=True, exist_ok=True)
     return payload
 
 
