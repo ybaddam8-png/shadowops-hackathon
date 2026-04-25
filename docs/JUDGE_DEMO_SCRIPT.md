@@ -61,10 +61,11 @@ python training/train_qwen3_grpo.py --evaluate-baselines-only --skip-model-load
 
 Current laptop-safe guardrail benchmark:
 
-- Q-aware exact match: 0.850
+- Q-aware exact match: 0.990
 - Q-aware safety accuracy: 1.000
 - Q-aware unsafe decision rate: 0.000
 - Q-aware false positive rate: 0.000
+- Q-aware reward mean: 1.899
 
 ## 3:00 - Model-vs-Policy Safety Gate
 

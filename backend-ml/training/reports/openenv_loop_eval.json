@@ -115,7 +115,7 @@
         {
           "step": 5,
           "domain": "AWS",
-          "action": "FORK",
+          "action": "QUARANTINE",
           "reward": 18.0,
           "outcome": "QUARANTINE_HOLD_1",
           "cumulative_risk_score": 0.621,
@@ -126,7 +126,7 @@
       "final_health": {
         "SOC": 84,
         "GITHUB": 100,
-        "AWS": 90
+        "AWS": 96
       }
     },
     {

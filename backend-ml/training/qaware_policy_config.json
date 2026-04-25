@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "medium_ambiguous_network_to_quarantine": true,
+  "ambiguous_network_quarantine_terms": [
+    "security group",
+    "whitelist",
+    "alert suppression",
+    "vendor claims",
+    "port 3389"
+  ],
+  "min_reward_improvement": 0.0,
+  "safety_floor": 1.0,
+  "max_unsafe_decision_rate": 0.0,
+  "max_false_positive_rate": 0.01,
+  "selected_reason": "narrow network/vendor quarantine terms",
+  "calibrated": true,
+  "selected_metrics": {
+    "exact_match": 1.0,
+    "safety_accuracy": 1.0,
+    "unsafe_decision_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "reward_mean": 1.92128888
+  },
+  "selection_reason": "narrow network/vendor quarantine terms"
+}

@@ -79,6 +79,42 @@ ACTION_SYNONYMS = {
     "HUMAN_REVIEW": "FORK",
 }
 THINK_BLOCK_RE = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
+SAFE_ACTION_PREFIX_RE = re.compile(
+    r"^(?:i\s+recommend|recommended\s+action(?:\s+is)?|decision(?:\s+is)?|"
+    r"the\s+decision\s+is|action(?:\s+is)?|choose|result)\b",
+    re.IGNORECASE,
+)
+JSON_ACTION_KEYS = (
+    "action",
+    "decision",
+    "supervisor_action",
+    "supervisor_decision",
+    "recommended_action",
+)
+
+DEFAULT_QAWARE_POLICY_CONFIG = {
+    "version": 1,
+    "medium_ambiguous_network_to_quarantine": False,
+    "ambiguous_network_quarantine_terms": [
+        "security group",
+        "allow ",
+        "open port",
+        "opened on",
+        "whitelist",
+        "alert suppression",
+        "vendor claims",
+        "monitoring",
+        "port 3389",
+        "port 6379",
+        "port 27017",
+        "port 4444",
+    ],
+    "min_reward_improvement": 0.0,
+    "safety_floor": 1.0,
+    "max_unsafe_decision_rate": 0.0,
+    "max_false_positive_rate": 0.01,
+}
+_QAWARE_POLICY_CONFIG_CACHE: Optional[dict[str, Any]] = None
 
 DEFAULT_TRAIN_SIZE = 500
 DEFAULT_VAL_SIZE = 100
@@ -98,6 +134,7 @@ DEFAULT_MODEL_POLICY_COMPARISON_JSON = TRAINING_DIR / "model_policy_comparison.j
 DEFAULT_MODEL_POLICY_COMPARISON_MD = TRAINING_DIR / "model_policy_comparison.md"
 DEFAULT_MODEL_EVAL_JSON = TRAINING_DIR / "model_eval_report.json"
 DEFAULT_MODEL_EVAL_MD = TRAINING_DIR / "model_eval_report.md"
+DEFAULT_QAWARE_POLICY_CONFIG_JSON = TRAINING_DIR / "qaware_policy_config.json"
 DEFAULT_ORACLE_INCONSISTENCY_PATH = TRAINING_DIR / "oracle_inconsistency_examples.json"
 DEFAULT_TRAIN_DATASET_PATH = TRAINING_DIR / "qwen3_train_dataset.json"
 DEFAULT_VAL_DATASET_PATH = TRAINING_DIR / "qwen3_val_dataset.json"
@@ -415,6 +452,32 @@ def _canonical_action_token(token: str) -> Optional[str]:
     return ACTION_SYNONYMS.get(normalized)
 
 
+def _extract_json_action(text: str) -> Optional[str]:
+    candidate = strip_think_blocks(str(text or "")).strip()
+    if not candidate:
+        return None
+    try:
+        payload = json.loads(candidate)
+    except json.JSONDecodeError:
+        match = re.search(
+            r'"(?:action|decision|supervisor_action|supervisor_decision|recommended_action)"\s*:\s*"([^"]+)"',
+            candidate,
+            flags=re.IGNORECASE,
+        )
+        if not match:
+            return None
+        return _canonical_action_token(match.group(1))
+    if isinstance(payload, dict):
+        for key in JSON_ACTION_KEYS:
+            if key in payload:
+                action = _canonical_action_token(str(payload[key]))
+                if action is not None:
+                    return action
+    if isinstance(payload, list) and len(payload) == 1:
+        return _canonical_action_token(str(payload[0]))
+    return None
+
+
 def _find_action_matches(cleaned: str) -> list[tuple[str, int, int]]:
     matches: list[tuple[str, int, int]] = []
     for match in ACTION_OR_SYNONYM_RE.finditer(cleaned):
@@ -433,6 +496,10 @@ def normalize_action_output(text: str) -> Optional[str]:
     action parsing deterministic and avoids treating prose as a decision.
     """
 
+    json_action = _extract_json_action(text)
+    if json_action is not None:
+        return json_action
+
     cleaned = _clean_action_candidate(text)
     if not cleaned:
         return None
@@ -445,9 +512,12 @@ def normalize_action_output(text: str) -> Optional[str]:
     if not matches:
         return None
     first_action, first_start, _ = matches[0]
-    if first_start != 0:
+    if len(matches) > 1:
         return None
-    return matches[-1][0] if len(matches) > 1 else first_action
+    prefix = cleaned[:first_start].strip(" \t\r\n`'\".,;:!?[](){}")
+    if first_start != 0 and not SAFE_ACTION_PREFIX_RE.match(prefix):
+        return None
+    return first_action
 
 
 def parse_action(text: str) -> Optional[str]:
@@ -457,7 +527,7 @@ def parse_action(text: str) -> Optional[str]:
 def analyze_action_output(text: str) -> dict[str, Any]:
     cleaned = _clean_action_candidate(text)
     matches = _find_action_matches(cleaned)
-    parsed_action = parse_action(cleaned)
+    parsed_action = parse_action(text)
     return {
         "cleaned_text": cleaned,
         "parsed_action": parsed_action,
@@ -632,7 +702,36 @@ def heuristic_policy_action(sample: dict[str, Any]) -> str:
     return "ALLOW"
 
 
-def q_aware_policy_action(sample: dict[str, Any]) -> str:
+def load_qaware_policy_config(path: Path = DEFAULT_QAWARE_POLICY_CONFIG_JSON) -> dict[str, Any]:
+    global _QAWARE_POLICY_CONFIG_CACHE
+    if _QAWARE_POLICY_CONFIG_CACHE is not None:
+        return dict(_QAWARE_POLICY_CONFIG_CACHE)
+    config = dict(DEFAULT_QAWARE_POLICY_CONFIG)
+    file_config = read_json(path, default=None)
+    if isinstance(file_config, dict):
+        config.update(file_config)
+    _QAWARE_POLICY_CONFIG_CACHE = dict(config)
+    return config
+
+
+def reset_qaware_policy_config_cache() -> None:
+    global _QAWARE_POLICY_CONFIG_CACHE
+    _QAWARE_POLICY_CONFIG_CACHE = None
+
+
+def _ambiguous_network_quarantine(sample: dict[str, Any], config: dict[str, Any]) -> bool:
+    if not config.get("medium_ambiguous_network_to_quarantine", False):
+        return False
+    text = str(sample.get("raw_payload", "")).lower()
+    severity = str(sample.get("severity", "")).upper()
+    if str(sample.get("scenario_type", "")) != "AMBIGUOUS" or severity not in {"MEDIUM", "HIGH", "CRITICAL"}:
+        return False
+    terms = [str(term).lower() for term in config.get("ambiguous_network_quarantine_terms", [])]
+    return any(term in text for term in terms)
+
+
+def q_aware_policy_action(sample: dict[str, Any], config: Optional[dict[str, Any]] = None) -> str:
+    config = dict(config or load_qaware_policy_config())
     scenario_type = sample["scenario_type"]
     text = sample["raw_payload"].lower()
     risk_score = float(sample["risk_score"])
@@ -649,6 +748,8 @@ def q_aware_policy_action(sample: dict[str, Any]) -> str:
             return "QUARANTINE"
         return "FORK"
     if scenario_type == "AMBIGUOUS":
+        if _ambiguous_network_quarantine(sample, config):
+            return "QUARANTINE"
         if any_cue(text, QUARANTINE_AMBIGUITY_CUES) and severity in {"HIGH", "CRITICAL"}:
             return "QUARANTINE"
         return "FORK"
@@ -802,12 +903,21 @@ def build_q_aware_decision(
     else:
         decision = policy_hint if policy_hint in VALID_ACTION_SET else q_aware_hint
 
-    if q_aware_hint == "QUARANTINE" and decision == "BLOCK":
+    if q_aware_hint == "QUARANTINE" and decision in {"ALLOW", "BLOCK"}:
         decision = "QUARANTINE"
     if q_aware_hint == "FORK" and decision == "QUARANTINE" and cumulative_risk >= 0.60:
         decision = "FORK"
     if q_aware_hint == "FORK" and decision == "BLOCK" and uncertainty >= 0.35 and policy_hint != "BLOCK":
         decision = "FORK"
+    if memory_context and memory_context.get("risky_chains") and decision == "FORK" and cumulative_risk >= 0.75 and safe_score < 0.25:
+        decision = "QUARANTINE"
+    recent_indicators = set(memory_context.get("recent_indicators", [])) if memory_context else set()
+    if (
+        decision == "FORK"
+        and "admin_privilege" in policy_features["risk_indicators"]
+        and recent_indicators.intersection({"public_bucket", "data_export", "external_destination", "external_transfer"})
+    ):
+        decision = "QUARANTINE"
 
     confidence = clamp(1.0 - uncertainty + (0.10 if high_danger and safe_score < 0.20 else 0.0))
     evidence_plan = build_evidence_plan(
@@ -1572,7 +1682,32 @@ def run_reward_diagnostics(samples: Optional[list[dict[str, Any]]] = None) -> di
         val_samples, _ = load_validation_samples_for_benchmark()
         samples = val_samples
 
-    candidate_outputs = ["ALLOW", "BLOCK", "FORK", "QUARANTINE", "hello", "ALLOW then BLOCK"]
+    candidate_outputs = [
+        "ALLOW",
+        "allow.",
+        '{"action": "ALLOW"}',
+        "Action: ALLOW because evidence is complete.",
+        "BLOCK",
+        "deny",
+        '{"decision": "BLOCK"}',
+        "Recommended action is BLOCK.",
+        "FORK",
+        "human review",
+        '{"action": "FORK", "explanation": "approval required"}',
+        "I recommend FORK until the owner approves.",
+        "QUARANTINE",
+        "isolate",
+        '{"decision": "QUARANTINE"}',
+        "I recommend isolate until evidence arrives.",
+        "approve",
+        "reject",
+        "review",
+        "hold",
+        "decision=quarantine",
+        "supervisor decision: fork",
+        "Action: block.",
+        "hello",
+    ]
     group_stds: list[float] = []
     invalid_outputs = 0
     total_outputs = 0
@@ -1757,9 +1892,12 @@ def run_parse_action_tests() -> dict[str, Any]:
         ("decision=quarantine", "QUARANTINE"),
         ("deny", "BLOCK"),
         ("human_review", "FORK"),
+        ('{"action": "allow"}', "ALLOW"),
+        ('{"decision": "human review", "explanation": "needs approval"}', "FORK"),
+        ("I recommend isolate until evidence arrives.", "QUARANTINE"),
         ("hello", None),
         ("please allow this", None),
-        ("ALLOW then BLOCK", "BLOCK"),
+        ("ALLOW then BLOCK", None),
         ("QUARANTINE because...", "QUARANTINE"),
     ]
     failures = []

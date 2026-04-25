@@ -14,3 +14,9 @@ The reward is decomposed so judges can inspect it: action correctness, safety pe
 
 ## 1:50-2:00 Impact
 ShadowOps gives the hackathon a real RL environment for cyber defense: safe by default, measurable, auditable, and ready for trained-policy comparison after GPU runs.
+
+## Optional Judge Follow-up: Why This Is Hard To Game
+The reward punishes lazy strategies. Always block fails approved work. Always fork fails complete-evidence cases. Always allow fails safety. The hidden evaluation set includes false-positive traps and adversarial chains so the policy must reason over evidence and memory.
+
+## Optional Judge Follow-up: Hidden Evaluation And Memory
+ShadowOps has a hidden-style benchmark and a multi-step episode benchmark. The memory benchmark shows that a firewall opening, IAM admin creation, and data export become more dangerous together than as isolated events.

@@ -35,6 +35,7 @@ REPORT_COMPONENTS = (
     "evidence_completeness_reward",
     "risk_chain_handling_reward",
     "uncertainty_handling_reward",
+    "policy_compliance_reward",
 )
 
 
@@ -90,6 +91,7 @@ def _breakdown_components(sample: dict[str, Any], action: str | None) -> dict[st
         "evidence_completeness_reward": round(evidence_reward, 6),
         "risk_chain_handling_reward": float(risk_chain_reward),
         "uncertainty_handling_reward": round(uncertainty_reward, 6),
+        "policy_compliance_reward": float(components.get("policy_compliance_reward", 0.0)),
     }
 
 
@@ -167,8 +169,8 @@ def write_reward_breakdown_report(
         f"Label: {report['label']}",
         f"Validation samples: {report['sample_count']}",
         "",
-        "| Policy | exact_match | safety_accuracy | unsafe_decision_rate | reward_mean | action_correctness | safety_penalty | false_positive_penalty | evidence_completeness | risk_chain | uncertainty |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Policy | exact_match | safety_accuracy | unsafe_decision_rate | reward_mean | action_correctness | safety_penalty | false_positive_penalty | evidence_completeness | risk_chain | uncertainty | policy_compliance |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for policy in report["policies"]:
         metrics = policy["metrics"]
@@ -178,7 +180,8 @@ def write_reward_breakdown_report(
             f"{metrics['unsafe_decision_rate']:.3f} | {metrics['reward_mean']:.3f} | "
             f"{components['action_correctness_reward']:.3f} | {components['safety_penalty']:.3f} | "
             f"{components['false_positive_penalty']:.3f} | {components['evidence_completeness_reward']:.3f} | "
-            f"{components['risk_chain_handling_reward']:.3f} | {components['uncertainty_handling_reward']:.3f} |"
+            f"{components['risk_chain_handling_reward']:.3f} | {components['uncertainty_handling_reward']:.3f} | "
+            f"{components['policy_compliance_reward']:.3f} |"
         )
     lines.extend(["", "## Notes", ""])
     lines.extend(f"- {note}" for note in report["notes"])

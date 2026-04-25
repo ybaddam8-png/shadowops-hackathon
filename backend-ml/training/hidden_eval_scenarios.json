@@ -1,0 +1,3542 @@
+[
+  {
+    "id": "malicious-000",
+    "title": "GitHub / CI/CD: rogue workflow reads CI secrets and deploys payload",
+    "domain": "github_ci",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-000",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-001",
+    "title": "Cloud IAM: create emergency admin identity without ticket then export audit data",
+    "domain": "cloud_iam",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-001",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-002",
+    "title": "S3/public storage: make sensitive bucket public and transfer customer archive externally",
+    "domain": "aws_s3",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-002",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-003",
+    "title": "Kubernetes: open privileged network path then add external administrator",
+    "domain": "kubernetes",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-003",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-004",
+    "title": "Endpoint security: disable monitoring and run remote command from untrusted host",
+    "domain": "endpoint_security",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-004",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-005",
+    "title": "SaaS admin actions: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "saas_admin",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-005",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-006",
+    "title": "Data export: rogue workflow reads CI secrets and deploys payload",
+    "domain": "data_export",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-006",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-007",
+    "title": "Firewall/network policy: create emergency admin identity without ticket then export audit data",
+    "domain": "network_firewall",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-007",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-008",
+    "title": "Secrets management: make sensitive bucket public and transfer customer archive externally",
+    "domain": "secrets_management",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-008",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-009",
+    "title": "Production deployment: open privileged network path then add external administrator",
+    "domain": "production_deployment",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-009",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-010",
+    "title": "GitHub / CI/CD: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "github_ci",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-010",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-011",
+    "title": "Cloud IAM: rogue workflow reads CI secrets and deploys payload",
+    "domain": "cloud_iam",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-011",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-012",
+    "title": "S3/public storage: create emergency admin identity without ticket then export audit data",
+    "domain": "aws_s3",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-012",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-013",
+    "title": "Kubernetes: make sensitive bucket public and transfer customer archive externally",
+    "domain": "kubernetes",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-013",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-014",
+    "title": "Endpoint security: open privileged network path then add external administrator",
+    "domain": "endpoint_security",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-014",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-015",
+    "title": "SaaS admin actions: disable monitoring and run remote command from untrusted host",
+    "domain": "saas_admin",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-015",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-016",
+    "title": "Data export: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "data_export",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-016",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-017",
+    "title": "Firewall/network policy: rogue workflow reads CI secrets and deploys payload",
+    "domain": "network_firewall",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-017",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-018",
+    "title": "Secrets management: create emergency admin identity without ticket then export audit data",
+    "domain": "secrets_management",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-018",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-019",
+    "title": "Production deployment: make sensitive bucket public and transfer customer archive externally",
+    "domain": "production_deployment",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-019",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-020",
+    "title": "GitHub / CI/CD: disable monitoring and run remote command from untrusted host",
+    "domain": "github_ci",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-020",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-021",
+    "title": "Cloud IAM: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "cloud_iam",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-021",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-022",
+    "title": "S3/public storage: rogue workflow reads CI secrets and deploys payload",
+    "domain": "aws_s3",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-022",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-023",
+    "title": "Kubernetes: create emergency admin identity without ticket then export audit data",
+    "domain": "kubernetes",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-023",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-024",
+    "title": "Endpoint security: make sensitive bucket public and transfer customer archive externally",
+    "domain": "endpoint_security",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-024",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-025",
+    "title": "SaaS admin actions: open privileged network path then add external administrator",
+    "domain": "saas_admin",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-025",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-026",
+    "title": "Data export: disable monitoring and run remote command from untrusted host",
+    "domain": "data_export",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-026",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-027",
+    "title": "Firewall/network policy: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "network_firewall",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-027",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-028",
+    "title": "Secrets management: rogue workflow reads CI secrets and deploys payload",
+    "domain": "secrets_management",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-028",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-029",
+    "title": "Production deployment: create emergency admin identity without ticket then export audit data",
+    "domain": "production_deployment",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-029",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-030",
+    "title": "GitHub / CI/CD: open privileged network path then add external administrator",
+    "domain": "github_ci",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-030",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-031",
+    "title": "Cloud IAM: disable monitoring and run remote command from untrusted host",
+    "domain": "cloud_iam",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-031",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-032",
+    "title": "S3/public storage: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "aws_s3",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-032",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-033",
+    "title": "Kubernetes: rogue workflow reads CI secrets and deploys payload",
+    "domain": "kubernetes",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-033",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-034",
+    "title": "Endpoint security: create emergency admin identity without ticket then export audit data",
+    "domain": "endpoint_security",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-034",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-035",
+    "title": "SaaS admin actions: make sensitive bucket public and transfer customer archive externally",
+    "domain": "saas_admin",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-035",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-036",
+    "title": "Data export: open privileged network path then add external administrator",
+    "domain": "data_export",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-036",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-037",
+    "title": "Firewall/network policy: disable monitoring and run remote command from untrusted host",
+    "domain": "network_firewall",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-037",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-038",
+    "title": "Secrets management: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "secrets_management",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-038",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-039",
+    "title": "Production deployment: rogue workflow reads CI secrets and deploys payload",
+    "domain": "production_deployment",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-039",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-040",
+    "title": "GitHub / CI/CD: make sensitive bucket public and transfer customer archive externally",
+    "domain": "github_ci",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-040",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-041",
+    "title": "Cloud IAM: open privileged network path then add external administrator",
+    "domain": "cloud_iam",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-041",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-042",
+    "title": "S3/public storage: disable monitoring and run remote command from untrusted host",
+    "domain": "aws_s3",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-042",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-043",
+    "title": "Kubernetes: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "kubernetes",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-043",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-044",
+    "title": "Endpoint security: rogue workflow reads CI secrets and deploys payload",
+    "domain": "endpoint_security",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-044",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-045",
+    "title": "SaaS admin actions: create emergency admin identity without ticket then export audit data",
+    "domain": "saas_admin",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-045",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-046",
+    "title": "Data export: make sensitive bucket public and transfer customer archive externally",
+    "domain": "data_export",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-046",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-047",
+    "title": "Firewall/network policy: open privileged network path then add external administrator",
+    "domain": "network_firewall",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-047",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-048",
+    "title": "Secrets management: disable monitoring and run remote command from untrusted host",
+    "domain": "secrets_management",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-048",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-049",
+    "title": "Production deployment: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "production_deployment",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-049",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "hard"
+  },
+  {
+    "id": "malicious-050",
+    "title": "GitHub / CI/CD: create emergency admin identity without ticket then export audit data",
+    "domain": "github_ci",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-050",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-051",
+    "title": "Cloud IAM: make sensitive bucket public and transfer customer archive externally",
+    "domain": "cloud_iam",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "unknown",
+    "session_id": "hidden-malicious-051",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-052",
+    "title": "S3/public storage: open privileged network path then add external administrator",
+    "domain": "aws_s3",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-052",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-053",
+    "title": "Kubernetes: disable monitoring and run remote command from untrusted host",
+    "domain": "kubernetes",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "deploy_svc",
+    "session_id": "hidden-malicious-053",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-054",
+    "title": "Endpoint security: fake approval asks to rotate secret into attacker-controlled webhook",
+    "domain": "endpoint_security",
+    "intent": "fake approval asks to rotate secret into attacker-controlled webhook",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-054",
+    "environment": "production",
+    "indicators": [
+      "secret_rotation",
+      "external_destination",
+      "policy_override",
+      "fake_evidence"
+    ],
+    "safe_indicators": [
+      "approval ticket",
+      "secret owner",
+      "rotation plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-055",
+    "title": "SaaS admin actions: rogue workflow reads CI secrets and deploys payload",
+    "domain": "saas_admin",
+    "intent": "rogue workflow reads CI secrets and deploys payload",
+    "actor": "vendor_ops",
+    "session_id": "hidden-malicious-055",
+    "environment": "production",
+    "indicators": [
+      "ci_secret_access",
+      "workflow_modification",
+      "production_deploy",
+      "external_fetch"
+    ],
+    "safe_indicators": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-056",
+    "title": "Data export: create emergency admin identity without ticket then export audit data",
+    "domain": "data_export",
+    "intent": "create emergency admin identity without ticket then export audit data",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-056",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "new_identity",
+      "data_export",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "privilege diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-057",
+    "title": "Firewall/network policy: make sensitive bucket public and transfer customer archive externally",
+    "domain": "network_firewall",
+    "intent": "make sensitive bucket public and transfer customer archive externally",
+    "actor": "new contractor",
+    "session_id": "hidden-malicious-057",
+    "environment": "production",
+    "indicators": [
+      "public_bucket",
+      "sensitive_data",
+      "data_export",
+      "external_destination"
+    ],
+    "safe_indicators": [
+      "data classification",
+      "approval ticket",
+      "bucket policy diff"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-058",
+    "title": "Secrets management: open privileged network path then add external administrator",
+    "domain": "secrets_management",
+    "intent": "open privileged network path then add external administrator",
+    "actor": "security_admin",
+    "session_id": "hidden-malicious-058",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port",
+      "admin_privilege",
+      "review_bypass"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "rollback plan",
+      "approval chain"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "malicious-059",
+    "title": "Production deployment: disable monitoring and run remote command from untrusted host",
+    "domain": "production_deployment",
+    "intent": "disable monitoring and run remote command from untrusted host",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-malicious-059",
+    "environment": "production",
+    "indicators": [
+      "review_bypass",
+      "endpoint_disable",
+      "external_fetch",
+      "unknown_actor"
+    ],
+    "safe_indicators": [
+      "requester identity",
+      "change ticket",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "FORK",
+    "expected_reason": "malicious or adversarial evidence must be contained in human/shadow review before production execution",
+    "difficulty": "adversarial"
+  },
+  {
+    "id": "benign-000",
+    "title": "GitHub / CI/CD: approved dependency update touches CI but no secret scope changes",
+    "domain": "github_ci",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-000",
+    "environment": "staging",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-001",
+    "title": "Cloud IAM: public website bucket update with public classification and exposure duration",
+    "domain": "cloud_iam",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-001",
+    "environment": "prod-eu",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-002",
+    "title": "S3/public storage: break-glass admin access with incident commander approval and MFA",
+    "domain": "aws_s3",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-002",
+    "environment": "dev",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-003",
+    "title": "Kubernetes: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "kubernetes",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-003",
+    "environment": "staging",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-004",
+    "title": "Endpoint security: trusted automation production deployment matching known release pattern",
+    "domain": "endpoint_security",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-004",
+    "environment": "dev",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-005",
+    "title": "SaaS admin actions: authorized pentest activity inside approved scope and window",
+    "domain": "saas_admin",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-005",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-006",
+    "title": "Data export: approved dependency update touches CI but no secret scope changes",
+    "domain": "data_export",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-006",
+    "environment": "dev",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-007",
+    "title": "Firewall/network policy: public website bucket update with public classification and exposure duration",
+    "domain": "network_firewall",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-007",
+    "environment": "production",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-008",
+    "title": "Secrets management: break-glass admin access with incident commander approval and MFA",
+    "domain": "secrets_management",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-008",
+    "environment": "staging",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-009",
+    "title": "Production deployment: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "production_deployment",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-009",
+    "environment": "dev",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-010",
+    "title": "GitHub / CI/CD: authorized pentest activity inside approved scope and window",
+    "domain": "github_ci",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-010",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-011",
+    "title": "Cloud IAM: approved dependency update touches CI but no secret scope changes",
+    "domain": "cloud_iam",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-011",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-012",
+    "title": "S3/public storage: public website bucket update with public classification and exposure duration",
+    "domain": "aws_s3",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-012",
+    "environment": "staging",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-013",
+    "title": "Kubernetes: break-glass admin access with incident commander approval and MFA",
+    "domain": "kubernetes",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-013",
+    "environment": "prod-eu",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-014",
+    "title": "Endpoint security: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "endpoint_security",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-014",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-015",
+    "title": "SaaS admin actions: trusted automation production deployment matching known release pattern",
+    "domain": "saas_admin",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-015",
+    "environment": "prod-eu",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-016",
+    "title": "Data export: authorized pentest activity inside approved scope and window",
+    "domain": "data_export",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-016",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-017",
+    "title": "Firewall/network policy: approved dependency update touches CI but no secret scope changes",
+    "domain": "network_firewall",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-017",
+    "environment": "prod-eu",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-018",
+    "title": "Secrets management: public website bucket update with public classification and exposure duration",
+    "domain": "secrets_management",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-018",
+    "environment": "dev",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-019",
+    "title": "Production deployment: break-glass admin access with incident commander approval and MFA",
+    "domain": "production_deployment",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-019",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-020",
+    "title": "GitHub / CI/CD: trusted automation production deployment matching known release pattern",
+    "domain": "github_ci",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-020",
+    "environment": "dev",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-021",
+    "title": "Cloud IAM: authorized pentest activity inside approved scope and window",
+    "domain": "cloud_iam",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-021",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-022",
+    "title": "S3/public storage: approved dependency update touches CI but no secret scope changes",
+    "domain": "aws_s3",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-022",
+    "environment": "dev",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-023",
+    "title": "Kubernetes: public website bucket update with public classification and exposure duration",
+    "domain": "kubernetes",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-023",
+    "environment": "production",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-024",
+    "title": "Endpoint security: break-glass admin access with incident commander approval and MFA",
+    "domain": "endpoint_security",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-024",
+    "environment": "staging",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-025",
+    "title": "SaaS admin actions: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "saas_admin",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-025",
+    "environment": "dev",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-026",
+    "title": "Data export: trusted automation production deployment matching known release pattern",
+    "domain": "data_export",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-026",
+    "environment": "staging",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-027",
+    "title": "Firewall/network policy: authorized pentest activity inside approved scope and window",
+    "domain": "network_firewall",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-027",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-028",
+    "title": "Secrets management: approved dependency update touches CI but no secret scope changes",
+    "domain": "secrets_management",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-028",
+    "environment": "staging",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-029",
+    "title": "Production deployment: public website bucket update with public classification and exposure duration",
+    "domain": "production_deployment",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-029",
+    "environment": "prod-eu",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-030",
+    "title": "GitHub / CI/CD: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "github_ci",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-030",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-031",
+    "title": "Cloud IAM: trusted automation production deployment matching known release pattern",
+    "domain": "cloud_iam",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-031",
+    "environment": "prod-eu",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-032",
+    "title": "S3/public storage: authorized pentest activity inside approved scope and window",
+    "domain": "aws_s3",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-032",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-033",
+    "title": "Kubernetes: approved dependency update touches CI but no secret scope changes",
+    "domain": "kubernetes",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-033",
+    "environment": "prod-eu",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-034",
+    "title": "Endpoint security: public website bucket update with public classification and exposure duration",
+    "domain": "endpoint_security",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-034",
+    "environment": "dev",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-035",
+    "title": "SaaS admin actions: break-glass admin access with incident commander approval and MFA",
+    "domain": "saas_admin",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-035",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-036",
+    "title": "Data export: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "data_export",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-036",
+    "environment": "prod-eu",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-037",
+    "title": "Firewall/network policy: trusted automation production deployment matching known release pattern",
+    "domain": "network_firewall",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-037",
+    "environment": "production",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-038",
+    "title": "Secrets management: authorized pentest activity inside approved scope and window",
+    "domain": "secrets_management",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-038",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-039",
+    "title": "Production deployment: approved dependency update touches CI but no secret scope changes",
+    "domain": "production_deployment",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-039",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-040",
+    "title": "GitHub / CI/CD: break-glass admin access with incident commander approval and MFA",
+    "domain": "github_ci",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-040",
+    "environment": "staging",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-041",
+    "title": "Cloud IAM: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "cloud_iam",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-041",
+    "environment": "dev",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-042",
+    "title": "S3/public storage: trusted automation production deployment matching known release pattern",
+    "domain": "aws_s3",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-042",
+    "environment": "staging",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-043",
+    "title": "Kubernetes: authorized pentest activity inside approved scope and window",
+    "domain": "kubernetes",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-043",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-044",
+    "title": "Endpoint security: approved dependency update touches CI but no secret scope changes",
+    "domain": "endpoint_security",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-044",
+    "environment": "staging",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-045",
+    "title": "SaaS admin actions: public website bucket update with public classification and exposure duration",
+    "domain": "saas_admin",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-045",
+    "environment": "prod-eu",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-046",
+    "title": "Data export: break-glass admin access with incident commander approval and MFA",
+    "domain": "data_export",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-046",
+    "environment": "dev",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-047",
+    "title": "Firewall/network policy: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "network_firewall",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-047",
+    "environment": "staging",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-048",
+    "title": "Secrets management: trusted automation production deployment matching known release pattern",
+    "domain": "secrets_management",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-048",
+    "environment": "dev",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-049",
+    "title": "Production deployment: authorized pentest activity inside approved scope and window",
+    "domain": "production_deployment",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-049",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "medium"
+  },
+  {
+    "id": "benign-050",
+    "title": "GitHub / CI/CD: public website bucket update with public classification and exposure duration",
+    "domain": "github_ci",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-050",
+    "environment": "dev",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-051",
+    "title": "Cloud IAM: break-glass admin access with incident commander approval and MFA",
+    "domain": "cloud_iam",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-051",
+    "environment": "production",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-052",
+    "title": "S3/public storage: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "aws_s3",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-052",
+    "environment": "prod-eu",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-053",
+    "title": "Kubernetes: trusted automation production deployment matching known release pattern",
+    "domain": "kubernetes",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "deploy_svc",
+    "session_id": "hidden-benign-053",
+    "environment": "production",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-054",
+    "title": "Endpoint security: authorized pentest activity inside approved scope and window",
+    "domain": "endpoint_security",
+    "intent": "authorized pentest activity inside approved scope and window",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-054",
+    "environment": "staging",
+    "indicators": [
+      "scan_activity",
+      "exploit_simulation"
+    ],
+    "safe_indicators": [
+      "authorization letter",
+      "approved test window",
+      "scope document",
+      "target list",
+      "emergency contact"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-055",
+    "title": "SaaS admin actions: approved dependency update touches CI but no secret scope changes",
+    "domain": "saas_admin",
+    "intent": "approved dependency update touches CI but no secret scope changes",
+    "actor": "vendor_ops",
+    "session_id": "hidden-benign-055",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification"
+    ],
+    "safe_indicators": [
+      "trusted maintainer",
+      "approved change ticket",
+      "no secret permission diff",
+      "package provenance"
+    ],
+    "missing_evidence": [
+      "maintainer identity"
+    ],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-056",
+    "title": "Data export: public website bucket update with public classification and exposure duration",
+    "domain": "data_export",
+    "intent": "public website bucket update with public classification and exposure duration",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-056",
+    "environment": "staging",
+    "indicators": [
+      "public_bucket"
+    ],
+    "safe_indicators": [
+      "classification public",
+      "approval ticket",
+      "bucket policy diff",
+      "exposure duration"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-057",
+    "title": "Firewall/network policy: break-glass admin access with incident commander approval and MFA",
+    "domain": "network_firewall",
+    "intent": "break-glass admin access with incident commander approval and MFA",
+    "actor": "new contractor",
+    "session_id": "hidden-benign-057",
+    "environment": "prod-eu",
+    "indicators": [
+      "admin_privilege",
+      "break_glass"
+    ],
+    "safe_indicators": [
+      "approval chain",
+      "requester identity",
+      "break-glass approval",
+      "MFA status"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-058",
+    "title": "Secrets management: maintenance firewall rule with ticket window and rollback plan",
+    "domain": "secrets_management",
+    "intent": "maintenance firewall rule with ticket window and rollback plan",
+    "actor": "security_admin",
+    "session_id": "hidden-benign-058",
+    "environment": "production",
+    "indicators": [
+      "public_exposure",
+      "admin_port"
+    ],
+    "safe_indicators": [
+      "change ticket",
+      "approved maintenance window",
+      "source/destination justification",
+      "rollback plan"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "benign-059",
+    "title": "Production deployment: trusted automation production deployment matching known release pattern",
+    "domain": "production_deployment",
+    "intent": "trusted automation production deployment matching known release pattern",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-benign-059",
+    "environment": "prod-eu",
+    "indicators": [
+      "production_deploy"
+    ],
+    "safe_indicators": [
+      "known automation",
+      "approved ticket",
+      "rollback plan",
+      "trusted maintainer"
+    ],
+    "missing_evidence": [],
+    "expected_action": "ALLOW",
+    "expected_reason": "trusted evidence lowers severity and avoids false positive",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-000",
+    "title": "GitHub / CI/CD: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "github_ci",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "deploy_svc",
+    "session_id": "hidden-ambiguous-000",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-001",
+    "title": "Cloud IAM: new maintainer changes workflow and says security approval is pending",
+    "domain": "cloud_iam",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "security_admin",
+    "session_id": "hidden-ambiguous-001",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-002",
+    "title": "S3/public storage: data export request has business justification but no classification",
+    "domain": "aws_s3",
+    "intent": "data export request has business justification but no classification",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-ambiguous-002",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-003",
+    "title": "Kubernetes: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "kubernetes",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "new contractor",
+    "session_id": "hidden-ambiguous-003",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-004",
+    "title": "Endpoint security: new maintainer changes workflow and says security approval is pending",
+    "domain": "endpoint_security",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "deploy_svc",
+    "session_id": "hidden-ambiguous-004",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-005",
+    "title": "SaaS admin actions: data export request has business justification but no classification",
+    "domain": "saas_admin",
+    "intent": "data export request has business justification but no classification",
+    "actor": "deploy_svc",
+    "session_id": "hidden-ambiguous-005",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-006",
+    "title": "Data export: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "data_export",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "vendor_ops",
+    "session_id": "hidden-ambiguous-006",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-007",
+    "title": "Firewall/network policy: new maintainer changes workflow and says security approval is pending",
+    "domain": "network_firewall",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "vendor_ops",
+    "session_id": "hidden-ambiguous-007",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-008",
+    "title": "Secrets management: data export request has business justification but no classification",
+    "domain": "secrets_management",
+    "intent": "data export request has business justification but no classification",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-ambiguous-008",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-009",
+    "title": "Production deployment: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "production_deployment",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "unknown",
+    "session_id": "hidden-ambiguous-009",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-010",
+    "title": "GitHub / CI/CD: data export request has business justification but no classification",
+    "domain": "github_ci",
+    "intent": "data export request has business justification but no classification",
+    "actor": "new contractor",
+    "session_id": "hidden-ambiguous-010",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-011",
+    "title": "Cloud IAM: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "cloud_iam",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-ambiguous-011",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-012",
+    "title": "S3/public storage: new maintainer changes workflow and says security approval is pending",
+    "domain": "aws_s3",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "unknown",
+    "session_id": "hidden-ambiguous-012",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-013",
+    "title": "Kubernetes: data export request has business justification but no classification",
+    "domain": "kubernetes",
+    "intent": "data export request has business justification but no classification",
+    "actor": "vendor_ops",
+    "session_id": "hidden-ambiguous-013",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-014",
+    "title": "Endpoint security: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "endpoint_security",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "new contractor",
+    "session_id": "hidden-ambiguous-014",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-015",
+    "title": "SaaS admin actions: new maintainer changes workflow and says security approval is pending",
+    "domain": "saas_admin",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "new contractor",
+    "session_id": "hidden-ambiguous-015",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-016",
+    "title": "Data export: data export request has business justification but no classification",
+    "domain": "data_export",
+    "intent": "data export request has business justification but no classification",
+    "actor": "deploy_svc",
+    "session_id": "hidden-ambiguous-016",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-017",
+    "title": "Firewall/network policy: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "network_firewall",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "deploy_svc",
+    "session_id": "hidden-ambiguous-017",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-018",
+    "title": "Secrets management: new maintainer changes workflow and says security approval is pending",
+    "domain": "secrets_management",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "unknown",
+    "session_id": "hidden-ambiguous-018",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-019",
+    "title": "Production deployment: data export request has business justification but no classification",
+    "domain": "production_deployment",
+    "intent": "data export request has business justification but no classification",
+    "actor": "security_admin",
+    "session_id": "hidden-ambiguous-019",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "hard"
+  },
+  {
+    "id": "ambiguous-020",
+    "title": "GitHub / CI/CD: new maintainer changes workflow and says security approval is pending",
+    "domain": "github_ci",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "vendor_ops",
+    "session_id": "hidden-ambiguous-020",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-021",
+    "title": "Cloud IAM: data export request has business justification but no classification",
+    "domain": "cloud_iam",
+    "intent": "data export request has business justification but no classification",
+    "actor": "unknown",
+    "session_id": "hidden-ambiguous-021",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-022",
+    "title": "S3/public storage: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "aws_s3",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "security_admin",
+    "session_id": "hidden-ambiguous-022",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-023",
+    "title": "Kubernetes: new maintainer changes workflow and says security approval is pending",
+    "domain": "kubernetes",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "deploy_svc",
+    "session_id": "hidden-ambiguous-023",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-024",
+    "title": "Endpoint security: data export request has business justification but no classification",
+    "domain": "endpoint_security",
+    "intent": "data export request has business justification but no classification",
+    "actor": "vendor_ops",
+    "session_id": "hidden-ambiguous-024",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-025",
+    "title": "SaaS admin actions: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "saas_admin",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "vendor_ops",
+    "session_id": "hidden-ambiguous-025",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-026",
+    "title": "Data export: new maintainer changes workflow and says security approval is pending",
+    "domain": "data_export",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "new contractor",
+    "session_id": "hidden-ambiguous-026",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-027",
+    "title": "Firewall/network policy: data export request has business justification but no classification",
+    "domain": "network_firewall",
+    "intent": "data export request has business justification but no classification",
+    "actor": "new contractor",
+    "session_id": "hidden-ambiguous-027",
+    "environment": "production",
+    "indicators": [
+      "data_export",
+      "sensitive_data"
+    ],
+    "safe_indicators": [
+      "business justification"
+    ],
+    "missing_evidence": [
+      "data classification",
+      "approval ticket",
+      "destination owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-028",
+    "title": "Secrets management: vendor requests temporary access but ownership evidence is incomplete",
+    "domain": "secrets_management",
+    "intent": "vendor requests temporary access but ownership evidence is incomplete",
+    "actor": "security_admin",
+    "session_id": "hidden-ambiguous-028",
+    "environment": "production",
+    "indicators": [
+      "external_principal",
+      "temporary_access"
+    ],
+    "safe_indicators": [
+      "vendor ticket"
+    ],
+    "missing_evidence": [
+      "requester identity",
+      "approval chain",
+      "asset owner"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  },
+  {
+    "id": "ambiguous-029",
+    "title": "Production deployment: new maintainer changes workflow and says security approval is pending",
+    "domain": "production_deployment",
+    "intent": "new maintainer changes workflow and says security approval is pending",
+    "actor": "trusted maintainer",
+    "session_id": "hidden-ambiguous-029",
+    "environment": "production",
+    "indicators": [
+      "workflow_modification",
+      "new_contributor"
+    ],
+    "safe_indicators": [
+      "partial ticket"
+    ],
+    "missing_evidence": [
+      "maintainer identity",
+      "secret permission diff",
+      "approved change ticket"
+    ],
+    "expected_action": "FORK",
+    "expected_reason": "uncertainty and missing evidence require human review",
+    "difficulty": "medium"
+  }
+]

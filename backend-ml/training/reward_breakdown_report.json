@@ -12,7 +12,8 @@
     "false_positive_penalty",
     "evidence_completeness_reward",
     "risk_chain_handling_reward",
-    "uncertainty_handling_reward"
+    "uncertainty_handling_reward",
+    "policy_compliance_reward"
   ],
   "policies": [
     {
@@ -30,7 +31,8 @@
         "false_positive_penalty": -0.10800000000000004,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
-        "uncertainty_handling_reward": 0.004
+        "uncertainty_handling_reward": 0.004,
+        "policy_compliance_reward": -0.042800000000000005
       },
       "action_distribution": {
         "ALLOW": 0.24,
@@ -51,7 +53,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -66,7 +69,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -81,7 +85,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.0
           }
         },
         {
@@ -96,7 +101,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": -0.5
           }
         },
         {
@@ -111,7 +117,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -126,7 +133,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -141,7 +149,8 @@
             "false_positive_penalty": -0.3,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": -0.18
           }
         },
         {
@@ -156,7 +165,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         }
       ]
@@ -176,7 +186,8 @@
         "false_positive_penalty": 0.0,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
-        "uncertainty_handling_reward": 0.0
+        "uncertainty_handling_reward": 0.0,
+        "policy_compliance_reward": 0.08179999999999998
       },
       "action_distribution": {
         "ALLOW": 0.43,
@@ -197,7 +208,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": -0.5
           }
         },
         {
@@ -212,7 +224,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -227,7 +240,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.0
           }
         },
         {
@@ -242,7 +256,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -257,7 +272,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -272,7 +288,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": -0.5
           }
         },
         {
@@ -287,7 +304,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -302,7 +320,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         }
       ]
@@ -310,25 +329,26 @@
     {
       "policy": "q_aware",
       "metrics": {
-        "exact_match": 0.93,
+        "exact_match": 0.99,
         "safety_accuracy": 1.0,
         "unsafe_decision_rate": 0.0,
         "false_positive_rate": 0.0,
-        "reward_mean": 1.86648566
+        "reward_mean": 1.89905622
       },
       "mean_components": {
-        "action_correctness_reward": 1.645,
+        "action_correctness_reward": 1.735,
         "safety_penalty": 0.0,
         "false_positive_penalty": 0.0,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
-        "uncertainty_handling_reward": 0.006000000000000001
+        "uncertainty_handling_reward": 0.006000000000000001,
+        "policy_compliance_reward": 0.13139999999999982
       },
       "action_distribution": {
         "ALLOW": 0.35,
         "BLOCK": 0.15,
-        "FORK": 0.35,
-        "QUARANTINE": 0.15
+        "FORK": 0.27,
+        "QUARANTINE": 0.23
       },
       "examples": [
         {
@@ -343,7 +363,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -358,7 +379,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -373,7 +395,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.0
           }
         },
         {
@@ -388,7 +411,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -403,7 +427,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -418,7 +443,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -433,7 +459,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -448,7 +475,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         }
       ]
@@ -468,7 +496,8 @@
         "false_positive_penalty": 0.0,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
-        "uncertainty_handling_reward": 0.006000000000000001
+        "uncertainty_handling_reward": 0.006000000000000001,
+        "policy_compliance_reward": 0.13139999999999982
       },
       "action_distribution": {
         "ALLOW": 0.35,
@@ -489,7 +518,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -504,7 +534,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -519,7 +550,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.0
           }
         },
         {
@@ -534,7 +566,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -549,7 +582,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -564,7 +598,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         },
         {
@@ -579,7 +614,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -594,7 +630,8 @@
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
-            "uncertainty_handling_reward": 0.0
+            "uncertainty_handling_reward": 0.0,
+            "policy_compliance_reward": 0.12
           }
         }
       ]

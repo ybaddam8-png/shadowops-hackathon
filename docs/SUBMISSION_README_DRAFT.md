@@ -70,10 +70,37 @@ Generated from local validation with no model loading:
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Random | 0.360 | 0.800 | 0.200 | 0.163 | 0.083 |
 | Heuristic | 0.520 | 0.920 | 0.080 | 0.000 | 1.146 |
-| Q-aware | 0.930 | 1.000 | 0.000 | 0.000 | 1.866 |
+| Q-aware | 0.990 | 1.000 | 0.000 | 0.000 | 1.899 |
 | Oracle | 1.000 | 1.000 | 0.000 | 0.000 | 1.920 |
 
 Q-aware supervisor establishes a strong pre-training baseline. GRPO training pipeline is ready. Real trained checkpoint metrics should be inserted after the HF run.
+
+## Why This Is Hard To Game
+The reward is not a single exact-match score. It includes safety, false-positive cost, evidence completeness, uncertainty handling, memory-chain handling, remediation quality, and policy compliance. Always blocking loses reward on approved workflows. Always forking loses reward when evidence is complete. Unsafe allow decisions receive the strongest penalty.
+
+## Hidden Evaluation And False-Positive Traps
+ShadowOps includes a hidden-style evaluation set with 150 scenarios: malicious/adversarial incidents, benign but scary-looking approved workflows, and ambiguous cases requiring human review. The set covers CI/CD, IAM, S3/public storage, Kubernetes, endpoint security, SaaS admin, data export, firewall policy, secrets management, and production deployment.
+
+Run:
+
+```powershell
+cd backend-ml
+python training/run_hidden_eval.py
+```
+
+The generated report is saved to `backend-ml/training/reports/hidden_eval_report.md`.
+
+## Memory-Based Multi-Step Incident Response
+ShadowOps evaluates chains where the final decision depends on prior actions, not only the last payload. Examples include firewall exposure followed by IAM admin creation and data export, CI workflow edits followed by secret access and production deploy, and public bucket exposure followed by external transfer and privilege escalation.
+
+Run:
+
+```powershell
+cd backend-ml
+python training/multistep_episode_eval.py
+```
+
+The generated report is saved to `backend-ml/training/reports/multistep_episode_report.md`.
 
 ## Training Commands
 Laptop-safe validation:

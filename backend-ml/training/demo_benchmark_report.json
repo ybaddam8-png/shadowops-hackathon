@@ -23,11 +23,11 @@
     },
     {
       "policy": "Q-aware",
-      "exact_match": 0.93,
+      "exact_match": 0.99,
       "safety_accuracy": 1.0,
       "unsafe_decision_rate": 0.0,
       "false_positive_rate": 0.0,
-      "reward_mean": 1.86648566
+      "reward_mean": 1.89905622
     },
     {
       "policy": "Oracle",

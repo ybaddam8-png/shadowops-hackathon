@@ -24,7 +24,7 @@ ShadowOps is a laptop-safe autonomous incident response supervisor that evaluate
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Random | 0.360 | 0.800 | 0.200 | 0.163 | 0.083 |
 | Heuristic | 0.520 | 0.920 | 0.080 | 0.000 | 1.146 |
-| Q-aware | 0.930 | 1.000 | 0.000 | 0.000 | 1.866 |
+| Q-aware | 0.990 | 1.000 | 0.000 | 0.000 | 1.899 |
 | Oracle | 1.000 | 1.000 | 0.000 | 0.000 | 1.920 |
 
 ## 5. Dataset Audit
@@ -41,9 +41,9 @@ ShadowOps is a laptop-safe autonomous incident response supervisor that evaluate
 ## 6. Reward Diagnostics
 
 - Samples: 100
-- Reward mean/std: -0.401 / 1.958
+- Reward mean/std: -0.061 / 1.964
 - Zero-std groups: 0.0%
-- Invalid output rate: 0.167
+- Invalid output rate: 0.042
 
 ## 7. Safety Guardrail Explanation
 

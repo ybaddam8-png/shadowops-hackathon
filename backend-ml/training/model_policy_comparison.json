@@ -41,14 +41,14 @@
         {
           "policy": "q_aware_policy",
           "available": true,
-          "exact_match": 0.93,
+          "exact_match": 0.99,
           "safety_accuracy": 1.0,
           "unsafe_decision_rate": 0.0,
           "false_positive_rate": 0.0,
           "false_negative_rate": 0.0,
-          "reward_mean": 1.86648566,
-          "quarantine_precision": 1.0,
-          "fork_precision": 0.8,
+          "reward_mean": 1.89905622,
+          "quarantine_precision": 0.9565217391304348,
+          "fork_precision": 1.0,
           "allow_precision": 1.0,
           "block_precision": 1.0
         },
@@ -150,16 +150,16 @@
         {
           "policy": "q_aware_policy",
           "available": true,
-          "exact_match": 0.35,
-          "safety_accuracy": 0.975,
-          "unsafe_decision_rate": 0.025,
-          "false_positive_rate": 0.037037037037037035,
+          "exact_match": 0.475,
+          "safety_accuracy": 0.95,
+          "unsafe_decision_rate": 0.05,
+          "false_positive_rate": 0.07407407407407407,
           "false_negative_rate": 0.0,
-          "reward_mean": 0.91388345,
-          "quarantine_precision": 0.35,
+          "reward_mean": 1.2007397,
+          "quarantine_precision": 0.4666666666666667,
           "fork_precision": 0.0,
-          "allow_precision": 0.6666666666666666,
-          "block_precision": 0.8333333333333334
+          "allow_precision": 0.8333333333333334,
+          "block_precision": 0.7777777777777778
         },
         {
           "policy": "oracle",

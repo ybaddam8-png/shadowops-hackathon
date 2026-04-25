@@ -1,0 +1,869 @@
+{
+  "title": "ShadowOps Hidden Evaluation Report",
+  "datasets": {
+    "validation": {
+      "dataset": "validation",
+      "sample_count": 100,
+      "policies": {
+        "random": {
+          "metrics": {
+            "exact_match": 0.36,
+            "safety_accuracy": 0.8,
+            "unsafe_decision_rate": 0.2,
+            "false_positive_rate": 0.16279069767441862,
+            "reward_mean": 0.08253612000000003
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.26592,
+              0.45408
+            ],
+            "safety_accuracy": [
+              0.7216,
+              0.8784000000000001
+            ],
+            "unsafe_decision_rate": [
+              0.12160000000000001,
+              0.2784
+            ],
+            "false_positive_rate": [
+              0.09043247577181493,
+              0.2351489195770223
+            ]
+          },
+          "per_domain_exact": {
+            "AWS": 0.43902439024390244,
+            "GITHUB": 0.3142857142857143,
+            "SOC": 0.2916666666666667
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 0.375,
+              "recall": 0.2571428571428571
+            },
+            "BLOCK": {
+              "precision": 0.36363636363636365,
+              "recall": 0.5333333333333333
+            },
+            "FORK": {
+              "precision": 0.45,
+              "recall": 0.32142857142857145
+            },
+            "QUARANTINE": {
+              "precision": 0.29411764705882354,
+              "recall": 0.45454545454545453
+            }
+          }
+        },
+        "heuristic": {
+          "metrics": {
+            "exact_match": 0.52,
+            "safety_accuracy": 0.92,
+            "unsafe_decision_rate": 0.08,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.1457713
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.42207843138511314,
+              0.6179215686148869
+            ],
+            "safety_accuracy": [
+              0.8668265329322979,
+              0.9731734670677021
+            ],
+            "unsafe_decision_rate": [
+              0.0268265329322979,
+              0.1331734670677021
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "AWS": 0.43902439024390244,
+            "GITHUB": 0.6,
+            "SOC": 0.5416666666666666
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 0.813953488372093,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 0.03571428571428571,
+              "recall": 0.06666666666666667
+            },
+            "FORK": {
+              "precision": 0.5517241379310345,
+              "recall": 0.5714285714285714
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "q_aware": {
+          "metrics": {
+            "exact_match": 0.99,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.89905622
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.9704982462327102,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "AWS": 0.975609756097561,
+            "GITHUB": 1.0,
+            "SOC": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 0.9642857142857143
+            },
+            "QUARANTINE": {
+              "precision": 0.9565217391304348,
+              "recall": 1.0
+            }
+          }
+        },
+        "oracle": {
+          "metrics": {
+            "exact_match": 1.0,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.92046906
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              1.0,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "AWS": 1.0,
+            "GITHUB": 1.0,
+            "SOC": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 1.0,
+              "recall": 1.0
+            }
+          }
+        }
+      }
+    },
+    "hard_negative": {
+      "dataset": "hard_negative",
+      "sample_count": 40,
+      "policies": {
+        "random": {
+          "metrics": {
+            "exact_match": 0.15,
+            "safety_accuracy": 0.55,
+            "unsafe_decision_rate": 0.45,
+            "false_positive_rate": 0.2962962962962963,
+            "reward_mean": -1.0058661
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.03934242005176508,
+              0.2606575799482349
+            ],
+            "safety_accuracy": [
+              0.3958250993189878,
+              0.7041749006810123
+            ],
+            "unsafe_decision_rate": [
+              0.2958250993189877,
+              0.6041749006810123
+            ],
+            "false_positive_rate": [
+              0.15478728210499576,
+              0.4378053104875968
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 0.2222222222222222,
+            "github_ci": 0.14285714285714285,
+            "iam": 0.125,
+            "network_firewall": 0.0,
+            "pentest": 0.25
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 0.15384615384615385,
+              "recall": 0.14285714285714285
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "QUARANTINE": {
+              "precision": 0.2857142857142857,
+              "recall": 0.4
+            }
+          }
+        },
+        "heuristic": {
+          "metrics": {
+            "exact_match": 0.725,
+            "safety_accuracy": 0.975,
+            "unsafe_decision_rate": 0.025,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.28290855
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.5866237917848591,
+              0.8633762082151408
+            ],
+            "safety_accuracy": [
+              0.9266163767375778,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.07338362326242218
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 0.5555555555555556,
+            "github_ci": 0.8571428571428571,
+            "iam": 0.875,
+            "network_firewall": 0.6,
+            "pentest": 0.5
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 0.9333333333333333,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 1.0,
+              "recall": 0.9230769230769231
+            },
+            "FORK": {
+              "precision": 0.23076923076923078,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "q_aware": {
+          "metrics": {
+            "exact_match": 0.475,
+            "safety_accuracy": 0.95,
+            "unsafe_decision_rate": 0.05,
+            "false_positive_rate": 0.07407407407407407,
+            "reward_mean": 1.2007397
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.3202422053659332,
+              0.6297577946340668
+            ],
+            "safety_accuracy": [
+              0.8824581611147578,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.11754183888524208
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.15523505992406644
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 0.7777777777777778,
+            "github_ci": 0.2857142857142857,
+            "iam": 0.625,
+            "network_firewall": 0.4,
+            "pentest": 0.25
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 0.8333333333333334,
+              "recall": 0.35714285714285715
+            },
+            "BLOCK": {
+              "precision": 0.7777777777777778,
+              "recall": 0.5384615384615384
+            },
+            "FORK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "QUARANTINE": {
+              "precision": 0.4666666666666667,
+              "recall": 0.7
+            }
+          }
+        },
+        "oracle": {
+          "metrics": {
+            "exact_match": 1.0,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 2.1519662
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              1.0,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 1.0,
+            "github_ci": 1.0,
+            "iam": 1.0,
+            "network_firewall": 1.0,
+            "pentest": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 1.0,
+              "recall": 1.0
+            }
+          }
+        }
+      }
+    },
+    "hidden_eval": {
+      "dataset": "hidden_eval",
+      "sample_count": 150,
+      "policies": {
+        "random": {
+          "metrics": {
+            "exact_match": 0.23333333333333334,
+            "safety_accuracy": 0.7333333333333333,
+            "unsafe_decision_rate": 0.26666666666666666,
+            "false_positive_rate": 0.25555555555555554,
+            "reward_mean": 0.03276496666666668
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.16564682283305932,
+              0.30101984383360736
+            ],
+            "safety_accuracy": [
+              0.6625639321196156,
+              0.804102734547051
+            ],
+            "unsafe_decision_rate": [
+              0.19589726545294894,
+              0.3374360678803844
+            ],
+            "false_positive_rate": [
+              0.18575333289706247,
+              0.3253577782140486
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 0.3333333333333333,
+            "cloud_iam": 0.13333333333333333,
+            "data_export": 0.4,
+            "endpoint_security": 0.06666666666666667,
+            "github_ci": 0.2,
+            "kubernetes": 0.26666666666666666,
+            "network_firewall": 0.4,
+            "production_deployment": 0.13333333333333333,
+            "saas_admin": 0.3333333333333333,
+            "secrets_management": 0.06666666666666667
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 0.42105263157894735,
+              "recall": 0.26666666666666666
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 0.5757575757575758,
+              "recall": 0.2111111111111111
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "heuristic": {
+          "metrics": {
+            "exact_match": 0.8,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.6719456133333332
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.7359866680552664,
+              0.8640133319447337
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 0.8,
+            "cloud_iam": 0.8,
+            "data_export": 0.8,
+            "endpoint_security": 0.8,
+            "github_ci": 0.8,
+            "kubernetes": 0.8,
+            "network_firewall": 0.8,
+            "production_deployment": 0.8,
+            "saas_admin": 0.8,
+            "secrets_management": 0.8
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 0.6666666666666666
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "q_aware": {
+          "metrics": {
+            "exact_match": 1.0,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.8484177333333334
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              1.0,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 1.0,
+            "cloud_iam": 1.0,
+            "data_export": 1.0,
+            "endpoint_security": 1.0,
+            "github_ci": 1.0,
+            "kubernetes": 1.0,
+            "network_firewall": 1.0,
+            "production_deployment": 1.0,
+            "saas_admin": 1.0,
+            "secrets_management": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "oracle": {
+          "metrics": {
+            "exact_match": 1.0,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.9284177333333334
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              1.0,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "aws_s3": 1.0,
+            "cloud_iam": 1.0,
+            "data_export": 1.0,
+            "endpoint_security": 1.0,
+            "github_ci": 1.0,
+            "kubernetes": 1.0,
+            "network_firewall": 1.0,
+            "production_deployment": 1.0,
+            "saas_admin": 1.0,
+            "secrets_management": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        }
+      }
+    },
+    "multi_step_chain": {
+      "dataset": "multi_step_chain",
+      "sample_count": 3,
+      "policies": {
+        "random": {
+          "metrics": {
+            "exact_match": 0.0,
+            "safety_accuracy": 0.6666666666666666,
+            "unsafe_decision_rate": 0.3333333333333333,
+            "false_positive_rate": 0.0,
+            "reward_mean": -1.3000203333333333
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.0,
+              0.0
+            ],
+            "safety_accuracy": [
+              0.13322223379388565,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.8667777662061142
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "github_ci": 0.0,
+            "network_firewall": 0.0,
+            "pentest": 0.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "heuristic": {
+          "metrics": {
+            "exact_match": 0.6666666666666666,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.6007156666666666
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.13322223379388565,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "github_ci": 1.0,
+            "network_firewall": 0.0,
+            "pentest": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "q_aware": {
+          "metrics": {
+            "exact_match": 0.6666666666666666,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 1.614049
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              0.13322223379388565,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "github_ci": 1.0,
+            "network_firewall": 0.0,
+            "pentest": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 0.5,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 0.0,
+              "recall": 0.0
+            }
+          }
+        },
+        "oracle": {
+          "metrics": {
+            "exact_match": 1.0,
+            "safety_accuracy": 1.0,
+            "unsafe_decision_rate": 0.0,
+            "false_positive_rate": 0.0,
+            "reward_mean": 2.0940286666666665
+          },
+          "confidence_intervals": {
+            "exact_match": [
+              1.0,
+              1.0
+            ],
+            "safety_accuracy": [
+              1.0,
+              1.0
+            ],
+            "unsafe_decision_rate": [
+              0.0,
+              0.0
+            ],
+            "false_positive_rate": [
+              0.0,
+              0.0
+            ]
+          },
+          "per_domain_exact": {
+            "github_ci": 1.0,
+            "network_firewall": 1.0,
+            "pentest": 1.0
+          },
+          "per_action_precision_recall": {
+            "ALLOW": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "BLOCK": {
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "FORK": {
+              "precision": 1.0,
+              "recall": 1.0
+            },
+            "QUARANTINE": {
+              "precision": 1.0,
+              "recall": 1.0
+            }
+          }
+        }
+      }
+    }
+  },
+  "notes": [
+    "No trained model metrics are included.",
+    "Q-aware is evaluated as a deterministic policy baseline."
+  ]
+}

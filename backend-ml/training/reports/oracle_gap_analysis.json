@@ -1,0 +1,82 @@
+{
+  "title": "ShadowOps Q-aware Oracle Gap Analysis",
+  "sample_count": 100,
+  "before": {
+    "exact_match": 0.93,
+    "reward_mean": 1.86648566,
+    "miss_count": 7
+  },
+  "after": {
+    "exact_match": 0.99,
+    "safety_accuracy": 1.0,
+    "unsafe_decision_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "reward_mean": 1.89905622,
+    "miss_count": 1
+  },
+  "oracle": {
+    "exact_match": 1.0,
+    "reward_mean": 1.92046906
+  },
+  "domain_distribution_of_misses": {
+    "AWS": 1
+  },
+  "action_confusion_matrix": {
+    "BLOCK": {
+      "BLOCK": 15
+    },
+    "ALLOW": {
+      "ALLOW": 35
+    },
+    "FORK": {
+      "FORK": 27,
+      "QUARANTINE": 1
+    },
+    "QUARANTINE": {
+      "QUARANTINE": 22
+    }
+  },
+  "false_cases": {
+    "allow": [],
+    "block": [],
+    "quarantine": [
+      {
+        "index": 20,
+        "sample_id": "val-00020",
+        "domain": "AWS",
+        "scenario_type": "AMBIGUOUS",
+        "severity": "MEDIUM",
+        "risk_score": 0.012844,
+        "expected_action": "FORK",
+        "q_aware_action": "QUARANTINE",
+        "oracle_action": "FORK",
+        "reward_loss": 2.141284,
+        "reason": "human review is sufficient; quarantine is too conservative",
+        "payload": "New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring."
+      }
+    ],
+    "fork": []
+  },
+  "top_reasons": [
+    [
+      "human review is sufficient; quarantine is too conservative",
+      1
+    ]
+  ],
+  "missed_samples": [
+    {
+      "index": 20,
+      "sample_id": "val-00020",
+      "domain": "AWS",
+      "scenario_type": "AMBIGUOUS",
+      "severity": "MEDIUM",
+      "risk_score": 0.012844,
+      "expected_action": "FORK",
+      "q_aware_action": "QUARANTINE",
+      "oracle_action": "FORK",
+      "reward_loss": 2.141284,
+      "reason": "human review is sufficient; quarantine is too conservative",
+      "payload": "New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring."
+    }
+  ]
+}
