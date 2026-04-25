@@ -24,8 +24,12 @@ from training.shadowops_training_common import (  # noqa: E402
     CLOUD_FALLBACK_COMMAND,
     CLOUD_GRPO_COMMAND,
     CLOUD_SFT_COMMAND,
+    DEFAULT_DEMO_BENCHMARK_JSON,
+    DEFAULT_DEMO_BENCHMARK_MD,
     DEFAULT_GRPO_OUTPUT_DIR,
     DEFAULT_HEALTH_REPORT_PATH,
+    DEFAULT_MODEL_POLICY_COMPARISON_JSON,
+    DEFAULT_MODEL_POLICY_COMPARISON_MD,
     DEFAULT_SFT_METRICS_PATH,
     DEFAULT_SFT_OUTPUT_DIR,
     MODEL_OPTIONS,
@@ -54,6 +58,8 @@ from training.shadowops_training_common import (  # noqa: E402
     preflight_dataset_check,
     read_json,
     run_logic_smoke_test,
+    run_demo_benchmark,
+    run_model_policy_comparison,
     run_parse_action_tests,
     run_subprocess,
     select_supported_kwargs,
@@ -74,6 +80,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Train ShadowOps GRPO adapter from an SFT warm-start.")
     parser.add_argument("--run-sft", action="store_true", help="Run SFT before GRPO using the current CLI settings.")
     parser.add_argument("--skip-grpo", action="store_true", help="Run preflight and optional SFT, but stop before GRPO.")
+    parser.add_argument("--evaluate-baselines-only", action="store_true", help="Evaluate Random, Heuristic, Q-aware, and Oracle baselines without loading a model.")
     parser.add_argument("--model-name", default=MODEL_OPTIONS["1.7b"], help="Base Qwen3 model name.")
     parser.add_argument("--resume-from-sft", type=Path, default=DEFAULT_SFT_OUTPUT_DIR, help="Path to the SFT adapter to resume from.")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_GRPO_OUTPUT_DIR, help="GRPO adapter output directory.")
@@ -106,9 +113,13 @@ def maybe_run_sft(args: argparse.Namespace) -> None:
         return
 
     sft_script = ROOT_DIR / "training" / "train_qwen3_sft.py"
+    try:
+        sft_script_rel = str(sft_script.relative_to(ROOT_DIR))
+    except ValueError:
+        sft_script_rel = str(sft_script)
     command = [
         sys.executable,
-        str(sft_script.relative_to(ROOT_DIR)),
+        sft_script_rel,
         "--model-name",
         args.model_name,
         "--sft-epochs",
@@ -365,6 +376,18 @@ def run_pipeline(args: argparse.Namespace) -> int:
     args.resume_from_sft = resolve_repo_path(args.resume_from_sft)
     args.sft_output_dir = resolve_repo_path(args.sft_output_dir)
     args.output_dir = resolve_repo_path(args.output_dir)
+
+    if args.evaluate_baselines_only:
+        run_demo_benchmark(
+            output_json=DEFAULT_DEMO_BENCHMARK_JSON,
+            output_md=DEFAULT_DEMO_BENCHMARK_MD,
+        )
+        run_model_policy_comparison(
+            output_json=DEFAULT_MODEL_POLICY_COMPARISON_JSON,
+            output_md=DEFAULT_MODEL_POLICY_COMPARISON_MD,
+        )
+        return 0
+
     args.val_size = max(args.val_size, args.val_eval_eps)
     args.val_eval_eps = max(50, args.val_eval_eps)
 

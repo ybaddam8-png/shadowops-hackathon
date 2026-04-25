@@ -1,0 +1,47 @@
+{
+  "dataset": {
+    "train_sample_count": 500,
+    "val_sample_count": 100,
+    "validation_source": "training\\qwen3_val_dataset.json"
+  },
+  "metrics": [
+    {
+      "policy": "Random",
+      "exact_match": 0.36,
+      "safety_accuracy": 0.8,
+      "unsafe_decision_rate": 0.2,
+      "false_positive_rate": 0.16279069767441862,
+      "reward_mean": 0.069
+    },
+    {
+      "policy": "Heuristic",
+      "exact_match": 0.52,
+      "safety_accuracy": 0.92,
+      "unsafe_decision_rate": 0.08,
+      "false_positive_rate": 0.0,
+      "reward_mean": 1.04
+    },
+    {
+      "policy": "Q-aware",
+      "exact_match": 0.85,
+      "safety_accuracy": 1.0,
+      "unsafe_decision_rate": 0.0,
+      "false_positive_rate": 0.0,
+      "reward_mean": 1.645
+    },
+    {
+      "policy": "Oracle",
+      "exact_match": 1.0,
+      "safety_accuracy": 1.0,
+      "unsafe_decision_rate": 0.0,
+      "false_positive_rate": 0.0,
+      "reward_mean": 1.75
+    }
+  ],
+  "oracle_check": {
+    "passed": true,
+    "oracle_reward_mean": 1.75,
+    "inconsistency_count": 0,
+    "output_path": "training\\oracle_inconsistency_examples.json"
+  }
+}

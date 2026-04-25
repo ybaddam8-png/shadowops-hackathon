@@ -7,7 +7,8 @@ Key changes from v3.0:
   - ScenarioGenerator: infinite unique payloads via parameterized templates
     + random IP/user/bucket/port/CVE/repo variables
   - Continuous risk distribution → BLOCK fires naturally (was 0%)
-  - Balanced 4-action training: ALLOW ~35%, BLOCK ~25%, FORK ~25%, QUARANTINE ~15%
+  - Action distribution: ALLOW ~35%, BLOCK ~25%, FORK ~25%, QUARANTINE ~15%
+    (trained policy may vary; baseline heuristic: ALLOW ~70%, BLOCK ~25%, FORK ~5%)
   - Reward table rebalanced: QUARANTINE hold cost -2/step (was -5)
     resolution bonuses raised so quarantine-aware > heuristic
   - ATTACK_SCENARIOS kept as a small seed/smoke-test set only

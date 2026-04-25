@@ -32,16 +32,16 @@ Training-ready: yes
 - cloud_training_commands_documented: pass
 
 ## Dataset Audit
-- Train samples: 80
-- Val samples: 32
+- Train samples: 500
+- Val samples: 100
 - Duplicate prompts: 0
 - Train/val overlap: 0
 
 ## Metrics
-- Random reward mean: 0.531
-- Heuristic reward mean: 0.891
-- Q-aware reward mean: 1.672
-- Oracle reward mean: 2.000
+- Random reward mean: 0.069
+- Heuristic reward mean: 1.040
+- Q-aware reward mean: 1.645
+- Oracle reward mean: 1.750
 - Raw model metrics available: no
 - SFT metrics available: no
 - GRPO metrics available: no

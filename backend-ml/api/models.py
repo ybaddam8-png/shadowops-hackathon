@@ -14,6 +14,11 @@ class WorkerActionIn(BaseModel):
 class InboundMessage(BaseModel):
     domain: str
     action: WorkerActionIn
+    actor: str = "unknown"
+    session_id: str = "default"
+    service: str = ""
+    environment: str = "production"
+    provided_evidence: List[str] = Field(default_factory=list)
 
 
 # ── Outbound sub-models ───────────────────────────────────────
@@ -25,10 +30,23 @@ class WorkerActionOut(BaseModel):
 
 
 class SupervisorDecision(BaseModel):
-    action_taken:               str    # ALLOW | BLOCK | FORK | QUARANTINE
-    risk_vector:                List[float]
+    action_taken:               str        # ALLOW | BLOCK | FORK | QUARANTINE
+    risk_vector:                List[float] = Field(..., min_items=16, max_items=16)  # 16-dim risk feature vector
     ambiguity_score:            float  # [0,1] — how close to 0.5 risk midpoint
     quarantine_steps_remaining: int    # 0 if no active hold
+    decision:                   Optional[str] = None
+    confidence:                 Optional[float] = None
+    uncertainty:                Optional[float] = None
+    risk_score:                 Optional[float] = None
+    cumulative_risk_score:      Optional[float] = None
+    missing_evidence:           List[str] = Field(default_factory=list)
+    required_evidence:          List[str] = Field(default_factory=list)
+    explanation:                Optional[str] = None
+    safe_outcome:               Optional[str] = None
+    policy_name:                Optional[str] = None
+    domain:                     Optional[str] = None
+    mitre_tactic:               Optional[str] = None
+    mitre_technique:            Optional[str] = None
 
 
 class EnvironmentState(BaseModel):

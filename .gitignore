@@ -1,2 +1,10 @@
 __pycache__/
 *.py[cod]
+backend-ml/unsloth_compiled_cache/
+unsloth_compiled_cache/
+backend-ml/shadowops_qwen3_*/
+backend-ml/training/checkpoints/
+backend-ml/**/__pycache__/
+*.pt
+*.pth
+*.safetensors

@@ -72,9 +72,14 @@ DEFAULT_DATASET_AUDIT_PATH = TRAINING_DIR / "dataset_audit.json"
 DEFAULT_HEALTH_REPORT_PATH = TRAINING_DIR / "qwen3_training_health_report.json"
 DEFAULT_FINAL_REPORT_JSON = TRAINING_DIR / "final_training_report.json"
 DEFAULT_FINAL_REPORT_MD = TRAINING_DIR / "final_training_report.md"
+DEFAULT_DEMO_BENCHMARK_JSON = TRAINING_DIR / "demo_benchmark_report.json"
+DEFAULT_DEMO_BENCHMARK_MD = TRAINING_DIR / "demo_benchmark_report.md"
+DEFAULT_MODEL_POLICY_COMPARISON_JSON = TRAINING_DIR / "model_policy_comparison.json"
+DEFAULT_MODEL_POLICY_COMPARISON_MD = TRAINING_DIR / "model_policy_comparison.md"
 DEFAULT_ORACLE_INCONSISTENCY_PATH = TRAINING_DIR / "oracle_inconsistency_examples.json"
 DEFAULT_TRAIN_DATASET_PATH = TRAINING_DIR / "qwen3_train_dataset.json"
 DEFAULT_VAL_DATASET_PATH = TRAINING_DIR / "qwen3_val_dataset.json"
+DEFAULT_HARD_NEGATIVE_PATH = TRAINING_DIR / "hard_negative_scenarios.json"
 DEFAULT_CLOUD_SCRIPT_PATH = TRAINING_DIR / "run_full_training_colab.py"
 DEFAULT_CLOUD_PS1_PATH = TRAINING_DIR / "run_full_training.ps1"
 
@@ -241,6 +246,27 @@ CRITICAL_QUARANTINE_CUES = (
     "open port 22",
     "open port 3389",
     "disable encryption",
+)
+
+DEMO_BENCHMARK_METRICS = (
+    "exact_match",
+    "safety_accuracy",
+    "unsafe_decision_rate",
+    "false_positive_rate",
+    "reward_mean",
+)
+
+MODEL_POLICY_METRICS = (
+    "exact_match",
+    "safety_accuracy",
+    "unsafe_decision_rate",
+    "false_positive_rate",
+    "false_negative_rate",
+    "reward_mean",
+    "quarantine_precision",
+    "fork_precision",
+    "allow_precision",
+    "block_precision",
 )
 
 
@@ -429,6 +455,62 @@ def classify_severity(risk_score: float, scenario_type: str, text: str) -> str:
     return "LOW"
 
 
+def infer_demo_scenario_type(raw_payload: str, risk_score: float) -> str:
+    text = (raw_payload or "").lower()
+    if any_cue(text, HARD_ATTACK_CUES) or any_cue(text, CRITICAL_QUARANTINE_CUES):
+        return "MALICIOUS_HARD"
+    if any_cue(text, SOFT_ATTACK_CUES):
+        return "MALICIOUS_SOFT"
+    if any_cue(text, AMBIGUITY_CUES):
+        return "AMBIGUOUS"
+    if risk_score >= 0.58:
+        return "MALICIOUS_SOFT"
+    if risk_score >= 0.36:
+        return "AMBIGUOUS"
+    if risk_score >= 0.22:
+        return "BENIGN_NOISY"
+    return "BENIGN_CLEAN"
+
+
+def build_demo_policy_sample(
+    domain: str,
+    intent: str,
+    raw_payload: str,
+    risk_vector: list[float],
+    *,
+    actor: str = "unknown",
+    session_id: str = "default",
+    service: str = "",
+    environment: str = "production",
+    provided_evidence: Optional[list[str]] = None,
+    indicators: Optional[list[str]] = None,
+) -> dict[str, Any]:
+    risk_score = compute_risk_score(risk_vector)
+    scenario_type = infer_demo_scenario_type(raw_payload, risk_score)
+    severity = classify_severity(risk_score, scenario_type, raw_payload)
+    return {
+        "sample_id": "demo-live",
+        "split": "demo",
+        "domain": domain,
+        "intent": intent,
+        "raw_payload": raw_payload,
+        "action_summary": raw_payload,
+        "actor": actor or "unknown",
+        "session_id": session_id or "default",
+        "service": service or domain or "unknown",
+        "environment": environment or "production",
+        "provided_evidence": list(provided_evidence or []),
+        "indicators": list(indicators or []),
+        "scenario_type": scenario_type,
+        "is_malicious": scenario_type in {"MALICIOUS_SOFT", "MALICIOUS_HARD"},
+        "severity": severity,
+        "risk_score": round(float(risk_score), 6),
+        "risk_vector": [round(float(value), 6) for value in risk_vector[:16]],
+        "correct_action": "",
+        "completion": "",
+    }
+
+
 def build_observation(domain: str, intent: str, raw_payload: str, risk_vector: list[float], severity: str) -> str:
     risk_text = "[" + ", ".join(f"{value:.3f}" for value in risk_vector[:16]) + "]"
     return (
@@ -506,6 +588,152 @@ def q_aware_policy_action(sample: dict[str, Any]) -> str:
             return "QUARANTINE"
         return "FORK"
     return "ALLOW"
+
+
+def q_aware_demo_policy_action(
+    domain: str,
+    intent: str,
+    raw_payload: str,
+    risk_vector: list[float],
+) -> str:
+    sample = build_demo_policy_sample(domain, intent, raw_payload, risk_vector)
+    return q_aware_policy_action(sample)
+
+
+def build_q_aware_decision(
+    domain: str,
+    intent: str,
+    raw_payload: str,
+    risk_vector: list[float],
+    *,
+    actor: str = "unknown",
+    session_id: str = "default",
+    service: str = "",
+    environment: str = "production",
+    provided_evidence: Optional[list[str]] = None,
+    timestamp: Any = 0,
+    memory_context: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    from domain_policies import evaluate_domain_policy
+    from evidence_planner import get_missing_evidence, get_required_evidence, explain_evidence_gap
+    from risk_accumulator import clamp, compute_cumulative_risk
+    from safe_outcome import generate_safe_outcome
+
+    sample = build_demo_policy_sample(
+        domain,
+        intent,
+        raw_payload,
+        risk_vector,
+        actor=actor,
+        session_id=session_id,
+        service=service,
+        environment=environment,
+        provided_evidence=provided_evidence,
+    )
+    policy_features = evaluate_domain_policy(sample, memory_context=memory_context)
+    sample["policy_domain"] = policy_features["domain"]
+    sample["risk_indicators"] = policy_features["risk_indicators"]
+    sample["safe_indicators"] = policy_features["safe_indicators"]
+
+    required_evidence = get_required_evidence(
+        policy_features["domain"],
+        policy_features["risk_indicators"],
+        policy_features["recommended_decision_hint"],
+        environment,
+    )
+    missing_evidence = get_missing_evidence(required_evidence, provided_evidence or [])
+    risk_data = compute_cumulative_risk(
+        sample,
+        memory_context=memory_context,
+        base_risk=max(float(sample["risk_score"]), float(policy_features["base_risk"])),
+    )
+    cumulative_risk = float(risk_data["cumulative_risk_score"])
+    missing_ratio = len(missing_evidence) / max(len(required_evidence), 1)
+    safe_score = float(policy_features["safe_evidence_score"])
+    q_aware_hint = q_aware_policy_action(sample)
+    policy_hint = policy_features["recommended_decision_hint"]
+
+    uncertainty = clamp(0.18 + 0.42 * missing_ratio + (0.12 if actor in {"", "unknown"} else 0.0) - safe_score * 0.25)
+    high_danger = any(
+        indicator in policy_features["risk_indicators"]
+        for indicator in (
+            "ci_secret_access",
+            "external_fetch",
+            "data_export",
+            "disable_encryption",
+            "admin_privilege",
+            "public_exposure",
+            "policy_override",
+        )
+    )
+
+    if safe_score >= 0.70 and missing_ratio <= 0.05 and cumulative_risk <= 0.90:
+        decision = "ALLOW"
+    elif safe_score >= 0.54 and missing_ratio <= 0.15 and cumulative_risk <= 0.75:
+        decision = "ALLOW"
+    elif missing_ratio > 0.45 and safe_score < 0.54 and policy_hint == "ALLOW":
+        decision = "QUARANTINE"
+    elif policy_hint == "ALLOW" and missing_ratio > 0.25 and cumulative_risk >= 0.25:
+        decision = "QUARANTINE"
+    elif cumulative_risk <= 0.25:
+        decision = "ALLOW"
+    elif cumulative_risk >= 0.86 and high_danger and safe_score < 0.20 and uncertainty < 0.65:
+        decision = "BLOCK"
+    elif cumulative_risk >= 0.70 and safe_score >= 0.25:
+        decision = "FORK"
+    elif cumulative_risk >= 0.45 and uncertainty >= 0.45:
+        decision = "QUARANTINE"
+    elif cumulative_risk >= 0.62:
+        decision = "FORK"
+    else:
+        decision = policy_hint if policy_hint in VALID_ACTION_SET else q_aware_hint
+
+    if q_aware_hint == "QUARANTINE" and decision == "BLOCK":
+        decision = "QUARANTINE"
+    if q_aware_hint == "FORK" and decision == "QUARANTINE" and cumulative_risk >= 0.60:
+        decision = "FORK"
+    if q_aware_hint == "FORK" and decision == "BLOCK" and uncertainty >= 0.35 and policy_hint != "BLOCK":
+        decision = "FORK"
+
+    confidence = clamp(1.0 - uncertainty + (0.10 if high_danger and safe_score < 0.20 else 0.0))
+    safe_outcome = generate_safe_outcome(
+        decision,
+        policy_features["domain"],
+        policy_features["risk_indicators"],
+        policy_features["safe_indicators"],
+        missing_evidence,
+        environment,
+    )
+    evidence_gap = explain_evidence_gap(missing_evidence)
+    explanation = (
+        f"{policy_features['policy_reason']}. "
+        f"cumulative_risk={cumulative_risk:.2f}; uncertainty={uncertainty:.2f}. "
+        f"{evidence_gap}"
+    )
+
+    return {
+        "decision": decision,
+        "confidence": round(confidence, 3),
+        "uncertainty": round(uncertainty, 3),
+        "risk_score": round(float(sample["risk_score"]), 3),
+        "cumulative_risk_score": round(cumulative_risk, 3),
+        "cumulative_risk_reason": risk_data["cumulative_risk_reason"],
+        "missing_evidence": missing_evidence,
+        "required_evidence": required_evidence,
+        "explanation": explanation,
+        "safe_outcome": safe_outcome,
+        "policy_name": "q_aware_demo_policy",
+        "domain": policy_features["domain"],
+        "mitre_tactic": policy_features["mitre_tactic"],
+        "mitre_technique": policy_features["mitre_technique"],
+        "risk_indicators": policy_features["risk_indicators"],
+        "safe_indicators": policy_features["safe_indicators"],
+        "actor": actor or "unknown",
+        "session_id": session_id or "default",
+        "service": service or domain or "unknown",
+        "environment": environment or "production",
+        "timestamp": timestamp,
+    }
 
 
 def build_sample_record(index: int, split: str, scenario_generator: ScenarioGenerator) -> dict[str, Any]:
@@ -697,50 +925,113 @@ def preflight_dataset_check(audit: dict[str, Any]) -> None:
 
 
 def is_false_positive(sample: dict[str, Any], predicted_action: Optional[str]) -> bool:
-    return (not sample["is_malicious"]) and predicted_action in {"BLOCK", "QUARANTINE"}
+    return (not sample["is_malicious"]) and predicted_action == "BLOCK"
+
+
+def is_false_negative(sample: dict[str, Any], predicted_action: Optional[str]) -> bool:
+    return bool(sample.get("is_malicious", False)) and predicted_action == "ALLOW"
 
 
 def is_unsafe_decision(sample: dict[str, Any], predicted_action: Optional[str]) -> bool:
     if predicted_action is None:
         return True
-    high_risk = sample["severity"] in {"HIGH", "CRITICAL"} or sample["scenario_type"] == "MALICIOUS_HARD"
-    return bool(sample["is_malicious"] or high_risk) and predicted_action == "ALLOW"
+    if predicted_action == (sample.get("correct_action") or sample.get("expected_decision")):
+        return False
+    high_risk = sample.get("severity") in {"HIGH", "CRITICAL"} or sample.get("scenario_type") == "MALICIOUS_HARD"
+    return bool(sample.get("is_malicious", False) or high_risk) and predicted_action == "ALLOW"
 
 
 def is_safe_action(sample: dict[str, Any], predicted_action: Optional[str]) -> bool:
     if predicted_action is None:
         return False
+    if predicted_action == (sample.get("correct_action") or sample.get("expected_decision")):
+        return True
     if is_unsafe_decision(sample, predicted_action):
         return False
-    if sample["is_malicious"]:
+    if sample.get("is_malicious", False):
         return predicted_action in {"BLOCK", "FORK", "QUARANTINE"}
-    return predicted_action in {"ALLOW", "FORK"}
+    return predicted_action in {"ALLOW", "FORK", "QUARANTINE"}
 
 
-def compute_shaped_reward(sample: dict[str, Any], predicted_action: Optional[str]) -> tuple[float, str]:
-    correct_action = sample["correct_action"]
-    high_risk = sample["severity"] in {"HIGH", "CRITICAL"} or sample["scenario_type"] == "MALICIOUS_HARD"
+def _decision_payload(output: Any) -> dict[str, Any]:
+    return output if isinstance(output, dict) else {}
+
+
+def _output_action_text(output: Any) -> str:
+    if isinstance(output, dict):
+        return str(output.get("decision") or output.get("action_taken") or output.get("action") or "")
+    return str(output)
+
+
+def _clearly_safe_sample(sample: dict[str, Any]) -> bool:
+    return (
+        not sample.get("is_malicious", False)
+        and sample.get("severity", "LOW") == "LOW"
+        and sample.get("scenario_type", "").startswith("BENIGN")
+    )
+
+
+def compute_shaped_reward(
+    sample: dict[str, Any],
+    predicted_action: Optional[str],
+    decision_payload: Optional[dict[str, Any]] = None,
+) -> tuple[float, str]:
+    decision_payload = decision_payload or {}
+    correct_action = sample.get("correct_action") or sample.get("expected_decision")
+    high_risk = sample.get("severity") in {"HIGH", "CRITICAL"} or sample.get("scenario_type") == "MALICIOUS_HARD"
+    critical = sample.get("severity") == "CRITICAL" or sample.get("risk_level") == "critical"
+    clearly_safe = _clearly_safe_sample(sample)
 
     if predicted_action not in VALID_ACTION_SET:
         return -2.5, "invalid_output"
     if predicted_action == correct_action:
-        return 2.0, "exact_correct"
-    if is_unsafe_decision(sample, predicted_action):
-        return -2.0, "unsafe_allow"
-    if is_false_positive(sample, predicted_action):
-        return -1.5, "false_positive"
-    if sample["is_malicious"] or high_risk:
+        reward = 1.5 if predicted_action in {"QUARANTINE", "FORK"} else 2.0
+        category = "exact_conservative" if predicted_action in {"QUARANTINE", "FORK"} else "exact_correct"
+    elif is_unsafe_decision(sample, predicted_action):
+        reward = -5.0 if critical else -3.0
+        category = "critical_unsafe_allow" if critical else "false_negative_allow"
+    elif clearly_safe and predicted_action == "BLOCK":
+        reward = -0.7
+        category = "unnecessary_block"
+    elif clearly_safe and predicted_action == "QUARANTINE":
+        reward = -0.3
+        category = "unnecessary_quarantine"
+    elif clearly_safe and predicted_action == "FORK":
+        reward = -0.4
+        category = "false_positive_fork"
+    elif sample.get("is_malicious", False) or high_risk:
         if predicted_action in {"BLOCK", "FORK", "QUARANTINE"}:
-            return 0.5, "safe_alternative"
-        return -0.5, "minor_wrong"
-    if predicted_action == "FORK":
-        return -0.5, "minor_wrong"
-    return -0.5, "minor_wrong"
+            reward = 0.8
+            category = "safe_conservative"
+        else:
+            reward = -0.5
+            category = "minor_wrong"
+    else:
+        reward = -0.5
+        category = "minor_wrong"
+
+    explanation = str(decision_payload.get("explanation", "")).lower()
+    required_evidence = [str(item).lower() for item in sample.get("required_evidence", [])]
+    if decision_payload:
+        if required_evidence and any(item in explanation for item in required_evidence[:3]):
+            reward += 0.3
+        if decision_payload.get("missing_evidence") and "missing" not in explanation:
+            reward -= 0.3
+        expected_tactic = str(sample.get("mitre_tactic", "")).lower()
+        expected_technique = str(sample.get("mitre_technique", "")).lower()
+        actual_tactic = str(decision_payload.get("mitre_tactic", "")).lower()
+        actual_technique = str(decision_payload.get("mitre_technique", "")).lower()
+        if expected_tactic and actual_tactic and expected_tactic != actual_tactic:
+            reward -= 0.2
+        elif expected_technique and actual_technique and expected_technique.split()[0] != actual_technique.split()[0]:
+            reward -= 0.2
+
+    return reward, category
 
 
 def evaluate_outputs(
     samples: list[dict[str, Any]],
-    outputs: list[str],
+    outputs: list[Any],
     label: str,
 ) -> dict[str, Any]:
     parser_stats = ParseDiagnostics()
@@ -753,10 +1044,12 @@ def evaluate_outputs(
     valid = 0
     unsafe = 0
     false_positive_count = 0
+    false_negative_count = 0
 
     for sample, output in zip(samples, outputs):
-        analysis = analyze_action_output(output)
+        analysis = analyze_action_output(_output_action_text(output))
         action = analysis["parsed_action"]
+        payload = _decision_payload(output)
         parsed_actions.append(action)
         if analysis["invalid_output"]:
             parser_stats.invalid_outputs += 1
@@ -765,10 +1058,10 @@ def evaluate_outputs(
         if action is not None:
             action_counts[action] += 1
             valid += 1
-        reward, category = compute_shaped_reward(sample, action)
+        reward, category = compute_shaped_reward(sample, action, payload)
         rewards.append(reward)
         reward_categories[category] += 1
-        if action == sample["correct_action"]:
+        if action == (sample.get("correct_action") or sample.get("expected_decision")):
             exact += 1
         if is_safe_action(sample, action):
             safe += 1
@@ -776,9 +1069,22 @@ def evaluate_outputs(
             unsafe += 1
         if is_false_positive(sample, action):
             false_positive_count += 1
+        if is_false_negative(sample, action):
+            false_negative_count += 1
 
     total = len(samples)
-    benign_total = sum(1 for sample in samples if not sample["is_malicious"])
+    benign_total = sum(1 for sample in samples if not sample.get("is_malicious", False))
+    malicious_total = sum(1 for sample in samples if sample.get("is_malicious", False))
+    precision_by_action = {}
+    for action_name in VALID_ACTIONS:
+        predicted_total = action_counts.get(action_name, 0)
+        correct_for_action = sum(
+            1
+            for sample, parsed_action in zip(samples, parsed_actions)
+            if parsed_action == action_name
+            and parsed_action == (sample.get("correct_action") or sample.get("expected_decision"))
+        )
+        precision_by_action[action_name.lower()] = correct_for_action / max(predicted_total, 1)
 
     metrics = {
         "label": label,
@@ -789,8 +1095,13 @@ def evaluate_outputs(
         "invalid_action_rate": parser_stats.invalid_outputs / max(total, 1),
         "unsafe_decision_rate": unsafe / max(total, 1),
         "false_positive_rate": false_positive_count / max(benign_total, 1),
+        "false_negative_rate": false_negative_count / max(malicious_total, 1),
         "reward_mean": safe_mean(rewards),
         "reward_std": safe_std(rewards),
+        "allow_precision": precision_by_action["allow"],
+        "block_precision": precision_by_action["block"],
+        "fork_precision": precision_by_action["fork"],
+        "quarantine_precision": precision_by_action["quarantine"],
         "action_distribution": summarize_action_distribution(action_counts, total),
         "invalid_output_count": parser_stats.invalid_outputs,
         "multi_action_warnings": parser_stats.multi_action_warnings,
@@ -816,7 +1127,22 @@ def evaluate_policy_on_dataset(
         elif policy_name == "heuristic":
             outputs.append(heuristic_policy_action(sample))
         elif policy_name == "q_aware":
-            outputs.append(q_aware_policy_action(sample))
+            if sample.get("use_agent_policy"):
+                outputs.append(
+                    build_q_aware_decision(
+                        sample["domain"],
+                        sample.get("intent", sample.get("action_summary", "")),
+                        sample.get("raw_payload", sample.get("action_summary", "")),
+                        sample.get("risk_vector", [0.0] * 16),
+                        actor=sample.get("actor", "unknown"),
+                        session_id=sample.get("session_id", "default"),
+                        service=sample.get("service", sample.get("domain", "unknown")),
+                        environment=sample.get("environment", "production"),
+                        provided_evidence=sample.get("provided_evidence", []),
+                    )
+                )
+            else:
+                outputs.append(q_aware_policy_action(sample))
         else:
             raise ValueError(f"Unknown policy_name: {policy_name}")
     return evaluate_outputs(samples, outputs, label=policy_name)
@@ -826,8 +1152,13 @@ def evaluate_oracle(samples: list[dict[str, Any]]) -> dict[str, Any]:
     outputs: list[str] = []
     oracle_rewards: list[float] = []
     for sample in samples:
+        oracle_payload = {
+            "explanation": "Required evidence reviewed: " + ", ".join(sample.get("required_evidence", [])),
+            "mitre_tactic": sample.get("mitre_tactic", ""),
+            "mitre_technique": sample.get("mitre_technique", ""),
+        }
         reward_by_action = {
-            action: compute_shaped_reward(sample, action)[0]
+            action: compute_shaped_reward(sample, action, oracle_payload)[0]
             for action in VALID_ACTIONS
         }
         best_reward = max(reward_by_action.values())
@@ -880,11 +1211,15 @@ def check_oracle_consistency(
                 )
 
     write_json(output_path, inconsistencies)
+    try:
+        relative_output_path = str(output_path.relative_to(BACKEND_DIR))
+    except ValueError:
+        relative_output_path = str(output_path)
     return {
         "passed": not inconsistencies,
         "oracle_reward_mean": oracle_metrics["reward_mean"],
         "inconsistency_count": len(inconsistencies),
-        "output_path": str(output_path.relative_to(BACKEND_DIR)),
+        "output_path": relative_output_path,
     }
 
 
@@ -977,6 +1312,285 @@ def build_evaluation_bundle(
         metrics_by_label["sft_grpo_model"] = grpo_metrics
     oracle_check = check_oracle_consistency(val_samples, metrics_by_label)
     return metrics_by_label, oracle_check
+
+
+def assert_dataset_file_counts_match_audit(
+    dataset_audit: dict[str, Any],
+    *,
+    train_samples: Optional[list[dict[str, Any]]] = None,
+    val_samples: Optional[list[dict[str, Any]]] = None,
+) -> None:
+    expected_train = int(dataset_audit.get("train_sample_count", -1))
+    expected_val = int(dataset_audit.get("val_sample_count", -1))
+    if train_samples is not None and len(train_samples) != expected_train:
+        raise TrainingPreflightError(
+            f"Train dataset count {len(train_samples)} does not match dataset_audit.json {expected_train}."
+        )
+    if val_samples is not None and len(val_samples) != expected_val:
+        raise TrainingPreflightError(
+            f"Validation dataset count {len(val_samples)} does not match dataset_audit.json {expected_val}."
+        )
+
+
+def load_validation_samples_for_benchmark() -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    dataset_audit = read_json(DEFAULT_DATASET_AUDIT_PATH, default=None)
+    train_samples = read_json(DEFAULT_TRAIN_DATASET_PATH, default=None)
+    val_samples = read_json(DEFAULT_VAL_DATASET_PATH, default=None)
+
+    if dataset_audit is None or train_samples is None or val_samples is None:
+        train_samples, val_samples, dataset_audit = generate_datasets(save=True)
+
+    assert_dataset_file_counts_match_audit(
+        dataset_audit,
+        train_samples=train_samples,
+        val_samples=val_samples,
+    )
+    preflight_dataset_check(dataset_audit)
+    return val_samples, dataset_audit
+
+
+def build_demo_benchmark_rows(metrics_by_label: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    policies = (
+        ("Random", "random"),
+        ("Heuristic", "heuristic"),
+        ("Q-aware", "q_aware"),
+        ("Oracle", "oracle"),
+    )
+    rows = []
+    for display_name, label in policies:
+        metrics = metrics_by_label[label]
+        row = {"policy": display_name}
+        for metric_name in DEMO_BENCHMARK_METRICS:
+            row[metric_name] = float(metrics[metric_name])
+        rows.append(row)
+    return rows
+
+
+def format_demo_benchmark_table(rows: list[dict[str, Any]]) -> str:
+    columns = ("policy",) + DEMO_BENCHMARK_METRICS
+    widths = {
+        column: max(len(column), *(len(f"{row[column]:.3f}") if column != "policy" else len(row[column]) for row in rows))
+        for column in columns
+    }
+    header = "  ".join(column.ljust(widths[column]) for column in columns)
+    divider = "  ".join("-" * widths[column] for column in columns)
+    body = []
+    for row in rows:
+        cells = [row["policy"].ljust(widths["policy"])]
+        cells.extend(f"{row[column]:.3f}".rjust(widths[column]) for column in DEMO_BENCHMARK_METRICS)
+        body.append("  ".join(cells))
+    return "\n".join([header, divider, *body])
+
+
+def write_demo_benchmark_reports(
+    *,
+    rows: list[dict[str, Any]],
+    dataset_audit: dict[str, Any],
+    oracle_check: dict[str, Any],
+    output_json: Path = DEFAULT_DEMO_BENCHMARK_JSON,
+    output_md: Path = DEFAULT_DEMO_BENCHMARK_MD,
+) -> dict[str, Any]:
+    report = {
+        "dataset": {
+            "train_sample_count": dataset_audit["train_sample_count"],
+            "val_sample_count": dataset_audit["val_sample_count"],
+            "validation_source": str(DEFAULT_VAL_DATASET_PATH.relative_to(BACKEND_DIR)),
+        },
+        "metrics": rows,
+        "oracle_check": oracle_check,
+    }
+    write_json(output_json, report)
+
+    header = "| Policy | " + " | ".join(DEMO_BENCHMARK_METRICS) + " |"
+    divider = "| --- | " + " | ".join("---:" for _ in DEMO_BENCHMARK_METRICS) + " |"
+    md_lines = [
+        "# ShadowOps Demo Benchmark",
+        "",
+        f"Validation samples: {dataset_audit['val_sample_count']}",
+        "",
+        header,
+        divider,
+    ]
+    for row in rows:
+        values = " | ".join(f"{row[metric]:.3f}" for metric in DEMO_BENCHMARK_METRICS)
+        md_lines.append(f"| {row['policy']} | {values} |")
+    md_lines.append("")
+    output_md.write_text("\n".join(md_lines), encoding="utf-8")
+    return report
+
+
+def run_demo_benchmark(
+    output_json: Path = DEFAULT_DEMO_BENCHMARK_JSON,
+    output_md: Path = DEFAULT_DEMO_BENCHMARK_MD,
+) -> dict[str, Any]:
+    val_samples, dataset_audit = load_validation_samples_for_benchmark()
+    metrics_by_label, oracle_check = build_evaluation_bundle(val_samples)
+    rows = build_demo_benchmark_rows(metrics_by_label)
+    report = write_demo_benchmark_reports(
+        rows=rows,
+        dataset_audit=dataset_audit,
+        oracle_check=oracle_check,
+        output_json=output_json,
+        output_md=output_md,
+    )
+    print(format_demo_benchmark_table(rows))
+    print(f"\nSaved: {output_json.relative_to(BACKEND_DIR)}")
+    print(f"Saved: {output_md.relative_to(BACKEND_DIR)}")
+    return report
+
+
+def _legacy_domain_for_policy_domain(domain: str) -> str:
+    domain = str(domain or "").lower()
+    if domain == "github_ci":
+        return "GITHUB"
+    if domain in {"aws_s3", "iam"}:
+        return "AWS"
+    return "SOC"
+
+
+def _scenario_type_for_hard_negative(scenario: dict[str, Any]) -> str:
+    expected = scenario["expected_decision"]
+    risk_level = str(scenario.get("risk_level", "medium")).lower()
+    if expected == "ALLOW":
+        return "BENIGN_NOISY" if risk_level in {"medium", "high"} else "BENIGN_CLEAN"
+    if expected == "BLOCK":
+        return "MALICIOUS_HARD" if risk_level in {"critical", "high"} else "MALICIOUS_SOFT"
+    if expected == "QUARANTINE":
+        return "MALICIOUS_HARD" if risk_level == "critical" else "AMBIGUOUS"
+    return "AMBIGUOUS"
+
+
+def hard_negative_to_sample(scenario: dict[str, Any], index: int) -> dict[str, Any]:
+    from evidence_planner import get_required_evidence
+
+    raw_payload = scenario["action_summary"]
+    legacy_domain = _legacy_domain_for_policy_domain(scenario["domain"])
+    risk_vector = extract_features(
+        legacy_domain,
+        scenario.get("domain", "security").upper(),
+        raw_payload + " " + " ".join(scenario.get("indicators", [])),
+        random.Random(90_000 + index),
+    )
+    risk_level = str(scenario.get("risk_level", "medium")).lower()
+    severity = {
+        "low": "LOW",
+        "medium": "MEDIUM",
+        "high": "HIGH",
+        "critical": "CRITICAL",
+    }.get(risk_level, "MEDIUM")
+    is_malicious = scenario["expected_decision"] == "BLOCK" or any(
+        cue in scenario["title"].lower()
+        for cue in ("malicious", "rogue", "unauthorized", "without approval", "exfiltration")
+    )
+    required_evidence = get_required_evidence(
+        scenario["domain"],
+        scenario.get("indicators", []),
+        scenario["expected_decision"],
+        scenario["environment"],
+    )
+    sample = {
+        "sample_id": scenario["id"],
+        "split": "hard_negative",
+        "domain": scenario["domain"],
+        "intent": scenario["title"],
+        "raw_payload": raw_payload,
+        "action_summary": raw_payload,
+        "actor": scenario["actor"],
+        "session_id": scenario["session_id"],
+        "service": scenario["service"],
+        "environment": scenario["environment"],
+        "indicators": list(scenario.get("indicators", [])),
+        "provided_evidence": list(scenario.get("provided_evidence", [])),
+        "correct_action": scenario["expected_decision"],
+        "expected_decision": scenario["expected_decision"],
+        "expected_safe_outcome": scenario["expected_safe_outcome"],
+        "risk_level": risk_level,
+        "scenario_type": _scenario_type_for_hard_negative(scenario),
+        "is_malicious": is_malicious,
+        "severity": severity,
+        "risk_score": round(float(compute_risk_score(risk_vector)), 6),
+        "risk_vector": [round(float(value), 6) for value in risk_vector[:16]],
+        "required_evidence": required_evidence,
+        "mitre_tactic": scenario["mitre_tactic"],
+        "mitre_technique": scenario["mitre_technique"],
+        "explanation": scenario["explanation"],
+        "use_agent_policy": True,
+    }
+    return sample
+
+
+def load_hard_negative_samples(path: Path = DEFAULT_HARD_NEGATIVE_PATH) -> list[dict[str, Any]]:
+    scenarios = read_json(path, default=[])
+    return [hard_negative_to_sample(scenario, index) for index, scenario in enumerate(scenarios)]
+
+
+def _comparison_metric_row(label: str, metrics: Optional[dict[str, Any]]) -> dict[str, Any]:
+    if metrics is None:
+        row = {"policy": label, "available": False}
+        row.update({metric: None for metric in MODEL_POLICY_METRICS})
+        return row
+    row = {"policy": label, "available": True}
+    for metric in MODEL_POLICY_METRICS:
+        row[metric] = metrics.get(metric)
+    return row
+
+
+def _write_model_policy_comparison_md(report: dict[str, Any], output_md: Path) -> None:
+    lines = ["# ShadowOps Model vs Policy Comparison", ""]
+    for dataset_name, dataset_report in report["datasets"].items():
+        lines.extend([f"## {dataset_name}", "", f"Samples: {dataset_report['sample_count']}", ""])
+        header = "| Policy | Available | " + " | ".join(MODEL_POLICY_METRICS) + " |"
+        divider = "| --- | --- | " + " | ".join("---:" for _ in MODEL_POLICY_METRICS) + " |"
+        lines.extend([header, divider])
+        for row in dataset_report["rows"]:
+            values = []
+            for metric in MODEL_POLICY_METRICS:
+                value = row.get(metric)
+                values.append("n/a" if value is None else f"{float(value):.3f}")
+            lines.append(f"| {row['policy']} | {row['available']} | " + " | ".join(values) + " |")
+        lines.append("")
+    output_md.write_text("\n".join(lines), encoding="utf-8")
+
+
+def run_model_policy_comparison(
+    *,
+    model_metrics_by_dataset: Optional[dict[str, dict[str, Optional[dict[str, Any]]]]] = None,
+    output_json: Path = DEFAULT_MODEL_POLICY_COMPARISON_JSON,
+    output_md: Path = DEFAULT_MODEL_POLICY_COMPARISON_MD,
+) -> dict[str, Any]:
+    val_samples, _ = load_validation_samples_for_benchmark()
+    hard_negative_samples = load_hard_negative_samples()
+    model_metrics_by_dataset = model_metrics_by_dataset or {}
+    report = {
+        "model_metrics_note": "Model rows are unavailable unless raw/SFT/GRPO models are explicitly loaded and evaluated.",
+        "datasets": {},
+    }
+
+    for dataset_name, samples in (
+        ("validation", val_samples),
+        ("hard_negative", hard_negative_samples),
+    ):
+        metrics_by_label, oracle_check = build_evaluation_bundle(samples)
+        rows = [
+            _comparison_metric_row("random", metrics_by_label["random"]),
+            _comparison_metric_row("heuristic", metrics_by_label["heuristic"]),
+            _comparison_metric_row("q_aware_policy", metrics_by_label["q_aware"]),
+            _comparison_metric_row("oracle", metrics_by_label["oracle"]),
+        ]
+        dataset_model_metrics = model_metrics_by_dataset.get(dataset_name, {})
+        for label in ("raw_model", "sft_model", "grpo_model"):
+            rows.append(_comparison_metric_row(label, dataset_model_metrics.get(label)))
+        report["datasets"][dataset_name] = {
+            "sample_count": len(samples),
+            "oracle_check": oracle_check,
+            "rows": rows,
+        }
+
+    write_json(output_json, report)
+    _write_model_policy_comparison_md(report, output_md)
+    print(f"Saved: {output_json.relative_to(BACKEND_DIR)}")
+    print(f"Saved: {output_md.relative_to(BACKEND_DIR)}")
+    return report
 
 
 def build_training_health_report(
@@ -1079,6 +1693,20 @@ def build_training_ready_criteria(
     return criteria
 
 
+def assert_report_sample_counts_match_latest_audit(report: dict[str, Any]) -> None:
+    latest_audit = read_json(DEFAULT_DATASET_AUDIT_PATH, default=None)
+    if latest_audit is None:
+        return
+    report_audit = report.get("dataset_audit", {})
+    for key in ("train_sample_count", "val_sample_count"):
+        latest_count = latest_audit.get(key)
+        report_count = report_audit.get(key)
+        if report_count != latest_count:
+            raise TrainingPreflightError(
+                f"Final report {key}={report_count} does not match dataset_audit.json {key}={latest_count}."
+            )
+
+
 def generate_final_reports(
     *,
     dataset_audit: dict[str, Any],
@@ -1092,6 +1720,16 @@ def generate_final_reports(
     output_json: Path = DEFAULT_FINAL_REPORT_JSON,
     output_md: Path = DEFAULT_FINAL_REPORT_MD,
 ) -> dict[str, Any]:
+    latest_dataset_audit = read_json(DEFAULT_DATASET_AUDIT_PATH, default=None)
+    if latest_dataset_audit is not None:
+        for key in ("train_sample_count", "val_sample_count"):
+            if dataset_audit.get(key) != latest_dataset_audit.get(key):
+                raise TrainingPreflightError(
+                    f"Report input {key}={dataset_audit.get(key)} does not match "
+                    f"dataset_audit.json {key}={latest_dataset_audit.get(key)}."
+                )
+        dataset_audit = latest_dataset_audit
+
     criteria = build_training_ready_criteria(
         parse_tests=parse_tests,
         dataset_audit=dataset_audit,
@@ -1141,6 +1779,7 @@ def generate_final_reports(
             "oom_fallback": CLOUD_FALLBACK_COMMAND,
         },
     }
+    assert_report_sample_counts_match_latest_audit(report)
     write_json(output_json, report)
 
     markdown_lines = [
@@ -1208,8 +1847,8 @@ def generate_final_reports(
 
 
 def run_logic_smoke_test(
-    train_size: int = 80,
-    val_size: int = 32,
+    train_size: int = DEFAULT_TRAIN_SIZE,
+    val_size: int = DEFAULT_VAL_SIZE,
 ) -> dict[str, Any]:
     train_samples, val_samples, dataset_audit = generate_datasets(
         train_size=train_size,
@@ -1787,7 +2426,10 @@ def pick_best_checkpoint(
 
     if best_path is None:
         return None
-    return str(best_path.relative_to(BACKEND_DIR))
+    try:
+        return str(best_path.relative_to(BACKEND_DIR))
+    except ValueError:
+        return str(best_path)
 
 
 def run_subprocess(command: list[str], cwd: Path) -> None:
