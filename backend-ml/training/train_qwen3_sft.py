@@ -85,7 +85,7 @@ def train_sft(args: argparse.Namespace) -> int:
             "mode": "dry-run" if args.dry_run else "skip-model-load",
             "parse_tests": parse_tests,
             "dataset_audit_path": "training/dataset_audit.json",
-            "output_dir": str(args.sft_output_dir.relative_to(ROOT_DIR)),
+            "output_dir": str(args.sft_output_dir.relative_to(ROOT_DIR)) if args.sft_output_dir.is_relative_to(ROOT_DIR) else str(args.sft_output_dir),
         }
         write_json(DEFAULT_SFT_METRICS_PATH, dry_metrics)
         print("SFT dry-run complete.")
@@ -211,7 +211,7 @@ def train_sft(args: argparse.Namespace) -> int:
         "base_model_metrics": compact_metrics(base_metrics),
         "sft_metrics": compact_metrics(sft_metrics),
         "lora_parameter_delta": compute_parameter_delta(before_snapshot, model),
-        "output_dir": str(args.sft_output_dir.relative_to(ROOT_DIR)),
+        "output_dir": str(args.sft_output_dir.relative_to(ROOT_DIR)) if args.sft_output_dir.is_relative_to(ROOT_DIR) else str(args.sft_output_dir),
     }
     write_json(DEFAULT_SFT_METRICS_PATH, metrics_payload)
     print(f"SFT adapter saved to {args.sft_output_dir}")

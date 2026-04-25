@@ -106,9 +106,13 @@ def maybe_run_sft(args: argparse.Namespace) -> None:
         return
 
     sft_script = ROOT_DIR / "training" / "train_qwen3_sft.py"
+    try:
+        sft_script_rel = str(sft_script.relative_to(ROOT_DIR))
+    except ValueError:
+        sft_script_rel = str(sft_script)
     command = [
         sys.executable,
-        str(sft_script.relative_to(ROOT_DIR)),
+        sft_script_rel,
         "--model-name",
         args.model_name,
         "--sft-epochs",

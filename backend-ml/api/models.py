@@ -25,8 +25,8 @@ class WorkerActionOut(BaseModel):
 
 
 class SupervisorDecision(BaseModel):
-    action_taken:               str    # ALLOW | BLOCK | FORK | QUARANTINE
-    risk_vector:                List[float]
+    action_taken:               str        # ALLOW | BLOCK | FORK | QUARANTINE
+    risk_vector:                List[float] = Field(..., min_items=16, max_items=16)  # 16-dim risk feature vector
     ambiguity_score:            float  # [0,1] — how close to 0.5 risk midpoint
     quarantine_steps_remaining: int    # 0 if no active hold
 

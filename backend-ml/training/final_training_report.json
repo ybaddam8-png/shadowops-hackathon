@@ -176,7 +176,7 @@
     "passed": true,
     "oracle_reward_mean": 2.0,
     "inconsistency_count": 0,
-    "output_path": "training\\oracle_inconsistency_examples.json"
+    "output_path": "training/oracle_inconsistency_examples.json"
   },
   "raw_model_metrics": null,
   "sft_metrics": null,

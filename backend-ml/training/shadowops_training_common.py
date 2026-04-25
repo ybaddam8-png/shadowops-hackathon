@@ -880,11 +880,15 @@ def check_oracle_consistency(
                 )
 
     write_json(output_path, inconsistencies)
+    try:
+        relative_output_path = str(output_path.relative_to(BACKEND_DIR))
+    except ValueError:
+        relative_output_path = str(output_path)
     return {
         "passed": not inconsistencies,
         "oracle_reward_mean": oracle_metrics["reward_mean"],
         "inconsistency_count": len(inconsistencies),
-        "output_path": str(output_path.relative_to(BACKEND_DIR)),
+        "output_path": relative_output_path,
     }
 
 
@@ -1787,7 +1791,10 @@ def pick_best_checkpoint(
 
     if best_path is None:
         return None
-    return str(best_path.relative_to(BACKEND_DIR))
+    try:
+        return str(best_path.relative_to(BACKEND_DIR))
+    except ValueError:
+        return str(best_path)
 
 
 def run_subprocess(command: list[str], cwd: Path) -> None:

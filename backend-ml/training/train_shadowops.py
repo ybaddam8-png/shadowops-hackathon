@@ -298,7 +298,7 @@ def evaluate(policy, n_episodes=50, seed=99, label="") -> dict:
 # ─────────────────────────────────────────────────────────────
 
 def make_reward_fn(valid_tokens=None):
-    valid = valid_tokens or VALID_ACTIONS
+    valid = VALID_ACTIONS if valid_tokens is None else valid_tokens
 
     def reward_fn(completions, **kwargs):
         rewards = []
