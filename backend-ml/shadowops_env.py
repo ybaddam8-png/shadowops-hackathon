@@ -262,11 +262,13 @@ class ScenarioGenerator:
 
     # Tier sampling weights — produces balanced action distribution
     TIER_WEIGHTS = {
-        "BENIGN_CLEAN":   0.30,
-        "BENIGN_NOISY":   0.15,
-        "AMBIGUOUS":      0.15,
-        "MALICIOUS_SOFT": 0.20,
-        "MALICIOUS_HARD": 0.20,
+        # Rebalanced for the training pipeline so BLOCK / QUARANTINE are not
+        # starved in the supervised warm-start or GRPO validation splits.
+        "BENIGN_CLEAN":   0.25,
+        "BENIGN_NOISY":   0.13,
+        "AMBIGUOUS":      0.22,
+        "MALICIOUS_SOFT": 0.23,
+        "MALICIOUS_HARD": 0.17,
     }
 
     DEPS = ["requests","numpy","fastapi","pydantic","sqlalchemy","celery","redis-py"]
