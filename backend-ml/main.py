@@ -49,6 +49,7 @@ log = logging.getLogger("shadowops")
 USE_REAL_MODEL   = False
 LLAMA_MODEL_PATH = "./training/shadowops_model"
 DEMO_POLICY_NAME = "q_aware_demo_policy"
+VALID_DECISIONS = {"ALLOW", "BLOCK", "FORK", "QUARANTINE"}
 
 # ── Llama loader ──────────────────────────────────────────────
 _llama_model = _llama_tokenizer = None
@@ -124,14 +125,160 @@ def _fallback_decision_details(domain: str, risk_vector: list, ambiguity: float,
         "uncertainty": round(max(0.0, min(1.0, ambiguity)), 3),
         "risk_score": round(float(risk_score), 3),
         "cumulative_risk_score": round(float(risk_score), 3),
+        "cumulative_risk_reason": "Threshold fallback does not compute cumulative memory risk.",
         "missing_evidence": [],
         "required_evidence": [],
         "explanation": "Threshold fallback decision; Q-aware policy details unavailable.",
         "safe_outcome": "Hold action until a valid supervisor decision is available.",
+        "evidence_plan": [],
+        "structured_safe_outcome": {
+            "outcome": "Hold action until a valid supervisor decision is available.",
+            "remediation_steps": ["Request a valid supervisor decision before execution."],
+            "rollback_required": False,
+            "human_review_required": True,
+            "monitoring_required": False,
+            "explanation": "Fallback policy has no evidence planner context.",
+            "evidence_needed": [],
+            "allowed_next_actions": ["request valid supervisor decision"],
+        },
+        "decision_trace": {
+            "domain": domain or "unknown",
+            "risk_signals": [],
+            "safe_signals": [],
+            "cumulative_risk_score": round(float(risk_score), 3),
+            "memory_signals": [],
+            "missing_evidence": [],
+            "evidence_steps": [],
+            "final_decision": decision,
+            "safety_rationale": "Fallback policy returned a conservative supervisor decision.",
+        },
+        "memory_context": {},
         "policy_name": "threshold_fallback_policy",
         "domain": domain,
         "mitre_tactic": "Unknown",
         "mitre_technique": "Unknown",
+        "risk_indicators": [],
+        "safe_indicators": [],
+    }
+
+
+def _as_list(value) -> list:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    if isinstance(value, (tuple, set)):
+        return list(value)
+    return [value]
+
+
+def _as_dict(value) -> dict:
+    return value if isinstance(value, dict) else {}
+
+
+def _as_float(value, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _safe_decision_details(
+    details: dict,
+    *,
+    domain: str,
+    risk_vector: list,
+    ambiguity: float,
+) -> dict:
+    if not isinstance(details, dict):
+        details = _fallback_decision_details(domain, risk_vector, ambiguity, "QUARANTINE")
+
+    decision = str(details.get("decision") or details.get("action_taken") or "QUARANTINE").upper()
+    if decision not in VALID_DECISIONS:
+        decision = "QUARANTINE"
+
+    risk_score = _as_float(details.get("risk_score"), _as_float(details.get("cumulative_risk_score"), 0.0))
+    cumulative_risk = _as_float(details.get("cumulative_risk_score"), risk_score)
+    missing_evidence = [str(item) for item in _as_list(details.get("missing_evidence"))]
+    required_evidence = [str(item) for item in _as_list(details.get("required_evidence"))]
+    risk_indicators = [str(item) for item in _as_list(details.get("risk_indicators"))]
+    safe_indicators = [str(item) for item in _as_list(details.get("safe_indicators"))]
+    evidence_plan = [
+        item for item in _as_list(details.get("evidence_plan"))
+        if isinstance(item, dict)
+    ]
+    safe_outcome = str(details.get("safe_outcome") or "Quarantine action until missing evidence is provided.")
+    structured_safe_outcome = _as_dict(details.get("structured_safe_outcome"))
+    structured_safe_outcome.setdefault("outcome", safe_outcome)
+    structured_safe_outcome.setdefault("remediation_steps", ["Collect required evidence before execution."])
+    structured_safe_outcome.setdefault("rollback_required", False)
+    structured_safe_outcome.setdefault("human_review_required", decision in {"FORK", "QUARANTINE", "BLOCK"})
+    structured_safe_outcome.setdefault("monitoring_required", decision in {"ALLOW", "FORK", "QUARANTINE"})
+    structured_safe_outcome.setdefault("explanation", "Safe defaults applied to supervisor response.")
+    structured_safe_outcome.setdefault("evidence_needed", [item.get("ask", "") for item in evidence_plan] or missing_evidence)
+    structured_safe_outcome.setdefault("allowed_next_actions", ["hold action", "collect missing evidence"])
+    if not isinstance(structured_safe_outcome.get("remediation_steps"), list):
+        structured_safe_outcome["remediation_steps"] = ["Collect required evidence before execution."]
+    if not isinstance(structured_safe_outcome.get("evidence_needed"), list):
+        structured_safe_outcome["evidence_needed"] = missing_evidence
+    if not isinstance(structured_safe_outcome.get("allowed_next_actions"), list):
+        structured_safe_outcome["allowed_next_actions"] = ["hold action", "collect missing evidence"]
+    decision_trace = _as_dict(details.get("decision_trace"))
+    decision_trace.setdefault("domain", str(details.get("domain") or domain or "unknown"))
+    decision_trace.setdefault("risk_signals", risk_indicators)
+    decision_trace.setdefault("safe_signals", safe_indicators)
+    decision_trace.setdefault("cumulative_risk_score", round(max(0.0, min(1.0, cumulative_risk)), 3))
+    memory_context = _as_dict(details.get("memory_context"))
+    memory_signals = list(memory_context.get("risky_chains", []))
+    decision_trace.setdefault("memory_signals", memory_signals)
+    decision_trace.setdefault("missing_evidence", missing_evidence)
+    decision_trace.setdefault(
+        "evidence_steps",
+        [
+            {
+                "step": item.get("step"),
+                "priority": item.get("priority"),
+                "ask": item.get("ask"),
+                "blocks_decision": item.get("blocks_decision", False),
+            }
+            for item in evidence_plan
+        ],
+    )
+    decision_trace.setdefault("final_decision", decision)
+    decision_trace.setdefault("safety_rationale", f"Safe outcome: {safe_outcome}")
+    if not isinstance(decision_trace.get("risk_signals"), list):
+        decision_trace["risk_signals"] = risk_indicators
+    if not isinstance(decision_trace.get("safe_signals"), list):
+        decision_trace["safe_signals"] = safe_indicators
+    if not isinstance(decision_trace.get("memory_signals"), list):
+        decision_trace["memory_signals"] = memory_signals
+    if not isinstance(decision_trace.get("missing_evidence"), list):
+        decision_trace["missing_evidence"] = missing_evidence
+    if not isinstance(decision_trace.get("evidence_steps"), list):
+        decision_trace["evidence_steps"] = []
+
+    return {
+        **details,
+        "decision": decision,
+        "confidence": round(max(0.0, min(1.0, _as_float(details.get("confidence"), 0.5))), 3),
+        "uncertainty": round(max(0.0, min(1.0, _as_float(details.get("uncertainty"), ambiguity))), 3),
+        "risk_score": round(max(0.0, min(1.0, risk_score)), 3),
+        "cumulative_risk_score": round(max(0.0, min(1.0, cumulative_risk)), 3),
+        "cumulative_risk_reason": str(details.get("cumulative_risk_reason") or "No cumulative risk reason provided."),
+        "missing_evidence": missing_evidence,
+        "required_evidence": required_evidence,
+        "explanation": str(details.get("explanation") or "Supervisor returned safe default decision details."),
+        "safe_outcome": safe_outcome,
+        "evidence_plan": evidence_plan,
+        "structured_safe_outcome": structured_safe_outcome,
+        "decision_trace": decision_trace,
+        "memory_context": memory_context,
+        "policy_name": str(details.get("policy_name") or DEMO_POLICY_NAME),
+        "domain": str(details.get("domain") or domain or "unknown"),
+        "mitre_tactic": str(details.get("mitre_tactic") or "Unknown"),
+        "mitre_technique": str(details.get("mitre_technique") or "Unknown"),
+        "risk_indicators": risk_indicators,
+        "safe_indicators": safe_indicators,
     }
 
 
@@ -154,7 +301,7 @@ def _decide(
         model_decision = _infer_llama(prompt)
         details = _fallback_decision_details(domain, risk_vector, ambiguity, model_decision)
         details["policy_name"] = "llama_model"
-        return details
+        return _safe_decision_details(details, domain=domain, risk_vector=risk_vector, ambiguity=ambiguity)
     if _Q_AWARE_POLICY_AVAILABLE and build_q_aware_decision is not None:
         try:
             memory_context = (
@@ -162,7 +309,7 @@ def _decide(
                 if summarize_memory_context is not None
                 else None
             )
-            return build_q_aware_decision(
+            details = build_q_aware_decision(
                 domain,
                 intent,
                 raw_payload,
@@ -174,9 +321,11 @@ def _decide(
                 provided_evidence=provided_evidence or [],
                 memory_context=memory_context,
             )
+            return _safe_decision_details(details, domain=domain, risk_vector=risk_vector, ambiguity=ambiguity)
         except Exception as exc:
             log.warning("Q-aware demo policy failed; using threshold fallback: %s", exc)
-    return _fallback_decision_details(domain, risk_vector, ambiguity, _mock_supervisor(risk_vector, ambiguity))
+    details = _fallback_decision_details(domain, risk_vector, ambiguity, _mock_supervisor(risk_vector, ambiguity))
+    return _safe_decision_details(details, domain=domain, risk_vector=risk_vector, ambiguity=ambiguity)
 
 
 def _process_inbound(payload: InboundMessage) -> dict:

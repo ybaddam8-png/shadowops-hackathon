@@ -1,0 +1,42 @@
+name: shadowops
+version: 1.0.0
+description: >
+  ShadowOps is a cybersecurity incident-response RL environment where agents
+  decide whether cloud, CI, IAM, network, and pentest actions should be allowed,
+  blocked, forked to human review, or quarantined.
+entrypoint: backend-ml/openenv_shadowops_env.py:ShadowOpsOpenEnvV1
+schema_contract: backend-ml/schema_contract.json
+interface:
+  reset: reset()
+  step: step(action)
+  state: state()
+  close: close()
+actions:
+  - ALLOW
+  - BLOCK
+  - QUARANTINE
+  - FORK
+observation:
+  type: object
+  fields:
+    prompt: Cybersecurity incident prompt for the agent.
+    risk_vector: Sixteen-dimensional risk feature vector.
+    incident_state: Production, memory, health, and quarantine state.
+    available_actions: Valid supervisor actions.
+reward:
+  type: composable
+  rubrics:
+    - correct_action_reward
+    - safety_reward
+    - false_positive_penalty
+    - missing_evidence_penalty
+    - risk_calibration_reward
+    - memory_chain_reward
+    - safe_outcome_reward
+    - invalid_output_penalty
+done:
+  condition: episode step count reaches episode_max_length.
+safe_defaults:
+  model_free: true
+  deterministic_seed: 42
+  no_huggingface_jobs: true

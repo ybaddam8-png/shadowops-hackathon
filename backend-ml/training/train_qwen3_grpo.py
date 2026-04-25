@@ -28,6 +28,8 @@ from training.shadowops_training_common import (  # noqa: E402
     DEFAULT_DEMO_BENCHMARK_MD,
     DEFAULT_GRPO_OUTPUT_DIR,
     DEFAULT_HEALTH_REPORT_PATH,
+    DEFAULT_MODEL_EVAL_JSON,
+    DEFAULT_MODEL_EVAL_MD,
     DEFAULT_MODEL_POLICY_COMPARISON_JSON,
     DEFAULT_MODEL_POLICY_COMPARISON_MD,
     DEFAULT_SFT_METRICS_PATH,
@@ -47,19 +49,26 @@ from training.shadowops_training_common import (  # noqa: E402
     ensure_trainable_lora,
     evaluate_model_on_dataset,
     evaluate_saved_model,
+    evaluate_policy_on_dataset,
+    evaluate_training_gate,
     format_prompt_for_model,
     generate_datasets,
+    load_hard_negative_samples,
+    load_validation_samples_for_benchmark,
     get_total_gpu_memory_gb,
     load_fast_model,
     load_training_stack,
     make_health_callback,
     make_reward_function,
+    metric_delta,
     pick_best_checkpoint,
     preflight_dataset_check,
     read_json,
     run_logic_smoke_test,
     run_demo_benchmark,
     run_model_policy_comparison,
+    run_reward_diagnostics,
+    print_reward_diagnostics,
     run_parse_action_tests,
     run_subprocess,
     select_supported_kwargs,
@@ -81,6 +90,13 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--run-sft", action="store_true", help="Run SFT before GRPO using the current CLI settings.")
     parser.add_argument("--skip-grpo", action="store_true", help="Run preflight and optional SFT, but stop before GRPO.")
     parser.add_argument("--evaluate-baselines-only", action="store_true", help="Evaluate Random, Heuristic, Q-aware, and Oracle baselines without loading a model.")
+    parser.add_argument("--evaluate-model", action="store_true", help="Evaluate a saved checkpoint against validation data and Q-aware policy.")
+    parser.add_argument("--model-path", type=Path, default=None, help="Saved model/checkpoint path for --evaluate-model.")
+    parser.add_argument("--compare-against-policy", action="store_true", help="Print explicit deltas versus Q-aware policy in model evaluation mode.")
+    parser.add_argument("--eval-report-path", type=Path, default=None, help="Optional JSON path for the model evaluation report.")
+    parser.add_argument("--eval-split", choices=("validation", "hard_negative", "combined"), default="validation", help="Dataset split for --evaluate-model.")
+    parser.add_argument("--max-eval-samples", type=int, default=None, help="Optional cap for model evaluation samples.")
+    parser.add_argument("--reward-diagnostics", action="store_true", help="Print reward variation diagnostics without loading a model.")
     parser.add_argument("--model-name", default=MODEL_OPTIONS["1.7b"], help="Base Qwen3 model name.")
     parser.add_argument("--resume-from-sft", type=Path, default=DEFAULT_SFT_OUTPUT_DIR, help="Path to the SFT adapter to resume from.")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_GRPO_OUTPUT_DIR, help="GRPO adapter output directory.")
@@ -98,6 +114,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--top-p", type=float, default=0.95, help="GRPO top-p.")
     parser.add_argument("--top-k", type=int, default=50, help="GRPO top-k.")
     parser.add_argument("--max-new-tokens", type=int, default=8, help="Maximum generated action tokens.")
+    parser.add_argument("--explanation-max-new-tokens", type=int, default=96, help="Token budget reserved for future structured explanation generation.")
     parser.add_argument("--max-seq-len", type=int, default=256, help="Maximum prompt sequence length.")
     parser.add_argument("--eval-steps", type=int, default=50, help="Checkpoint / evaluation interval.")
     parser.add_argument("--val-eval-eps", type=int, default=100, help="Validation examples to score for reports.")
@@ -188,6 +205,181 @@ def evaluate_all_variants(
             grpo_metrics["label"] = "sft_grpo_model"
 
     return raw_metrics, sft_metrics, grpo_metrics
+
+
+def _resolve_eval_report_paths(path_value: Path | None) -> tuple[Path, Path]:
+    if path_value is None:
+        return DEFAULT_MODEL_EVAL_JSON, DEFAULT_MODEL_EVAL_MD
+    json_path = resolve_repo_path(path_value)
+    md_path = json_path.with_suffix(".md")
+    return json_path, md_path
+
+
+def _display_repo_path(path_value: Path) -> str:
+    try:
+        return str(path_value.resolve().relative_to(ROOT_DIR))
+    except ValueError:
+        return str(path_value)
+
+
+def _load_eval_samples(eval_split: str, max_eval_samples: int | None) -> tuple[list[dict], dict]:
+    val_samples, audit = load_validation_samples_for_benchmark()
+    if eval_split == "validation":
+        samples = val_samples
+    elif eval_split == "hard_negative":
+        samples = load_hard_negative_samples()
+    elif eval_split == "combined":
+        samples = val_samples + load_hard_negative_samples()
+    else:
+        raise ValueError(f"Unsupported eval split: {eval_split}")
+    if max_eval_samples is not None:
+        samples = samples[: max(0, int(max_eval_samples))]
+    return samples, audit
+
+
+def _write_model_eval_markdown(report: dict, output_md: Path) -> None:
+    model = report.get("model_metrics") or {}
+    q_aware = report.get("q_aware_baseline") or {}
+    gate = report.get("training_gate") or {}
+    lines = [
+        "# ShadowOps Model Evaluation Report",
+        "",
+        f"Model: `{report.get('model_name_or_path')}`",
+        f"Checkpoint: `{report.get('checkpoint_path')}`",
+        f"Eval split: `{report.get('eval_split')}`",
+        f"Samples: {report.get('sample_count')}",
+        "",
+        "## Metrics",
+        "",
+        "| Metric | Model | Q-aware | Delta |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for metric in (
+        "exact_match",
+        "safety_accuracy",
+        "unsafe_decision_rate",
+        "false_positive_rate",
+        "reward_mean",
+        "invalid_output_rate",
+    ):
+        model_value = model.get(metric)
+        q_value = q_aware.get(metric)
+        delta = (report.get("delta_vs_q_aware") or {}).get(metric)
+        lines.append(
+            "| "
+            + metric
+            + " | "
+            + ("n/a" if model_value is None else f"{float(model_value):.3f}")
+            + " | "
+            + ("n/a" if q_value is None else f"{float(q_value):.3f}")
+            + " | "
+            + ("n/a" if delta is None else f"{float(delta):+.3f}")
+            + " |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Training Gate",
+            "",
+            f"Status: **{gate.get('training_gate_status', 'UNKNOWN')}**",
+            "",
+            f"Reason: {gate.get('reason', 'n/a')}",
+            "",
+            f"Recommended next action: {gate.get('recommended_next_action', 'n/a')}",
+            "",
+        ]
+    )
+    output_md.parent.mkdir(parents=True, exist_ok=True)
+    output_md.write_text("\n".join(lines), encoding="utf-8")
+
+
+def _write_model_eval_report(report: dict, output_json: Path, output_md: Path) -> None:
+    write_json(output_json, report)
+    _write_model_eval_markdown(report, output_md)
+    try:
+        json_label = output_json.relative_to(ROOT_DIR)
+    except ValueError:
+        json_label = output_json
+    try:
+        md_label = output_md.relative_to(ROOT_DIR)
+    except ValueError:
+        md_label = output_md
+    print(f"Saved: {json_label}")
+    print(f"Saved: {md_label}")
+
+
+def run_model_evaluation(args: argparse.Namespace) -> int:
+    samples, audit = _load_eval_samples(args.eval_split, args.max_eval_samples)
+    output_json, output_md = _resolve_eval_report_paths(args.eval_report_path)
+    q_aware_metrics = evaluate_policy_on_dataset(samples, "q_aware", seed=args.seed)
+
+    if args.model_path is None:
+        candidate_path = args.output_dir
+        model_load_target = str(candidate_path)
+        model_path_text = _display_repo_path(candidate_path)
+        model_path_exists = candidate_path.exists()
+    else:
+        candidate_path = resolve_repo_path(args.model_path)
+        model_load_target = str(candidate_path)
+        model_path_text = str(args.model_path) if not args.model_path.is_absolute() else _display_repo_path(args.model_path)
+        model_path_exists = candidate_path.exists()
+    model_metrics = None
+    error = None
+
+    if args.skip_model_load:
+        error = "Model loading skipped by --skip-model-load."
+    else:
+        if args.model_path is not None and not model_path_exists:
+            error = f"Model path does not exist: {model_path_text}"
+        else:
+            try:
+                model_metrics = evaluate_saved_model(
+                    model_path_or_name=model_load_target,
+                    val_samples=samples,
+                    max_seq_len=args.max_seq_len,
+                    batch_size=args.eval_batch_size,
+                    max_new_tokens=args.max_new_tokens,
+                )
+                if model_metrics is None:
+                    error = "Model stack unavailable. Check torch, datasets, transformers, trl, unsloth, CUDA, and checkpoint path."
+            except Exception as exc:
+                error = f"{type(exc).__name__}: {exc}"
+
+    if model_metrics is not None:
+        model_metrics["model_name_or_path"] = model_path_text
+        model_metrics["checkpoint_path"] = model_path_text
+
+    gate = evaluate_training_gate(model_metrics, q_aware_metrics)
+    delta = metric_delta(model_metrics, q_aware_metrics) if model_metrics is not None else None
+    report = {
+        "model_name_or_path": model_path_text,
+        "checkpoint_path": model_path_text,
+        "eval_split": args.eval_split,
+        "sample_count": len(samples),
+        "dataset_audit": {
+            "train_sample_count": audit.get("train_sample_count"),
+            "val_sample_count": audit.get("val_sample_count"),
+            "train_val_overlap_count": audit.get("train_val_overlap_count"),
+        },
+        "model_metrics": compact_metrics(model_metrics),
+        "q_aware_baseline": compact_metrics(q_aware_metrics),
+        "delta_vs_q_aware": delta,
+        "training_gate": gate,
+        "training_gate_status": gate["training_gate_status"],
+        "training_gate_passed": gate["training_gate_passed"],
+        "reason": gate["reason"],
+        "model_load_error": error,
+    }
+    _write_model_eval_report(report, output_json, output_md)
+    if args.compare_against_policy:
+        print("Delta vs Q-aware:")
+        for metric, value in (delta or {}).items():
+            print(f"  {metric}: {value:+.3f}")
+    if error and not args.skip_model_load:
+        print(f"Model evaluation failed: {error}")
+        return 1
+    print(f"Training gate: {gate['training_gate_status']} - {gate['reason']}")
+    return 0
 
 
 def run_grpo_training(
@@ -376,6 +568,15 @@ def run_pipeline(args: argparse.Namespace) -> int:
     args.resume_from_sft = resolve_repo_path(args.resume_from_sft)
     args.sft_output_dir = resolve_repo_path(args.sft_output_dir)
     args.output_dir = resolve_repo_path(args.output_dir)
+
+    if args.reward_diagnostics:
+        val_samples, _ = load_validation_samples_for_benchmark()
+        diagnostics = run_reward_diagnostics(val_samples)
+        print_reward_diagnostics(diagnostics)
+        return 0
+
+    if args.evaluate_model:
+        return run_model_evaluation(args)
 
     if args.evaluate_baselines_only:
         run_demo_benchmark(

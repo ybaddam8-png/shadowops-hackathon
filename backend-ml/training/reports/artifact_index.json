@@ -1,0 +1,33 @@
+{
+  "output_dir": "training\\reports",
+  "artifacts": [
+    "artifact_index.json",
+    "benchmark_table.md",
+    "hidden_eval_report.json",
+    "hidden_eval_report.md",
+    "model_policy_comparison.json",
+    "model_policy_comparison.md",
+    "multistep_episode_report.json",
+    "multistep_episode_report.md",
+    "openenv_loop_eval.json",
+    "openenv_loop_eval.md",
+    "oracle_gap_analysis.json",
+    "oracle_gap_analysis.md",
+    "qaware_calibration_report.json",
+    "qaware_calibration_report.md",
+    "reward_curve.png",
+    "reward_curve_status.md",
+    "reward_diagnostics.json",
+    "reward_diagnostics.md"
+  ],
+  "benchmark_policy_count": 4,
+  "model_policy_datasets": [
+    "hard_negative",
+    "validation"
+  ],
+  "openenv_loop": {
+    "episodes": 3,
+    "total_steps": 15,
+    "unsafe_allow_rate": 0.0
+  }
+}

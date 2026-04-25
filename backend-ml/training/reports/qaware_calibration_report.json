@@ -1,0 +1,173 @@
+{
+  "sample_count": 100,
+  "calibration_count": 50,
+  "held_out_count": 50,
+  "baseline": {
+    "calibration": {
+      "exact_match": 0.94,
+      "safety_accuracy": 1.0,
+      "unsafe_decision_rate": 0.0,
+      "false_positive_rate": 0.0,
+      "reward_mean": 1.87342004
+    },
+    "held_out": {
+      "exact_match": 0.92,
+      "safety_accuracy": 1.0,
+      "unsafe_decision_rate": 0.0,
+      "false_positive_rate": 0.0,
+      "reward_mean": 1.85955128
+    }
+  },
+  "candidates": [
+    {
+      "config": {
+        "version": 1,
+        "medium_ambiguous_network_to_quarantine": false,
+        "ambiguous_network_quarantine_terms": [
+          "security group",
+          "allow ",
+          "open port",
+          "opened on",
+          "whitelist",
+          "alert suppression",
+          "vendor claims",
+          "monitoring",
+          "port 3389",
+          "port 6379",
+          "port 27017",
+          "port 4444"
+        ],
+        "min_reward_improvement": 0.0,
+        "safety_floor": 1.0,
+        "max_unsafe_decision_rate": 0.0,
+        "max_false_positive_rate": 0.01
+      },
+      "calibration_metrics": {
+        "exact_match": 0.94,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.87342004
+      },
+      "held_out_metrics": {
+        "exact_match": 0.92,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.85955128
+      },
+      "safe": true,
+      "score": 2.22755128
+    },
+    {
+      "config": {
+        "version": 1,
+        "medium_ambiguous_network_to_quarantine": true,
+        "ambiguous_network_quarantine_terms": [
+          "security group",
+          "whitelist",
+          "alert suppression",
+          "vendor claims",
+          "port 3389"
+        ],
+        "min_reward_improvement": 0.0,
+        "safety_floor": 1.0,
+        "max_unsafe_decision_rate": 0.0,
+        "max_false_positive_rate": 0.01,
+        "selected_reason": "narrow network/vendor quarantine terms"
+      },
+      "calibration_metrics": {
+        "exact_match": 0.98,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.87682356
+      },
+      "held_out_metrics": {
+        "exact_match": 1.0,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.92128888
+      },
+      "safe": true,
+      "score": 2.32128888
+    },
+    {
+      "config": {
+        "version": 1,
+        "medium_ambiguous_network_to_quarantine": true,
+        "ambiguous_network_quarantine_terms": [
+          "security group",
+          "allow ",
+          "open port",
+          "opened on",
+          "whitelist",
+          "alert suppression",
+          "vendor claims",
+          "monitoring",
+          "port 3389",
+          "port 6379",
+          "port 27017",
+          "port 4444"
+        ],
+        "min_reward_improvement": 0.0,
+        "safety_floor": 1.0,
+        "max_unsafe_decision_rate": 0.0,
+        "max_false_positive_rate": 0.01,
+        "selected_reason": "quarantine medium ambiguous network/vendor exposure with missing evidence"
+      },
+      "calibration_metrics": {
+        "exact_match": 0.98,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.87682356
+      },
+      "held_out_metrics": {
+        "exact_match": 1.0,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.92128888
+      },
+      "safe": true,
+      "score": 2.32128888
+    }
+  ],
+  "selected_config": {
+    "version": 1,
+    "medium_ambiguous_network_to_quarantine": true,
+    "ambiguous_network_quarantine_terms": [
+      "security group",
+      "whitelist",
+      "alert suppression",
+      "vendor claims",
+      "port 3389"
+    ],
+    "min_reward_improvement": 0.0,
+    "safety_floor": 1.0,
+    "max_unsafe_decision_rate": 0.0,
+    "max_false_positive_rate": 0.01,
+    "selected_reason": "narrow network/vendor quarantine terms",
+    "calibrated": true,
+    "selected_metrics": {
+      "exact_match": 1.0,
+      "safety_accuracy": 1.0,
+      "unsafe_decision_rate": 0.0,
+      "false_positive_rate": 0.0,
+      "reward_mean": 1.92128888
+    },
+    "selection_reason": "narrow network/vendor quarantine terms"
+  },
+  "selected_improved": true,
+  "oracle_gap_after_selection": {
+    "exact_match": 0.99,
+    "safety_accuracy": 1.0,
+    "unsafe_decision_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "reward_mean": 1.89905622,
+    "miss_count": 1
+  },
+  "output_config": "training\\qaware_policy_config.json"
+}

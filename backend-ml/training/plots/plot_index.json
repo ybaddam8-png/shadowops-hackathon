@@ -1,0 +1,11 @@
+{
+  "label": "Policy baseline / pre-training validation",
+  "plots_dir": "training\\plots",
+  "plots": [
+    "baseline_policy_comparison.png",
+    "reward_breakdown.png",
+    "safety_accuracy_comparison.png",
+    "unsafe_decision_rate.png"
+  ],
+  "notes": "No trained model improvement is claimed by these plots."
+}
