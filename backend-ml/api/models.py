@@ -31,7 +31,7 @@ class WorkerActionOut(BaseModel):
 
 class SupervisorDecision(BaseModel):
     action_taken:               str        # ALLOW | BLOCK | FORK | QUARANTINE
-    risk_vector:                List[float] = Field(..., min_items=16, max_items=16)  # 16-dim risk feature vector
+    risk_vector:                List[float] = Field(..., min_length=16, max_length=16)  # 16-dim risk feature vector
     ambiguity_score:            float  # [0,1] — how close to 0.5 risk midpoint
     quarantine_steps_remaining: int    # 0 if no active hold
     decision:                   Optional[str] = None
@@ -47,6 +47,13 @@ class SupervisorDecision(BaseModel):
     domain:                     Optional[str] = None
     mitre_tactic:               Optional[str] = None
     mitre_technique:            Optional[str] = None
+    evidence_plan:              List[Dict[str, Any]] = Field(default_factory=list)
+    structured_safe_outcome:    Dict[str, Any] = Field(default_factory=dict)
+    decision_trace:             Dict[str, Any] = Field(default_factory=dict)
+    memory_context:             Dict[str, Any] = Field(default_factory=dict)
+    cumulative_risk_reason:     Optional[str] = None
+    risk_indicators:            List[str] = Field(default_factory=list)
+    safe_indicators:            List[str] = Field(default_factory=list)
 
 
 class EnvironmentState(BaseModel):

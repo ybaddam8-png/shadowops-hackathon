@@ -1,0 +1,552 @@
+{
+  "scenario_count": 5,
+  "pass_count": 5,
+  "rows": [
+    {
+      "scenario_name": "GitHub poisoned PR",
+      "action_chain": "GITHUB::MERGE_PR -> FORK",
+      "expected_behavior": "FORK",
+      "actual_decision": "FORK",
+      "risk_delta": 0.589,
+      "evidence_requested": [
+        "maintainer identity",
+        "package provenance",
+        "CI workflow diff",
+        "secret permission diff",
+        "approved change ticket"
+      ],
+      "evidence_steps": [
+        {
+          "step": 1,
+          "priority": "critical",
+          "ask": "Verify maintainer identity before reviewing approval evidence.",
+          "blocks_decision": true
+        },
+        {
+          "step": 2,
+          "priority": "high",
+          "ask": "Provide approved change ticket for github_ci production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 3,
+          "priority": "high",
+          "ask": "Provide secret permission diff for github_ci production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 4,
+          "priority": "medium",
+          "ask": "Provide CI workflow diff for github_ci production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 5,
+          "priority": "medium",
+          "ask": "Provide package provenance for github_ci production action.",
+          "blocks_decision": true
+        }
+      ],
+      "safe_outcome": "Fork to human reviewer before production workflow changes.",
+      "pass_fail": "PASS",
+      "decision_trace": {
+        "domain": "github_ci",
+        "risk_signals": [
+          "workflow_modification",
+          "external_fetch",
+          "policy_override",
+          "production_deploy",
+          "production_environment"
+        ],
+        "safe_signals": [],
+        "cumulative_risk_score": 0.833,
+        "memory_signals": [],
+        "missing_evidence": [
+          "maintainer identity",
+          "package provenance",
+          "CI workflow diff",
+          "secret permission diff",
+          "approved change ticket"
+        ],
+        "evidence_steps": [
+          {
+            "step": 1,
+            "priority": "critical",
+            "ask": "Verify maintainer identity before reviewing approval evidence.",
+            "blocks_decision": true
+          },
+          {
+            "step": 2,
+            "priority": "high",
+            "ask": "Provide approved change ticket for github_ci production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 3,
+            "priority": "high",
+            "ask": "Provide secret permission diff for github_ci production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 4,
+            "priority": "medium",
+            "ask": "Provide CI workflow diff for github_ci production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 5,
+            "priority": "medium",
+            "ask": "Provide package provenance for github_ci production action.",
+            "blocks_decision": true
+          }
+        ],
+        "final_decision": "FORK",
+        "safety_rationale": "Forked to human review because risk is high or approval is required before execution. Safe outcome: Fork to human reviewer before production workflow changes."
+      }
+    },
+    {
+      "scenario_name": "AWS public S3 exfiltration",
+      "action_chain": "AWS::MODIFY_S3 -> QUARANTINE",
+      "expected_behavior": "QUARANTINE",
+      "actual_decision": "QUARANTINE",
+      "risk_delta": 0.457,
+      "evidence_requested": [
+        "data classification",
+        "bucket policy diff",
+        "public access justification",
+        "approval ticket",
+        "exposure duration"
+      ],
+      "evidence_steps": [
+        {
+          "step": 1,
+          "priority": "high",
+          "ask": "Provide approval ticket for aws_s3 production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 2,
+          "priority": "high",
+          "ask": "Provide bucket policy diff for aws_s3 production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 3,
+          "priority": "high",
+          "ask": "Provide data classification for aws_s3 production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 4,
+          "priority": "high",
+          "ask": "Provide public access justification for aws_s3 production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 5,
+          "priority": "medium",
+          "ask": "Provide exposure duration for aws_s3 production action.",
+          "blocks_decision": true
+        }
+      ],
+      "safe_outcome": "Quarantine action until missing evidence is provided.",
+      "pass_fail": "PASS",
+      "decision_trace": {
+        "domain": "aws_s3",
+        "risk_signals": [
+          "sensitive_data",
+          "data_export",
+          "disable_encryption",
+          "production_environment"
+        ],
+        "safe_signals": [],
+        "cumulative_risk_score": 1.0,
+        "memory_signals": [],
+        "missing_evidence": [
+          "data classification",
+          "bucket policy diff",
+          "public access justification",
+          "approval ticket",
+          "exposure duration"
+        ],
+        "evidence_steps": [
+          {
+            "step": 1,
+            "priority": "high",
+            "ask": "Provide approval ticket for aws_s3 production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 2,
+            "priority": "high",
+            "ask": "Provide bucket policy diff for aws_s3 production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 3,
+            "priority": "high",
+            "ask": "Provide data classification for aws_s3 production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 4,
+            "priority": "high",
+            "ask": "Provide public access justification for aws_s3 production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 5,
+            "priority": "medium",
+            "ask": "Provide exposure duration for aws_s3 production action.",
+            "blocks_decision": true
+          }
+        ],
+        "final_decision": "QUARANTINE",
+        "safety_rationale": "Quarantined until missing evidence is provided and risk can be reduced. Safe outcome: Quarantine action until missing evidence is provided."
+      }
+    },
+    {
+      "scenario_name": "Rogue IAM admin creation",
+      "action_chain": "AWS::UPDATE_IAM -> QUARANTINE",
+      "expected_behavior": "QUARANTINE",
+      "actual_decision": "QUARANTINE",
+      "risk_delta": 0.267,
+      "evidence_requested": [
+        "approval chain",
+        "requester identity",
+        "privilege diff",
+        "break-glass justification",
+        "MFA status"
+      ],
+      "evidence_steps": [
+        {
+          "step": 1,
+          "priority": "critical",
+          "ask": "Verify MFA status for the requesting identity.",
+          "blocks_decision": true
+        },
+        {
+          "step": 2,
+          "priority": "critical",
+          "ask": "Verify requester identity before reviewing approval evidence.",
+          "blocks_decision": true
+        },
+        {
+          "step": 3,
+          "priority": "high",
+          "ask": "Provide approval chain for iam production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 4,
+          "priority": "high",
+          "ask": "Provide break-glass justification for iam production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 5,
+          "priority": "high",
+          "ask": "Provide privilege diff for iam production action.",
+          "blocks_decision": true
+        }
+      ],
+      "safe_outcome": "Quarantine action until missing evidence is provided.",
+      "pass_fail": "PASS",
+      "decision_trace": {
+        "domain": "iam",
+        "risk_signals": [
+          "admin_privilege",
+          "new_identity",
+          "external_principal",
+          "production_environment"
+        ],
+        "safe_signals": [],
+        "cumulative_risk_score": 0.919,
+        "memory_signals": [],
+        "missing_evidence": [
+          "approval chain",
+          "requester identity",
+          "privilege diff",
+          "break-glass justification",
+          "MFA status"
+        ],
+        "evidence_steps": [
+          {
+            "step": 1,
+            "priority": "critical",
+            "ask": "Verify MFA status for the requesting identity.",
+            "blocks_decision": true
+          },
+          {
+            "step": 2,
+            "priority": "critical",
+            "ask": "Verify requester identity before reviewing approval evidence.",
+            "blocks_decision": true
+          },
+          {
+            "step": 3,
+            "priority": "high",
+            "ask": "Provide approval chain for iam production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 4,
+            "priority": "high",
+            "ask": "Provide break-glass justification for iam production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 5,
+            "priority": "high",
+            "ask": "Provide privilege diff for iam production action.",
+            "blocks_decision": true
+          }
+        ],
+        "final_decision": "QUARANTINE",
+        "safety_rationale": "Quarantined until missing evidence is provided and risk can be reduced. Safe outcome: Quarantine action until missing evidence is provided."
+      }
+    },
+    {
+      "scenario_name": "Suspicious firewall opening",
+      "action_chain": "SOC::UPDATE_FIREWALL -> QUARANTINE",
+      "expected_behavior": "QUARANTINE",
+      "actual_decision": "QUARANTINE",
+      "risk_delta": 0.243,
+      "evidence_requested": [
+        "change ticket",
+        "approved maintenance window",
+        "source/destination justification",
+        "exposed port risk",
+        "rollback plan",
+        "approval chain",
+        "public access justification"
+      ],
+      "evidence_steps": [
+        {
+          "step": 1,
+          "priority": "high",
+          "ask": "Provide approval chain for network_firewall production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 2,
+          "priority": "high",
+          "ask": "Provide change ticket for network_firewall production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 3,
+          "priority": "high",
+          "ask": "Provide exposed port risk for network_firewall production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 4,
+          "priority": "high",
+          "ask": "Provide public access justification for network_firewall production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 5,
+          "priority": "medium",
+          "ask": "Provide approved maintenance window for network_firewall production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 6,
+          "priority": "medium",
+          "ask": "Provide source/destination justification for network_firewall production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 7,
+          "priority": "low",
+          "ask": "Provide rollback plan and monitoring owner before exposure is allowed.",
+          "blocks_decision": true
+        }
+      ],
+      "safe_outcome": "Quarantine action until missing evidence is provided.",
+      "pass_fail": "PASS",
+      "decision_trace": {
+        "domain": "network_firewall",
+        "risk_signals": [
+          "public_exposure",
+          "admin_port",
+          "review_bypass",
+          "production_environment"
+        ],
+        "safe_signals": [],
+        "cumulative_risk_score": 1.0,
+        "memory_signals": [],
+        "missing_evidence": [
+          "change ticket",
+          "approved maintenance window",
+          "source/destination justification",
+          "exposed port risk",
+          "rollback plan",
+          "approval chain",
+          "public access justification"
+        ],
+        "evidence_steps": [
+          {
+            "step": 1,
+            "priority": "high",
+            "ask": "Provide approval chain for network_firewall production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 2,
+            "priority": "high",
+            "ask": "Provide change ticket for network_firewall production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 3,
+            "priority": "high",
+            "ask": "Provide exposed port risk for network_firewall production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 4,
+            "priority": "high",
+            "ask": "Provide public access justification for network_firewall production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 5,
+            "priority": "medium",
+            "ask": "Provide approved maintenance window for network_firewall production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 6,
+            "priority": "medium",
+            "ask": "Provide source/destination justification for network_firewall production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 7,
+            "priority": "low",
+            "ask": "Provide rollback plan and monitoring owner before exposure is allowed.",
+            "blocks_decision": true
+          }
+        ],
+        "final_decision": "QUARANTINE",
+        "safety_rationale": "Quarantined until missing evidence is provided and risk can be reduced. Safe outcome: Quarantine action until missing evidence is provided."
+      }
+    },
+    {
+      "scenario_name": "Ambiguous pentest request",
+      "action_chain": "SOC::UPDATE_FIREWALL -> FORK",
+      "expected_behavior": "FORK",
+      "actual_decision": "FORK",
+      "risk_delta": 0.285,
+      "evidence_requested": [
+        "authorization letter",
+        "approved test window",
+        "scope document",
+        "target list",
+        "emergency contact",
+        "production approval"
+      ],
+      "evidence_steps": [
+        {
+          "step": 1,
+          "priority": "critical",
+          "ask": "Provide authorization letter for pentest production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 2,
+          "priority": "high",
+          "ask": "Provide production approval for pentest production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 3,
+          "priority": "medium",
+          "ask": "Provide approved test window for pentest production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 4,
+          "priority": "medium",
+          "ask": "Provide scope document for pentest production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 5,
+          "priority": "medium",
+          "ask": "Provide target list for pentest production action.",
+          "blocks_decision": true
+        },
+        {
+          "step": 6,
+          "priority": "low",
+          "ask": "Provide emergency contact for pentest production action.",
+          "blocks_decision": true
+        }
+      ],
+      "safe_outcome": "Fork to human reviewer before execution.",
+      "pass_fail": "PASS",
+      "decision_trace": {
+        "domain": "pentest",
+        "risk_signals": [
+          "scan_activity",
+          "production_environment"
+        ],
+        "safe_signals": [],
+        "cumulative_risk_score": 0.401,
+        "memory_signals": [],
+        "missing_evidence": [
+          "authorization letter",
+          "approved test window",
+          "scope document",
+          "target list",
+          "emergency contact",
+          "production approval"
+        ],
+        "evidence_steps": [
+          {
+            "step": 1,
+            "priority": "critical",
+            "ask": "Provide authorization letter for pentest production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 2,
+            "priority": "high",
+            "ask": "Provide production approval for pentest production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 3,
+            "priority": "medium",
+            "ask": "Provide approved test window for pentest production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 4,
+            "priority": "medium",
+            "ask": "Provide scope document for pentest production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 5,
+            "priority": "medium",
+            "ask": "Provide target list for pentest production action.",
+            "blocks_decision": true
+          },
+          {
+            "step": 6,
+            "priority": "low",
+            "ask": "Provide emergency contact for pentest production action.",
+            "blocks_decision": true
+          }
+        ],
+        "final_decision": "FORK",
+        "safety_rationale": "Forked to human review because risk is high or approval is required before execution. Safe outcome: Fork to human reviewer before execution."
+      }
+    }
+  ]
+}

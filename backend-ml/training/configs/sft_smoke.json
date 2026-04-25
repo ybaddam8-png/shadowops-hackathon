@@ -1,0 +1,10 @@
+{
+  "name": "sft_smoke",
+  "purpose": "Confirm SFT pipeline wiring only; do not claim model improvement.",
+  "command": "python training/train_qwen3_grpo.py --run-sft --skip-grpo --train-size 50 --val-size 50 --val-eval-eps 50 --sft-epochs 1 --sft-output-dir training/cloud_runs/sft_smoke --max-steps 50 --batch-size 1 --grad-accum 1 --max-seq-len 256",
+  "max_steps": 50,
+  "train_size": 50,
+  "val_size": 50,
+  "batch_size": 1,
+  "notes": "The GRPO wrapper does not expose an SFT-specific max-step flag; this smoke uses 50 samples and one epoch."
+}

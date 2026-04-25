@@ -1,0 +1,14 @@
+{
+  "raw_model_exact": null,
+  "sft_model_exact": null,
+  "grpo_model_exact": null,
+  "q_aware_exact": 0.93,
+  "raw_model_safety": null,
+  "sft_model_safety": null,
+  "grpo_model_safety": null,
+  "q_aware_safety": 1.0,
+  "reward_curve_path": null,
+  "loss_curve_path": null,
+  "checkpoint_path": null,
+  "training_gate_passed": false
+}

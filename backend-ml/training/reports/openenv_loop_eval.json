@@ -1,0 +1,194 @@
+{
+  "policy": "q_aware",
+  "episodes": 3,
+  "episode_max_length": 5,
+  "total_steps": 15,
+  "mean_reward_per_step": 19.066666666666666,
+  "unsafe_allow_rate": 0.0,
+  "risky_chain_signal_count": 0,
+  "episodes_detail": [
+    {
+      "episode": 1,
+      "episode_reward": 2.0,
+      "steps": [
+        {
+          "step": 1,
+          "domain": "AWS",
+          "action": "FORK",
+          "reward": 2.0,
+          "outcome": "UNNECESSARY_FORK",
+          "cumulative_risk_score": 0.43,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 2,
+          "domain": "SOC",
+          "action": "QUARANTINE",
+          "reward": 10.0,
+          "outcome": "QUARANTINE_INITIATED",
+          "cumulative_risk_score": 0.538,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 3,
+          "domain": "SOC",
+          "action": "QUARANTINE",
+          "reward": 8.0,
+          "outcome": "QUARANTINE_HOLD_1",
+          "cumulative_risk_score": 0.833,
+          "missing_evidence_count": 5,
+          "evidence_plan_steps": 5
+        },
+        {
+          "step": 4,
+          "domain": "SOC",
+          "action": "FORK",
+          "reward": 8.0,
+          "outcome": "QUARANTINE_HOLD_2",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 5,
+          "domain": "SOC",
+          "action": "QUARANTINE",
+          "reward": -26.0,
+          "outcome": "QUARANTINE_RESOLVED_ALLOW",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        }
+      ],
+      "final_health": {
+        "SOC": 100,
+        "GITHUB": 100,
+        "AWS": 92
+      }
+    },
+    {
+      "episode": 2,
+      "episode_reward": 87.0,
+      "steps": [
+        {
+          "step": 1,
+          "domain": "SOC",
+          "action": "FORK",
+          "reward": 2.0,
+          "outcome": "UNNECESSARY_FORK",
+          "cumulative_risk_score": 0.401,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 2,
+          "domain": "SOC",
+          "action": "FORK",
+          "reward": 2.0,
+          "outcome": "UNNECESSARY_FORK",
+          "cumulative_risk_score": 0.439,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 3,
+          "domain": "GITHUB",
+          "action": "FORK",
+          "reward": 45.0,
+          "outcome": "FORKED_ATTACK",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence_count": 5,
+          "evidence_plan_steps": 5
+        },
+        {
+          "step": 4,
+          "domain": "AWS",
+          "action": "QUARANTINE",
+          "reward": 20.0,
+          "outcome": "QUARANTINE_INITIATED",
+          "cumulative_risk_score": 0.619,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 5,
+          "domain": "AWS",
+          "action": "QUARANTINE",
+          "reward": 18.0,
+          "outcome": "QUARANTINE_HOLD_1",
+          "cumulative_risk_score": 0.621,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        }
+      ],
+      "final_health": {
+        "SOC": 84,
+        "GITHUB": 100,
+        "AWS": 96
+      }
+    },
+    {
+      "episode": 3,
+      "episode_reward": 197.0,
+      "steps": [
+        {
+          "step": 1,
+          "domain": "GITHUB",
+          "action": "QUARANTINE",
+          "reward": 0.0,
+          "outcome": "QUARANTINE_INITIATED",
+          "cumulative_risk_score": 0.458,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 2,
+          "domain": "GITHUB",
+          "action": "QUARANTINE",
+          "reward": -2.0,
+          "outcome": "QUARANTINE_HOLD_1",
+          "cumulative_risk_score": 0.544,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 3,
+          "domain": "GITHUB",
+          "action": "QUARANTINE",
+          "reward": -2.0,
+          "outcome": "QUARANTINE_HOLD_2",
+          "cumulative_risk_score": 0.579,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 4,
+          "domain": "GITHUB",
+          "action": "QUARANTINE",
+          "reward": 86.0,
+          "outcome": "QUARANTINE_RESOLVED_ALLOW",
+          "cumulative_risk_score": 0.877,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        },
+        {
+          "step": 5,
+          "domain": "GITHUB",
+          "action": "FORK",
+          "reward": 115.0,
+          "outcome": "FORKED_ATTACK",
+          "cumulative_risk_score": 0.742,
+          "missing_evidence_count": 6,
+          "evidence_plan_steps": 6
+        }
+      ],
+      "final_health": {
+        "SOC": 100,
+        "GITHUB": 92,
+        "AWS": 100
+      }
+    }
+  ]
+}

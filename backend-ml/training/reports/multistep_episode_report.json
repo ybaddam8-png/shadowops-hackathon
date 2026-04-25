@@ -1,0 +1,363 @@
+{
+  "chain_count": 5,
+  "chain_detection_accuracy": 1.0,
+  "safe_chain_allow_rate": 1.0,
+  "malicious_chain_block_or_quarantine_rate": 1.0,
+  "unnecessary_escalation_rate": 0.0,
+  "memory_risk_improvement": 0.0472,
+  "chains": [
+    {
+      "chain_id": "firewall-iam-export",
+      "malicious": true,
+      "final_decision": "QUARANTINE",
+      "expected_final": [
+        "BLOCK",
+        "FORK",
+        "QUARANTINE"
+      ],
+      "chain_detected": true,
+      "chain_detection_correct": true,
+      "risk_start": 1.0,
+      "risk_end": 1.0,
+      "memory_context": {
+        "session_id": "chain-firewall-iam-export",
+        "recent_action_count": 3,
+        "actor": "unknown",
+        "actor_risk": 1.0,
+        "session_risk": 1.0,
+        "service": "aws_s3",
+        "service_risk": 1.0,
+        "risky_chains": [
+          "firewall open -> IAM admin creation -> data export"
+        ],
+        "recent_decisions": [
+          "FORK",
+          "FORK",
+          "QUARANTINE"
+        ],
+        "recent_indicators": [
+          "admin_port",
+          "admin_privilege",
+          "data_export",
+          "external_destination",
+          "production_environment",
+          "public_exposure",
+          "sensitive_data",
+          "unknown_actor"
+        ]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "decision": "FORK",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence": [
+            "change ticket",
+            "approved maintenance window",
+            "source/destination justification",
+            "exposed port risk",
+            "rollback plan",
+            "approval chain",
+            "public access justification"
+          ],
+          "safe_outcome": "Fork to human reviewer with IAM approval chain."
+        },
+        {
+          "step": 2,
+          "decision": "FORK",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence": [
+            "approval chain",
+            "requester identity",
+            "privilege diff",
+            "break-glass justification",
+            "MFA status"
+          ],
+          "safe_outcome": "Fork to human reviewer with IAM approval chain."
+        },
+        {
+          "step": 3,
+          "decision": "QUARANTINE",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence": [
+            "data classification",
+            "bucket policy diff",
+            "public access justification",
+            "approval ticket",
+            "exposure duration"
+          ],
+          "safe_outcome": "Quarantine action until missing evidence is provided."
+        }
+      ]
+    },
+    {
+      "chain_id": "ci-secret-prod",
+      "malicious": true,
+      "final_decision": "QUARANTINE",
+      "expected_final": [
+        "BLOCK",
+        "FORK",
+        "QUARANTINE"
+      ],
+      "chain_detected": true,
+      "chain_detection_correct": true,
+      "risk_start": 0.79,
+      "risk_end": 0.842,
+      "memory_context": {
+        "session_id": "chain-ci-secret-prod",
+        "recent_action_count": 3,
+        "actor": "new contributor",
+        "actor_risk": 1.0,
+        "session_risk": 1.0,
+        "service": "github_ci",
+        "service_risk": 1.0,
+        "risky_chains": [
+          "CI secret access -> workflow modification -> production deploy"
+        ],
+        "recent_decisions": [
+          "QUARANTINE",
+          "BLOCK",
+          "QUARANTINE"
+        ],
+        "recent_indicators": [
+          "ci_secret_access",
+          "production_deploy",
+          "production_environment",
+          "workflow_modification"
+        ]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "decision": "QUARANTINE",
+          "cumulative_risk_score": 0.79,
+          "missing_evidence": [
+            "maintainer identity",
+            "package provenance",
+            "CI workflow diff",
+            "secret permission diff",
+            "approved change ticket"
+          ],
+          "safe_outcome": "Quarantine action until missing evidence is provided."
+        },
+        {
+          "step": 2,
+          "decision": "BLOCK",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence": [
+            "maintainer identity",
+            "package provenance",
+            "CI workflow diff",
+            "secret permission diff",
+            "approved change ticket"
+          ],
+          "safe_outcome": "Rotate exposed secrets and block merge."
+        },
+        {
+          "step": 3,
+          "decision": "QUARANTINE",
+          "cumulative_risk_score": 0.842,
+          "missing_evidence": [
+            "maintainer identity",
+            "package provenance",
+            "CI workflow diff",
+            "secret permission diff",
+            "approved change ticket"
+          ],
+          "safe_outcome": "Quarantine action until missing evidence is provided."
+        }
+      ]
+    },
+    {
+      "chain_id": "public-bucket-escalation",
+      "malicious": true,
+      "final_decision": "QUARANTINE",
+      "expected_final": [
+        "BLOCK",
+        "FORK",
+        "QUARANTINE"
+      ],
+      "chain_detected": true,
+      "chain_detection_correct": true,
+      "risk_start": 0.948,
+      "risk_end": 1.0,
+      "memory_context": {
+        "session_id": "chain-public-bucket-escalation",
+        "recent_action_count": 3,
+        "actor": "unknown",
+        "actor_risk": 1.0,
+        "session_risk": 1.0,
+        "service": "iam",
+        "service_risk": 1.0,
+        "risky_chains": [
+          "public bucket -> external transfer -> permission escalation"
+        ],
+        "recent_decisions": [
+          "FORK",
+          "QUARANTINE",
+          "QUARANTINE"
+        ],
+        "recent_indicators": [
+          "admin_privilege",
+          "data_export",
+          "external_destination",
+          "production_environment",
+          "sensitive_data",
+          "unknown_actor"
+        ]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "decision": "FORK",
+          "cumulative_risk_score": 0.948,
+          "missing_evidence": [
+            "data classification",
+            "bucket policy diff",
+            "public access justification",
+            "approval ticket",
+            "exposure duration"
+          ],
+          "safe_outcome": "Fork to human reviewer before execution."
+        },
+        {
+          "step": 2,
+          "decision": "QUARANTINE",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence": [
+            "data classification",
+            "bucket policy diff",
+            "public access justification",
+            "approval ticket",
+            "exposure duration"
+          ],
+          "safe_outcome": "Quarantine action until missing evidence is provided."
+        },
+        {
+          "step": 3,
+          "decision": "QUARANTINE",
+          "cumulative_risk_score": 1.0,
+          "missing_evidence": [
+            "approval chain",
+            "requester identity",
+            "privilege diff",
+            "break-glass justification",
+            "MFA status"
+          ],
+          "safe_outcome": "Quarantine action until missing evidence is provided."
+        }
+      ]
+    },
+    {
+      "chain_id": "approved-pentest",
+      "malicious": false,
+      "final_decision": "ALLOW",
+      "expected_final": [
+        "ALLOW",
+        "FORK"
+      ],
+      "chain_detected": false,
+      "chain_detection_correct": true,
+      "risk_start": 0.0,
+      "risk_end": 0.0,
+      "memory_context": {
+        "session_id": "chain-approved-pentest",
+        "recent_action_count": 3,
+        "actor": "trusted maintainer",
+        "actor_risk": 0.18665555555555555,
+        "session_risk": 0.18665555555555555,
+        "service": "pentest",
+        "service_risk": 0.18665555555555555,
+        "risky_chains": [],
+        "recent_decisions": [
+          "ALLOW",
+          "ALLOW",
+          "ALLOW"
+        ],
+        "recent_indicators": [
+          "scan_activity"
+        ]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "decision": "ALLOW",
+          "cumulative_risk_score": 0.0,
+          "missing_evidence": [],
+          "safe_outcome": "Allow in staging/dev only."
+        },
+        {
+          "step": 2,
+          "decision": "ALLOW",
+          "cumulative_risk_score": 0.0,
+          "missing_evidence": [],
+          "safe_outcome": "Allow in staging/dev only."
+        },
+        {
+          "step": 3,
+          "decision": "ALLOW",
+          "cumulative_risk_score": 0.0,
+          "missing_evidence": [],
+          "safe_outcome": "Allow in staging/dev only."
+        }
+      ]
+    },
+    {
+      "chain_id": "approved-break-glass",
+      "malicious": false,
+      "final_decision": "ALLOW",
+      "expected_final": [
+        "ALLOW",
+        "FORK"
+      ],
+      "chain_detected": false,
+      "chain_detection_correct": true,
+      "risk_start": 0.401,
+      "risk_end": 0.533,
+      "memory_context": {
+        "session_id": "chain-approved-break-glass",
+        "recent_action_count": 3,
+        "actor": "trusted maintainer",
+        "actor_risk": 0.6965261111111112,
+        "session_risk": 0.6965261111111112,
+        "service": "iam",
+        "service_risk": 0.6468552777777777,
+        "risky_chains": [],
+        "recent_decisions": [
+          "ALLOW",
+          "ALLOW",
+          "ALLOW"
+        ],
+        "recent_indicators": [
+          "admin_privilege",
+          "break_glass",
+          "production_environment",
+          "workflow_modification"
+        ]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "decision": "ALLOW",
+          "cumulative_risk_score": 0.401,
+          "missing_evidence": [],
+          "safe_outcome": "ALLOW_WITH_RESTRICTIONS: proceed only under documented approval and monitoring."
+        },
+        {
+          "step": 2,
+          "decision": "ALLOW",
+          "cumulative_risk_score": 0.396,
+          "missing_evidence": [],
+          "safe_outcome": "ALLOW_WITH_RESTRICTIONS: proceed only under documented approval and monitoring."
+        },
+        {
+          "step": 3,
+          "decision": "ALLOW",
+          "cumulative_risk_score": 0.533,
+          "missing_evidence": [],
+          "safe_outcome": "ALLOW_WITH_RESTRICTIONS: proceed only under documented approval and monitoring."
+        }
+      ]
+    }
+  ]
+}

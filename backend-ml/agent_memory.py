@@ -5,7 +5,13 @@ from __future__ import annotations
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+import json
+from pathlib import Path
 from typing import Any, Iterable
+
+
+BACKEND_DIR = Path(__file__).resolve().parent
+DEFAULT_MEMORY_PATH = BACKEND_DIR / "data" / "session_memory.json"
 
 
 def _parse_timestamp(value: Any) -> float:
@@ -60,19 +66,79 @@ class ActionMemoryRecord:
             indicators=list(payload.get("indicators") or []),
         )
 
+    def to_mapping(self) -> dict[str, Any]:
+        return {
+            "actor": self.actor,
+            "session_id": self.session_id,
+            "service": self.service,
+            "domain": self.domain,
+            "environment": self.environment,
+            "timestamp": self.timestamp,
+            "decision": self.decision,
+            "risk_score": self.risk_score,
+            "action_summary": self.action_summary,
+            "indicators": list(self.indicators),
+        }
+
 
 class SessionMemory:
-    def __init__(self, max_actions_per_session: int = 20, decay_window_seconds: float = 3600.0):
+    def __init__(
+        self,
+        max_actions_per_session: int = 20,
+        decay_window_seconds: float = 3600.0,
+        *,
+        persistence_enabled: bool = True,
+        storage_path: Path | str = DEFAULT_MEMORY_PATH,
+    ):
         self.max_actions_per_session = max_actions_per_session
         self.decay_window_seconds = decay_window_seconds
+        self.persistence_enabled = persistence_enabled
+        self.storage_path = Path(storage_path)
         self._by_session: dict[str, deque[ActionMemoryRecord]] = defaultdict(
             lambda: deque(maxlen=self.max_actions_per_session)
         )
+        if self.persistence_enabled:
+            self.load()
+
+    def load(self) -> None:
+        if not self.persistence_enabled or not self.storage_path.exists():
+            return
+        try:
+            payload = json.loads(self.storage_path.read_text(encoding="utf-8"))
+            sessions = payload.get("sessions", {}) if isinstance(payload, dict) else {}
+            for session_id, records in sessions.items():
+                queue = self._by_session[str(session_id)]
+                for item in records[-self.max_actions_per_session:]:
+                    if isinstance(item, dict):
+                        queue.append(ActionMemoryRecord.from_mapping(item))
+        except Exception:
+            self._by_session.clear()
+
+    def save(self) -> None:
+        if not self.persistence_enabled:
+            return
+        payload = {
+            "version": 1,
+            "max_actions_per_session": self.max_actions_per_session,
+            "sessions": {
+                session_id: [record.to_mapping() for record in records]
+                for session_id, records in self._by_session.items()
+            },
+        }
+        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+        self.storage_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    def clear(self) -> None:
+        """Clear all memory records and persist the empty state when enabled."""
+
+        self._by_session.clear()
+        self.save()
 
     def add_record(self, record: ActionMemoryRecord | dict[str, Any]) -> ActionMemoryRecord:
         if isinstance(record, dict):
             record = ActionMemoryRecord.from_mapping(record)
         self._by_session[record.session_id].append(record)
+        self.save()
         return record
 
     def get_recent_actions(self, session_id: str, limit: int = 10) -> list[ActionMemoryRecord]:
@@ -206,3 +272,7 @@ def detect_risky_chains(session_id: str) -> list[str]:
 
 def summarize_memory_context(session_id: str) -> dict[str, Any]:
     return DEFAULT_MEMORY.summarize_memory_context(session_id)
+
+
+def clear_memory() -> None:
+    DEFAULT_MEMORY.clear()

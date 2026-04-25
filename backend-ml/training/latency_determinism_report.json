@@ -1,0 +1,46 @@
+{
+  "iterations": 3,
+  "scenario_count": 5,
+  "deterministic": true,
+  "average_total_ms": 3.4734666672496437,
+  "average_decision_ms": 0.6946933334499288,
+  "decisions": {
+    "GitHub poisoned PR": "FORK",
+    "AWS public S3 exfiltration": "QUARANTINE",
+    "Rogue IAM admin creation": "QUARANTINE",
+    "Suspicious firewall opening": "QUARANTINE",
+    "Ambiguous pentest request": "FORK"
+  },
+  "runs": [
+    {
+      "elapsed_ms": 7.19559999924968,
+      "decisions": {
+        "GitHub poisoned PR": "FORK",
+        "AWS public S3 exfiltration": "QUARANTINE",
+        "Rogue IAM admin creation": "QUARANTINE",
+        "Suspicious firewall opening": "QUARANTINE",
+        "Ambiguous pentest request": "FORK"
+      }
+    },
+    {
+      "elapsed_ms": 1.5879000020504463,
+      "decisions": {
+        "GitHub poisoned PR": "FORK",
+        "AWS public S3 exfiltration": "QUARANTINE",
+        "Rogue IAM admin creation": "QUARANTINE",
+        "Suspicious firewall opening": "QUARANTINE",
+        "Ambiguous pentest request": "FORK"
+      }
+    },
+    {
+      "elapsed_ms": 1.6369000004488043,
+      "decisions": {
+        "GitHub poisoned PR": "FORK",
+        "AWS public S3 exfiltration": "QUARANTINE",
+        "Rogue IAM admin creation": "QUARANTINE",
+        "Suspicious firewall opening": "QUARANTINE",
+        "Ambiguous pentest request": "FORK"
+      }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "grpo_final",
+  "purpose": "Longer run only after model evaluation gate proves safety and reward progress.",
+  "command": "python training/train_qwen3_grpo.py --resume-from-sft training/checkpoints/qwen3_sft_adapter --output-dir training/checkpoints/qwen3_sft_grpo_adapter --max-steps 800 --batch-size 1 --grad-accum 4 --num-generations 8 --eval-steps 50 --val-eval-eps 100 --eval-batch-size 4 --max-seq-len 256",
+  "max_steps": 800,
+  "num_generations": 8,
+  "batch_size": 1,
+  "required_gate": "training_gate_status must be PASS or an explicitly accepted WARN with documented reason."
+}

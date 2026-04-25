@@ -1,6 +1,9 @@
 {
   "train_sample_count": 500,
   "val_sample_count": 100,
+  "hard_negative_count": 40,
+  "duplicate_prompt_count": 0,
+  "train_val_overlap_count": 0,
   "action_distribution": {
     "train": {
       "ALLOW": 189,
@@ -13,6 +16,12 @@
       "ALLOW": 35,
       "FORK": 28,
       "QUARANTINE": 22
+    },
+    "hard_negative": {
+      "ALLOW": 14,
+      "QUARANTINE": 10,
+      "BLOCK": 13,
+      "FORK": 3
     },
     "train_pct": {
       "ALLOW": 0.378,
@@ -50,8 +59,29 @@
     "AMBIGUOUS": 144,
     "MALICIOUS_SOFT": 144
   },
-  "duplicate_prompt_count": 0,
-  "train_val_overlap_count": 0,
+  "domain_distribution": {
+    "AWS": 203,
+    "GITHUB": 208,
+    "SOC": 189,
+    "github_ci": 14,
+    "pentest": 4,
+    "iam": 8,
+    "aws_s3": 9,
+    "network_firewall": 5
+  },
+  "risk_type_distribution": {
+    "LOW": 224,
+    "CRITICAL": 129,
+    "MEDIUM": 144,
+    "HIGH": 103,
+    "medium": 13,
+    "critical": 12,
+    "high": 10,
+    "low": 5
+  },
+  "false_positive_challenge_count": 192,
+  "missing_label_count": 0,
+  "invalid_action_label_count": 0,
   "examples_per_action": {
     "ALLOW": [
       {

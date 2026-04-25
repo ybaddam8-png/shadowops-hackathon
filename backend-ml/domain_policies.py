@@ -140,6 +140,9 @@ def normalize_policy_domain(scenario: dict[str, Any]) -> str:
     if explicit:
         return explicit
     domain = str(scenario.get("domain") or "").upper()
+    domain_key = _norm(scenario.get("domain") or "").replace(" ", "_")
+    if domain_key in POLICIES:
+        return domain_key
     intent = str(scenario.get("intent") or "").upper()
     text = _norm((scenario.get("action_summary") or scenario.get("raw_payload") or ""))
     if "pentest" in text or "pen test" in text or "port scanning" in text:
