@@ -7,19 +7,19 @@
   "metrics": [
     {
       "policy": "Random",
-      "exact_match": 0.36,
+      "exact_match": 0.35,
       "safety_accuracy": 0.8,
       "unsafe_decision_rate": 0.2,
       "false_positive_rate": 0.16279069767441862,
-      "reward_mean": 0.08253612000000003
+      "reward_mean": 0.06534407000000003
     },
     {
       "policy": "Heuristic",
-      "exact_match": 0.52,
+      "exact_match": 0.51,
       "safety_accuracy": 0.92,
       "unsafe_decision_rate": 0.08,
       "false_positive_rate": 0.0,
-      "reward_mean": 1.1457713
+      "reward_mean": 1.14566684
     },
     {
       "policy": "Q-aware",
@@ -27,7 +27,7 @@
       "safety_accuracy": 1.0,
       "unsafe_decision_rate": 0.0,
       "false_positive_rate": 0.0,
-      "reward_mean": 1.89905622
+      "reward_mean": 1.9203646
     },
     {
       "policy": "Oracle",
@@ -35,12 +35,12 @@
       "safety_accuracy": 1.0,
       "unsafe_decision_rate": 0.0,
       "false_positive_rate": 0.0,
-      "reward_mean": 1.92046906
+      "reward_mean": 1.94186906
     }
   ],
   "oracle_check": {
     "passed": true,
-    "oracle_reward_mean": 1.92046906,
+    "oracle_reward_mean": 1.94186906,
     "inconsistency_count": 0,
     "output_path": "training\\oracle_inconsistency_examples.json"
   }

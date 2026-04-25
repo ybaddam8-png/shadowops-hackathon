@@ -1,0 +1,19 @@
+{
+  "status": "WARN",
+  "failures": [],
+  "warnings": [
+    "real trained checkpoint metrics are pending",
+    "real trainer_state.json logs are pending; training curves will appear after SFT/GRPO runs"
+  ],
+  "missing_required_files": {},
+  "missing_plots": [],
+  "training_curve_missing": false,
+  "has_real_training_logs": false,
+  "possible_secrets": [],
+  "possible_fake_claims": [],
+  "bad_tracked_artifacts": [],
+  "nested_duplicate_repo_tracked": [],
+  "model_policy_gate_status": "PENDING_REAL_CHECKPOINT_EVAL",
+  "checkpoint_metrics_pending": true,
+  "checked_tracked_file_count": 159
+}

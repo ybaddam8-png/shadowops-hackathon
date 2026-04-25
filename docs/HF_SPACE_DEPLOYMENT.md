@@ -20,9 +20,11 @@ This document is a packaging plan only. Do not run these commands unless you int
 - `backend-ml/training/*.json`
 - `backend-ml/training/*.md`
 - `backend-ml/training/plots/*.png`
+- `backend-ml/model_action_parser.py`
 - `docs/SUBMISSION_README_DRAFT.md`
 - `docs/DEMO_PITCH_SCRIPT.md`
 - `docs/JUDGE_DEMO_CHECKLIST.md`
+- `docs/CHAMPION_CHECKPOINT_INTEGRATION.md`
 
 Do not include:
 - Hugging Face tokens
@@ -41,6 +43,9 @@ Recommended local preparation:
 ```powershell
 cd backend-ml
 python training/train_qwen3_grpo.py --evaluate-baselines-only --skip-model-load
+python training/build_action_only_sft_dataset.py
+python training/model_policy_gate.py --skip-model-load
+python training/check_submission_artifacts.py
 python training/generate_submission_plots.py
 python demo_judge.py
 ```
@@ -61,3 +66,6 @@ Create or clone the Space manually from the Hugging Face UI, then copy the backe
 - Do not run `hf jobs run` from deployment steps.
 - Do not upload checkpoints unless real model evidence is ready.
 - The production guardrail remains `q_aware_demo_policy` until checkpoint evaluation passes.
+- ShadowOps currently reports policy-baseline performance from reproducible benchmark artifacts.
+- Trained checkpoint metrics are reported only after `model_eval_report.json` or `checkpoint_comparison_report.json` is generated from a real checkpoint.
+- ShadowOps prevents common RL action-format failures by requiring exact action outputs: `ALLOW`, `BLOCK`, `FORK`, or `QUARANTINE`.

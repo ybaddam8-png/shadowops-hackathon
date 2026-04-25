@@ -3,13 +3,13 @@
   "episodes": 3,
   "episode_max_length": 5,
   "total_steps": 15,
-  "mean_reward_per_step": 19.066666666666666,
+  "mean_reward_per_step": 12.4,
   "unsafe_allow_rate": 0.0,
   "risky_chain_signal_count": 0,
   "episodes_detail": [
     {
       "episode": 1,
-      "episode_reward": 2.0,
+      "episode_reward": -38.0,
       "steps": [
         {
           "step": 1,
@@ -35,7 +35,7 @@
           "step": 3,
           "domain": "SOC",
           "action": "QUARANTINE",
-          "reward": 8.0,
+          "reward": 2.0,
           "outcome": "QUARANTINE_HOLD_1",
           "cumulative_risk_score": 0.833,
           "missing_evidence_count": 5,
@@ -45,7 +45,7 @@
           "step": 4,
           "domain": "SOC",
           "action": "FORK",
-          "reward": 8.0,
+          "reward": 2.0,
           "outcome": "QUARANTINE_HOLD_2",
           "cumulative_risk_score": 1.0,
           "missing_evidence_count": 6,
@@ -55,7 +55,7 @@
           "step": 5,
           "domain": "SOC",
           "action": "QUARANTINE",
-          "reward": -26.0,
+          "reward": -54.0,
           "outcome": "QUARANTINE_RESOLVED_ALLOW",
           "cumulative_risk_score": 1.0,
           "missing_evidence_count": 6,
@@ -70,7 +70,7 @@
     },
     {
       "episode": 2,
-      "episode_reward": 87.0,
+      "episode_reward": 81.0,
       "steps": [
         {
           "step": 1,
@@ -116,7 +116,7 @@
           "step": 5,
           "domain": "AWS",
           "action": "QUARANTINE",
-          "reward": 18.0,
+          "reward": 12.0,
           "outcome": "QUARANTINE_HOLD_1",
           "cumulative_risk_score": 0.621,
           "missing_evidence_count": 6,
@@ -131,7 +131,7 @@
     },
     {
       "episode": 3,
-      "episode_reward": 197.0,
+      "episode_reward": 143.0,
       "steps": [
         {
           "step": 1,
@@ -147,7 +147,7 @@
           "step": 2,
           "domain": "GITHUB",
           "action": "QUARANTINE",
-          "reward": -2.0,
+          "reward": -8.0,
           "outcome": "QUARANTINE_HOLD_1",
           "cumulative_risk_score": 0.544,
           "missing_evidence_count": 6,
@@ -157,7 +157,7 @@
           "step": 3,
           "domain": "GITHUB",
           "action": "QUARANTINE",
-          "reward": -2.0,
+          "reward": -8.0,
           "outcome": "QUARANTINE_HOLD_2",
           "cumulative_risk_score": 0.579,
           "missing_evidence_count": 6,
@@ -167,7 +167,7 @@
           "step": 4,
           "domain": "GITHUB",
           "action": "QUARANTINE",
-          "reward": 86.0,
+          "reward": 44.0,
           "outcome": "QUARANTINE_RESOLVED_ALLOW",
           "cumulative_risk_score": 0.877,
           "missing_evidence_count": 6,

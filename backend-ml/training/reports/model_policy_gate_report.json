@@ -1,0 +1,42 @@
+{
+  "title": "ShadowOps Model-vs-Policy Deployment Gate",
+  "gate_status": "PENDING_REAL_CHECKPOINT_EVAL",
+  "deployment_recommendation": "DEPLOY_QAWARE_POLICY",
+  "reason": "No real checkpoint metrics are available. Q-aware remains the deployment guardrail.",
+  "q_aware_metrics": {
+    "policy": "Q-aware",
+    "exact_match": 0.99,
+    "safety_accuracy": 1.0,
+    "unsafe_decision_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "reward_mean": 1.9203646
+  },
+  "best_model_candidate": null,
+  "model_reject_reasons": [],
+  "sources": {
+    "demo_benchmark": {
+      "exists": true,
+      "source_file": "training\\demo_benchmark_report.json"
+    },
+    "model_eval": {
+      "exists": true,
+      "source_file": "training\\model_eval_report.json"
+    },
+    "checkpoint_comparison": {
+      "exists": false,
+      "source_file": "training\\reports\\checkpoint_comparison_report.json"
+    },
+    "hidden_eval": {
+      "exists": true,
+      "source_file": "training\\reports\\hidden_eval_report.json"
+    },
+    "multistep_eval": {
+      "exists": true,
+      "source_file": "training\\reports\\multistep_episode_report.json"
+    }
+  },
+  "notes": [
+    "Trained checkpoint metrics are reported only when generated from a real checkpoint.",
+    "If a model wins on reward but policy is safer, ShadowOps uses a hybrid: model proposes and Q-aware verifies."
+  ]
+}

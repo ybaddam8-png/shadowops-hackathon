@@ -1,0 +1,89 @@
+{
+  "title": "ShadowOps Oracle Gap Report v2",
+  "sample_count": 100,
+  "before": {
+    "exact_match": 0.92,
+    "reward_mean": 1.8663812,
+    "miss_count": 8
+  },
+  "after": {
+    "exact_match": 0.99,
+    "safety_accuracy": 1.0,
+    "unsafe_decision_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "reward_mean": 1.9203646,
+    "miss_count": 1
+  },
+  "oracle": {
+    "exact_match": 1.0,
+    "reward_mean": 1.94186906
+  },
+  "domain_distribution_of_misses": {
+    "SOC": 1
+  },
+  "action_confusion_matrix": {
+    "BLOCK": {
+      "BLOCK": 15
+    },
+    "ALLOW": {
+      "ALLOW": 42
+    },
+    "QUARANTINE": {
+      "QUARANTINE": 22,
+      "FORK": 1
+    },
+    "FORK": {
+      "FORK": 20
+    }
+  },
+  "false_cases": {
+    "allow": [],
+    "block": [],
+    "quarantine": [],
+    "fork": [
+      {
+        "index": 42,
+        "sample_id": "val-00042",
+        "domain": "SOC",
+        "scenario_type": "AMBIGUOUS",
+        "severity": "MEDIUM",
+        "risk_score": 0.104462,
+        "expected_action": "QUARANTINE",
+        "q_aware_action": "FORK",
+        "oracle_action": "QUARANTINE",
+        "reward_loss": 2.150446,
+        "reason": "ambiguous network/vendor exposure needs quarantine until evidence is provided",
+        "payload": "SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.",
+        "safe_to_fix_generically": true,
+        "recommended_policy_improvement": "generic quarantine rule for medium/high ambiguous exposure with missing evidence",
+        "would_hurt_hidden_eval": "low if limited to exposure terms and missing evidence"
+      }
+    ]
+  },
+  "top_reasons": [
+    [
+      "ambiguous network/vendor exposure needs quarantine until evidence is provided",
+      1
+    ]
+  ],
+  "missed_samples": [
+    {
+      "index": 42,
+      "sample_id": "val-00042",
+      "domain": "SOC",
+      "scenario_type": "AMBIGUOUS",
+      "severity": "MEDIUM",
+      "risk_score": 0.104462,
+      "expected_action": "QUARANTINE",
+      "q_aware_action": "FORK",
+      "oracle_action": "QUARANTINE",
+      "reward_loss": 2.150446,
+      "reason": "ambiguous network/vendor exposure needs quarantine until evidence is provided",
+      "payload": "SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.",
+      "safe_to_fix_generically": true,
+      "recommended_policy_improvement": "generic quarantine rule for medium/high ambiguous exposure with missing evidence",
+      "would_hurt_hidden_eval": "low if limited to exposure terms and missing evidence"
+    }
+  ],
+  "guidance": "Do not overfit the final miss. Only apply a policy improvement when the rule is generic, hidden evaluation does not degrade, and false positives do not increase."
+}

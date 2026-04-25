@@ -73,13 +73,19 @@ Generated from local validation with no model loading:
 | Q-aware | 0.990 | 1.000 | 0.000 | 0.000 | 1.899 |
 | Oracle | 1.000 | 1.000 | 0.000 | 0.000 | 1.920 |
 
-Q-aware supervisor establishes a strong pre-training baseline. GRPO training pipeline is ready. Real trained checkpoint metrics should be inserted after the HF run.
+ShadowOps currently reports policy-baseline performance from reproducible benchmark artifacts. Q-aware supervisor establishes a strong pre-training baseline. GRPO training pipeline is ready. Real trained checkpoint metrics should be inserted after the HF run.
+
+Trained checkpoint metrics are reported only after `model_eval_report.json` or `checkpoint_comparison_report.json` is generated from a real checkpoint.
+
+Q-aware supervisor is the safety guardrail. A trained checkpoint must pass the model-vs-policy gate before it is considered a deployment candidate.
+
+ShadowOps prevents common RL action-format failures by requiring exact action outputs: `ALLOW`, `BLOCK`, `FORK`, or `QUARANTINE`.
 
 ## Why This Is Hard To Game
 The reward is not a single exact-match score. It includes safety, false-positive cost, evidence completeness, uncertainty handling, memory-chain handling, remediation quality, and policy compliance. Always blocking loses reward on approved workflows. Always forking loses reward when evidence is complete. Unsafe allow decisions receive the strongest penalty.
 
 ## Hidden Evaluation And False-Positive Traps
-ShadowOps includes a hidden-style evaluation set with 150 scenarios: malicious/adversarial incidents, benign but scary-looking approved workflows, and ambiguous cases requiring human review. The set covers CI/CD, IAM, S3/public storage, Kubernetes, endpoint security, SaaS admin, data export, firewall policy, secrets management, and production deployment.
+ShadowOps includes a hidden-style evaluation set with at least 200 deterministic scenarios: malicious/adversarial incidents, benign but scary-looking approved workflows, and ambiguous cases requiring human review. The set covers CI/CD, IAM, S3/public storage, Kubernetes, endpoint security, SaaS admin, data export, firewall policy, secrets management, production rollback, maintenance windows, trusted automation, approved pentests, and break-glass access.
 
 Run:
 
@@ -133,3 +139,12 @@ HF Space link: TODO
 Demo video: TODO
 
 Slides: TODO
+
+## Metric Sources
+
+- Benchmark report: `backend-ml/training/demo_benchmark_report.json`
+- Hidden eval report: `backend-ml/training/reports/hidden_eval_report.json`
+- Multi-step eval report: `backend-ml/training/reports/multistep_episode_report.json`
+- Reward diagnostics report: `backend-ml/training/reports/reward_diagnostics_report.json`
+- Model-policy gate report: `backend-ml/training/reports/model_policy_gate_report.json`
+- Checkpoint comparison report: `backend-ml/training/reports/checkpoint_comparison_report.json`

@@ -1,0 +1,135 @@
+{
+  "total_samples": 600,
+  "train_samples": 500,
+  "validation_samples": 100,
+  "action_distribution": {
+    "train": {
+      "ALLOW": 242,
+      "FORK": 87,
+      "QUARANTINE": 83,
+      "BLOCK": 88
+    },
+    "validation": {
+      "BLOCK": 15,
+      "ALLOW": 42,
+      "QUARANTINE": 23,
+      "FORK": 20
+    }
+  },
+  "domain_distribution": {
+    "train": {
+      "AWS": 162,
+      "GITHUB": 173,
+      "SOC": 165
+    },
+    "validation": {
+      "GITHUB": 35,
+      "SOC": 24,
+      "AWS": 41
+    }
+  },
+  "scenario_distribution": {
+    "train": {
+      "BENIGN_CLEAN": 119,
+      "BENIGN_NOISY": 123,
+      "MALICIOUS_HARD": 69,
+      "AMBIGUOUS": 68,
+      "MALICIOUS_SOFT": 121
+    },
+    "validation": {
+      "MALICIOUS_SOFT": 23,
+      "BENIGN_CLEAN": 21,
+      "BENIGN_NOISY": 21,
+      "MALICIOUS_HARD": 19,
+      "AMBIGUOUS": 16
+    }
+  },
+  "invalid_label_count": 0,
+  "invalid_labels": [],
+  "duplicate_count": 0,
+  "leakage_warning_count": 0,
+  "leakage_warnings": [],
+  "examples_per_action": {
+    "ALLOW": [
+      {
+        "sample_id": "train-00000",
+        "split": "train",
+        "domain": "AWS",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00001",
+        "split": "train",
+        "domain": "AWS",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00002",
+        "split": "train",
+        "domain": "AWS",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      }
+    ],
+    "FORK": [
+      {
+        "sample_id": "train-00003",
+        "split": "train",
+        "domain": "AWS",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00004",
+        "split": "train",
+        "domain": "GITHUB",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00010",
+        "split": "train",
+        "domain": "SOC",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      }
+    ],
+    "QUARANTINE": [
+      {
+        "sample_id": "train-00007",
+        "split": "train",
+        "domain": "SOC",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00008",
+        "split": "train",
+        "domain": "AWS",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00026",
+        "split": "train",
+        "domain": "AWS",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      }
+    ],
+    "BLOCK": [
+      {
+        "sample_id": "train-00013",
+        "split": "train",
+        "domain": "GITHUB",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00025",
+        "split": "train",
+        "domain": "GITHUB",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      },
+      {
+        "sample_id": "train-00034",
+        "split": "train",
+        "domain": "GITHUB",
+        "prompt_preview": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = cl"
+      }
+    ]
+  },
+  "passed": true
+}

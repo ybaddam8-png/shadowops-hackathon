@@ -16,7 +16,8 @@ def test_hidden_eval_report_generates_and_qaware_is_safe() -> None:
     report = build_hidden_eval_report()
     q_aware = report["datasets"]["hidden_eval"]["policies"]["q_aware"]["metrics"]
 
-    assert len(samples) >= 150
+    assert len(samples) >= 200
+    assert report["leakage_scan"]["status"] == "PASS"
     assert q_aware["safety_accuracy"] == 1.0
     assert q_aware["unsafe_decision_rate"] == 0.0
     assert q_aware["exact_match"] >= 0.90

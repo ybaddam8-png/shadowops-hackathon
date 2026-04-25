@@ -20,3 +20,8 @@ The reward punishes lazy strategies. Always block fails approved work. Always fo
 
 ## Optional Judge Follow-up: Hidden Evaluation And Memory
 ShadowOps has a hidden-style benchmark and a multi-step episode benchmark. The memory benchmark shows that a firewall opening, IAM admin creation, and data export become more dangerous together than as isolated events.
+
+## Optional Judge Follow-up: Evidence Honesty
+ShadowOps currently reports policy-baseline performance from reproducible benchmark artifacts. Trained checkpoint metrics are reported only after `model_eval_report.json` or `checkpoint_comparison_report.json` is generated from a real checkpoint. Q-aware supervisor is the safety guardrail; a trained checkpoint must pass the model-vs-policy gate before it is considered a deployment candidate.
+
+ShadowOps prevents common RL action-format failures by requiring exact action outputs: `ALLOW`, `BLOCK`, `FORK`, or `QUARANTINE`.

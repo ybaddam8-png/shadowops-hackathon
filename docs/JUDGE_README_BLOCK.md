@@ -79,3 +79,28 @@ Training is successful only if a real checkpoint evaluation proves safety and re
 - HF Space: TODO
 - Demo video: TODO
 - Slides: TODO
+
+## Evaluation Honesty
+ShadowOps currently reports policy-baseline performance from reproducible benchmark artifacts.
+
+Trained checkpoint metrics are reported only after `model_eval_report.json` or `checkpoint_comparison_report.json` is generated from a real checkpoint.
+
+Q-aware supervisor is the safety guardrail. A trained checkpoint must pass the model-vs-policy gate before it is considered a deployment candidate.
+
+ShadowOps prevents common RL action-format failures by requiring exact action outputs: `ALLOW`, `BLOCK`, `FORK`, or `QUARANTINE`.
+
+## Why This Is Hard To Game
+The evaluation includes random, heuristic, Q-aware, oracle, and always-action baselines. Unsafe allows, invalid conversational answers, always-block behavior, and over-quarantine of approved safe traffic receive separate penalties.
+
+## Hidden Evaluation And False-Positive Traps
+Hidden scenarios use deterministic IDs and checksums, plus leakage scanning against train and validation incidents. False-positive traps include approved pentests, maintenance windows, trusted automation, and approved break-glass access.
+
+## Memory-Based Multi-Step Incident Response
+ShadowOps evaluates chains where firewall exposure, IAM escalation, data export, CI secret access, and rollback evidence change the final action through persistent memory and accumulated risk.
+
+## Metric Sources
+- Benchmark report: `backend-ml/training/demo_benchmark_report.json`
+- Hidden eval report: `backend-ml/training/reports/hidden_eval_report.json`
+- Reward diagnostics report: `backend-ml/training/reports/reward_diagnostics_report.json`
+- Model-policy gate report: `backend-ml/training/reports/model_policy_gate_report.json`
+- Checkpoint comparison report: `backend-ml/training/reports/checkpoint_comparison_report.json`

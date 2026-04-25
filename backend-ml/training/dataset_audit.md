@@ -16,19 +16,19 @@
 
 | Action | Count |
 | --- | ---: |
-| ALLOW | 189 |
+| ALLOW | 242 |
 | BLOCK | 88 |
-| FORK | 156 |
-| QUARANTINE | 67 |
+| FORK | 87 |
+| QUARANTINE | 83 |
 
 ### val
 
 | Action | Count |
 | --- | ---: |
-| ALLOW | 35 |
+| ALLOW | 42 |
 | BLOCK | 15 |
-| FORK | 28 |
-| QUARANTINE | 22 |
+| FORK | 20 |
+| QUARANTINE | 23 |
 
 ### hard_negative
 

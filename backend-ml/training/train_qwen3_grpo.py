@@ -39,6 +39,7 @@ from training.shadowops_training_common import (  # noqa: E402
     TrainingPreflightError,
     add_shared_smoke_args,
     build_evaluation_bundle,
+    build_compact_action_prompt,
     build_training_health_report,
     capture_trainable_snapshot,
     compact_metrics,
@@ -68,6 +69,7 @@ from training.shadowops_training_common import (  # noqa: E402
     run_demo_benchmark,
     run_model_policy_comparison,
     run_reward_diagnostics,
+    write_reward_diagnostics_reports,
     print_reward_diagnostics,
     run_parse_action_tests,
     run_subprocess,
@@ -87,6 +89,7 @@ def resolve_repo_path(path_value: Path) -> Path:
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Train ShadowOps GRPO adapter from an SFT warm-start.")
+    parser.add_argument("--config", type=Path, default=None, help="Optional JSON config file with supported CLI field names.")
     parser.add_argument("--run-sft", action="store_true", help="Run SFT before GRPO using the current CLI settings.")
     parser.add_argument("--skip-grpo", action="store_true", help="Run preflight and optional SFT, but stop before GRPO.")
     parser.add_argument("--evaluate-baselines-only", action="store_true", help="Evaluate Random, Heuristic, Q-aware, and Oracle baselines without loading a model.")
@@ -97,6 +100,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--eval-split", choices=("validation", "hard_negative", "combined"), default="validation", help="Dataset split for --evaluate-model.")
     parser.add_argument("--max-eval-samples", type=int, default=None, help="Optional cap for model evaluation samples.")
     parser.add_argument("--reward-diagnostics", action="store_true", help="Print reward variation diagnostics without loading a model.")
+    parser.add_argument("--print-prompt-preflight", action="store_true", help="Print three compact action-only prompts and exit without model loading.")
+    parser.add_argument("--generate-plots", action="store_true", help="Generate reward/comparison PNGs from real artifacts after eval or training.")
     parser.add_argument("--model-name", default=MODEL_OPTIONS["1.7b"], help="Base Qwen3 model name.")
     parser.add_argument("--resume-from-sft", type=Path, default=DEFAULT_SFT_OUTPUT_DIR, help="Path to the SFT adapter to resume from.")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_GRPO_OUTPUT_DIR, help="GRPO adapter output directory.")
@@ -123,6 +128,26 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=42, help="Random seed for trainer configuration.")
     add_shared_smoke_args(parser)
     return parser
+
+
+def apply_config_file(args: argparse.Namespace) -> None:
+    if args.config is None:
+        return
+    config_path = resolve_repo_path(args.config)
+    payload = read_json(config_path, default=None)
+    if not isinstance(payload, dict):
+        raise TrainingPreflightError(f"Config file is not a JSON object: {config_path}")
+    ignored = {"name", "purpose", "command", "required_before_run"}
+    for key, value in payload.items():
+        normalized = str(key).replace("-", "_")
+        if normalized in ignored or not hasattr(args, normalized):
+            continue
+        current = getattr(args, normalized)
+        if isinstance(current, Path):
+            setattr(args, normalized, Path(str(value)))
+        else:
+            setattr(args, normalized, value)
+    print(f"Loaded config: {config_path}")
 
 
 def maybe_run_sft(args: argparse.Namespace) -> None:
@@ -220,6 +245,18 @@ def _display_repo_path(path_value: Path) -> str:
         return str(path_value.resolve().relative_to(ROOT_DIR))
     except ValueError:
         return str(path_value)
+
+
+def _maybe_generate_reward_curves(enabled: bool) -> None:
+    if not enabled:
+        return
+    try:
+        from training.generate_reward_curves import generate_reward_curves
+
+        report = generate_reward_curves()
+        print(f"Generated reward/training plots: {len(report.get('generated_plot_paths', []))}")
+    except Exception as exc:  # plotting should never make training/eval fail
+        print(f"WARNING: reward curve generation failed: {type(exc).__name__}: {exc}")
 
 
 def _load_eval_samples(eval_split: str, max_eval_samples: int | None) -> tuple[list[dict], dict]:
@@ -375,6 +412,7 @@ def run_model_evaluation(args: argparse.Namespace) -> int:
         print("Delta vs Q-aware:")
         for metric, value in (delta or {}).items():
             print(f"  {metric}: {value:+.3f}")
+    _maybe_generate_reward_curves(args.generate_plots)
     if error and not args.skip_model_load:
         print(f"Model evaluation failed: {error}")
         return 1
@@ -565,14 +603,31 @@ def run_grpo_training(
 
 def run_pipeline(args: argparse.Namespace) -> int:
     ensure_dirs()
+    try:
+        apply_config_file(args)
+    except TrainingPreflightError as exc:
+        print(f"Config preflight failed: {exc}")
+        return 1
     args.resume_from_sft = resolve_repo_path(args.resume_from_sft)
     args.sft_output_dir = resolve_repo_path(args.sft_output_dir)
     args.output_dir = resolve_repo_path(args.output_dir)
 
+    if args.print_prompt_preflight:
+        samples, _ = load_validation_samples_for_benchmark()
+        print("ShadowOps action-only prompt preflight")
+        print("Valid assistant labels: ALLOW, BLOCK, FORK, QUARANTINE")
+        for index, sample in enumerate(samples[:3], start=1):
+            print(f"\n--- Prompt {index} ---")
+            print(build_compact_action_prompt(sample.get("observation") or sample.get("raw_payload", "")))
+            print(f"Expected assistant token: {sample.get('correct_action') or sample.get('expected_decision')}")
+        return 0
+
     if args.reward_diagnostics:
         val_samples, _ = load_validation_samples_for_benchmark()
         diagnostics = run_reward_diagnostics(val_samples)
+        write_reward_diagnostics_reports(diagnostics)
         print_reward_diagnostics(diagnostics)
+        _maybe_generate_reward_curves(args.generate_plots)
         return 0
 
     if args.evaluate_model:
@@ -587,6 +642,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
             output_json=DEFAULT_MODEL_POLICY_COMPARISON_JSON,
             output_md=DEFAULT_MODEL_POLICY_COMPARISON_MD,
         )
+        _maybe_generate_reward_curves(args.generate_plots)
         return 0
 
     args.val_size = max(args.val_size, args.val_eval_eps)
@@ -664,6 +720,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
             best_checkpoint_path=None,
         )
         print(final_report["status"]["final_status"])
+        _maybe_generate_reward_curves(args.generate_plots)
         return 0
 
     if args.dry_run or args.skip_model_load:
@@ -691,6 +748,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
         )
         print("Dry-run complete.")
         print(final_report["status"]["final_status"])
+        _maybe_generate_reward_curves(args.generate_plots)
         return 0
 
     if not args.resume_from_sft.exists():
@@ -770,6 +828,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
     print("Cloud GRPO command:")
     print(CLOUD_GRPO_COMMAND)
     print(final_report["status"]["final_status"])
+    _maybe_generate_reward_curves(args.generate_plots)
     return 0
 
 

@@ -2,81 +2,87 @@
   "title": "ShadowOps Q-aware Oracle Gap Analysis",
   "sample_count": 100,
   "before": {
-    "exact_match": 0.93,
-    "reward_mean": 1.86648566,
-    "miss_count": 7
+    "exact_match": 0.92,
+    "reward_mean": 1.8663812,
+    "miss_count": 8
   },
   "after": {
     "exact_match": 0.99,
     "safety_accuracy": 1.0,
     "unsafe_decision_rate": 0.0,
     "false_positive_rate": 0.0,
-    "reward_mean": 1.89905622,
+    "reward_mean": 1.9203646,
     "miss_count": 1
   },
   "oracle": {
     "exact_match": 1.0,
-    "reward_mean": 1.92046906
+    "reward_mean": 1.94186906
   },
   "domain_distribution_of_misses": {
-    "AWS": 1
+    "SOC": 1
   },
   "action_confusion_matrix": {
     "BLOCK": {
       "BLOCK": 15
     },
     "ALLOW": {
-      "ALLOW": 35
-    },
-    "FORK": {
-      "FORK": 27,
-      "QUARANTINE": 1
+      "ALLOW": 42
     },
     "QUARANTINE": {
-      "QUARANTINE": 22
+      "QUARANTINE": 22,
+      "FORK": 1
+    },
+    "FORK": {
+      "FORK": 20
     }
   },
   "false_cases": {
     "allow": [],
     "block": [],
-    "quarantine": [
+    "quarantine": [],
+    "fork": [
       {
-        "index": 20,
-        "sample_id": "val-00020",
-        "domain": "AWS",
+        "index": 42,
+        "sample_id": "val-00042",
+        "domain": "SOC",
         "scenario_type": "AMBIGUOUS",
         "severity": "MEDIUM",
-        "risk_score": 0.012844,
-        "expected_action": "FORK",
-        "q_aware_action": "QUARANTINE",
-        "oracle_action": "FORK",
-        "reward_loss": 2.141284,
-        "reason": "human review is sufficient; quarantine is too conservative",
-        "payload": "New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring."
+        "risk_score": 0.104462,
+        "expected_action": "QUARANTINE",
+        "q_aware_action": "FORK",
+        "oracle_action": "QUARANTINE",
+        "reward_loss": 2.150446,
+        "reason": "ambiguous network/vendor exposure needs quarantine until evidence is provided",
+        "payload": "SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.",
+        "safe_to_fix_generically": true,
+        "recommended_policy_improvement": "generic quarantine rule for medium/high ambiguous exposure with missing evidence",
+        "would_hurt_hidden_eval": "low if limited to exposure terms and missing evidence"
       }
-    ],
-    "fork": []
+    ]
   },
   "top_reasons": [
     [
-      "human review is sufficient; quarantine is too conservative",
+      "ambiguous network/vendor exposure needs quarantine until evidence is provided",
       1
     ]
   ],
   "missed_samples": [
     {
-      "index": 20,
-      "sample_id": "val-00020",
-      "domain": "AWS",
+      "index": 42,
+      "sample_id": "val-00042",
+      "domain": "SOC",
       "scenario_type": "AMBIGUOUS",
       "severity": "MEDIUM",
-      "risk_score": 0.012844,
-      "expected_action": "FORK",
-      "q_aware_action": "QUARANTINE",
-      "oracle_action": "FORK",
-      "reward_loss": 2.141284,
-      "reason": "human review is sufficient; quarantine is too conservative",
-      "payload": "New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring."
+      "risk_score": 0.104462,
+      "expected_action": "QUARANTINE",
+      "q_aware_action": "FORK",
+      "oracle_action": "QUARANTINE",
+      "reward_loss": 2.150446,
+      "reason": "ambiguous network/vendor exposure needs quarantine until evidence is provided",
+      "payload": "SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.",
+      "safe_to_fix_generically": true,
+      "recommended_policy_improvement": "generic quarantine rule for medium/high ambiguous exposure with missing evidence",
+      "would_hurt_hidden_eval": "low if limited to exposure terms and missing evidence"
     }
   ]
 }

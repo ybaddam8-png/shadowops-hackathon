@@ -48,6 +48,7 @@ from shadowops_env import (  # noqa: E402
     build_llama_prompt,
     extract_features,
 )
+from model_action_parser import parse_action_output  # noqa: E402
 
 
 MODEL_OPTIONS = {
@@ -146,25 +147,15 @@ SFT_SYSTEM_PROMPT = (
     "You are ShadowOps, a cybersecurity decision policy."
 )
 
-ACTION_PROMPT_TEMPLATE = """You are ShadowOps, a cybersecurity decision policy.
+ACTION_PROMPT_TEMPLATE = """System:
+You are ShadowOps. Output exactly one token:
+ALLOW, BLOCK, FORK, or QUARANTINE.
+No explanation. No punctuation.
 
-Choose exactly one action:
-ALLOW, BLOCK, FORK, QUARANTINE.
-
-Rules:
-ALLOW = safe benign activity.
-BLOCK = clearly malicious or high-risk activity.
-FORK = suspicious or uncertain activity that needs investigation.
-QUARANTINE = high-risk activity that should be isolated but preserved for analysis.
-
-Return only one action.
-Do not explain.
-Do not use <think> tags.
-
-Observation:
+User:
 {observation}
 
-Answer:
+Assistant:
 """
 
 CLOUD_SFT_COMMAND = (
@@ -496,28 +487,8 @@ def normalize_action_output(text: str) -> Optional[str]:
     action parsing deterministic and avoids treating prose as a decision.
     """
 
-    json_action = _extract_json_action(text)
-    if json_action is not None:
-        return json_action
-
-    cleaned = _clean_action_candidate(text)
-    if not cleaned:
-        return None
-    compact = " ".join(cleaned.replace("_", " ").replace("-", " ").split()).upper()
-    direct = _canonical_action_token(compact)
-    if direct is not None:
-        return direct
-
-    matches = _find_action_matches(cleaned)
-    if not matches:
-        return None
-    first_action, first_start, _ = matches[0]
-    if len(matches) > 1:
-        return None
-    prefix = cleaned[:first_start].strip(" \t\r\n`'\".,;:!?[](){}")
-    if first_start != 0 and not SAFE_ACTION_PREFIX_RE.match(prefix):
-        return None
-    return first_action
+    result = parse_action_output(text, mode="tolerant_eval")
+    return result.action if result.valid else None
 
 
 def parse_action(text: str) -> Optional[str]:
@@ -527,13 +498,17 @@ def parse_action(text: str) -> Optional[str]:
 def analyze_action_output(text: str) -> dict[str, Any]:
     cleaned = _clean_action_candidate(text)
     matches = _find_action_matches(cleaned)
-    parsed_action = parse_action(text)
+    result = parse_action_output(text, mode="tolerant_eval")
+    parsed_action = result.action if result.valid else None
     return {
         "cleaned_text": cleaned,
         "parsed_action": parsed_action,
         "invalid_output": parsed_action is None,
         "multi_action_warning": len(matches) > 1,
         "matches": [match[0] for match in matches],
+        "parser_mode": result.mode,
+        "parser_reason": result.reason,
+        "mapped_from": result.mapped_from,
     }
 
 
@@ -657,6 +632,17 @@ def build_observation(domain: str, intent: str, raw_payload: str, risk_vector: l
 
 def build_action_prompt(observation: str) -> str:
     return ACTION_PROMPT_TEMPLATE.format(observation=observation)
+
+
+def build_compact_action_prompt(incident_state: str) -> str:
+    """Render the single-token prompt used by SFT, GRPO, and evaluation.
+
+    Action-only training deliberately uses a tiny output contract. The model is
+    trained to emit one canonical label, while explanations are handled by the
+    deterministic policy layer and reports.
+    """
+
+    return build_action_prompt(incident_state)
 
 
 def build_teacher_action(sample: dict[str, Any]) -> str:
@@ -1715,6 +1701,10 @@ def run_reward_diagnostics(samples: Optional[list[dict[str, Any]]] = None) -> di
     sample_summaries: list[dict[str, Any]] = []
     same_reward_examples: list[dict[str, Any]] = []
     all_rewards: list[float] = []
+    rewards_by_domain: dict[str, list[float]] = {}
+    rewards_by_action: dict[str, list[float]] = {}
+    unsafe_allow_count = 0
+    unnecessary_quarantine_count = 0
 
     for sample in samples:
         rewards_by_output: dict[str, float] = {}
@@ -1731,6 +1721,13 @@ def run_reward_diagnostics(samples: Optional[list[dict[str, Any]]] = None) -> di
                 action,
                 {"multi_action_warning": analysis["multi_action_warning"]},
             )
+            domain = str(sample.get("policy_domain") or sample.get("domain") or "unknown")
+            rewards_by_domain.setdefault(domain, []).append(reward)
+            rewards_by_action.setdefault(action or "INVALID", []).append(reward)
+            if action == "ALLOW" and is_unsafe_decision(sample, action):
+                unsafe_allow_count += 1
+            if action == "QUARANTINE" and _clearly_safe_sample(sample):
+                unnecessary_quarantine_count += 1
             rewards_by_output[output] = reward
             all_rewards.append(reward)
         values = list(rewards_by_output.values())
@@ -1756,10 +1753,22 @@ def run_reward_diagnostics(samples: Optional[list[dict[str, Any]]] = None) -> di
         "sample_count": len(samples),
         "reward_mean": safe_mean(all_rewards),
         "reward_std": safe_std(all_rewards),
+        "zero_std_group_rate": sum(1 for value in group_stds if value <= 1e-12) / max(len(group_stds), 1),
         "percent_zero_std_groups": 100.0 * sum(1 for value in group_stds if value <= 1e-12) / max(len(group_stds), 1),
         "frac_reward_zero_std": sum(1 for value in group_stds if value <= 1e-12) / max(len(group_stds), 1),
         "invalid_output_rate": invalid_outputs / max(total_outputs, 1),
         "action_distribution": summarize_action_distribution(action_counts, max(total_outputs - invalid_outputs, 1)),
+        "action_distribution_entropy": distribution_entropy(
+            summarize_action_distribution(action_counts, max(total_outputs - invalid_outputs, 1))
+        ),
+        "always_action_baseline_rewards": {
+            action: evaluate_outputs(samples, [action] * len(samples), f"always_{action.lower()}")["reward_mean"]
+            for action in VALID_ACTIONS
+        },
+        "reward_std_by_domain": {domain: safe_std(values) for domain, values in sorted(rewards_by_domain.items())},
+        "reward_std_by_action": {action: safe_std(values) for action, values in sorted(rewards_by_action.items())},
+        "unsafe_allow_count": unsafe_allow_count,
+        "unnecessary_quarantine_count": unnecessary_quarantine_count,
         "easiest_samples": easiest,
         "hardest_samples": hardest,
         "same_reward_examples": same_reward_examples[:5],
@@ -1787,6 +1796,48 @@ def print_reward_diagnostics(diagnostics: dict[str, Any]) -> None:
             print(f"  {row['sample_id']} {row['correct_action']} {row['payload']}")
     else:
         print("same-reward examples: none")
+
+
+def write_reward_diagnostics_reports(
+    diagnostics: dict[str, Any],
+    *,
+    output_json: Path = TRAINING_DIR / "reports" / "reward_diagnostics_report.json",
+    output_md: Path = TRAINING_DIR / "reports" / "reward_diagnostics_report.md",
+) -> None:
+    write_json(output_json, diagnostics)
+    lines = [
+        "# ShadowOps Reward Diagnostics Report",
+        "",
+        f"Samples: {diagnostics['sample_count']}",
+        f"Reward mean/std: {diagnostics['reward_mean']:.3f} / {diagnostics['reward_std']:.3f}",
+        f"Zero-std group rate: {diagnostics['zero_std_group_rate']:.3f}",
+        f"Invalid output rate: {diagnostics['invalid_output_rate']:.3f}",
+        f"Action distribution entropy: {diagnostics['action_distribution_entropy']:.3f}",
+        f"Unsafe allow count: {diagnostics['unsafe_allow_count']}",
+        f"Unnecessary quarantine count: {diagnostics['unnecessary_quarantine_count']}",
+        "",
+        "## Always-Action Baseline Rewards",
+        "",
+    ]
+    for action, reward in diagnostics["always_action_baseline_rewards"].items():
+        lines.append(f"- {action}: {reward:.3f}")
+    lines.extend(["", "## Reward Std By Domain", ""])
+    for domain, value in diagnostics["reward_std_by_domain"].items():
+        lines.append(f"- {domain}: {value:.3f}")
+    lines.extend(["", "## Reward Std By Action", ""])
+    for action, value in diagnostics["reward_std_by_action"].items():
+        lines.append(f"- {action}: {value:.3f}")
+    lines.extend(
+        [
+            "",
+            "## Metric Sources",
+            "",
+            f"- Validation dataset: `{DEFAULT_VAL_DATASET_PATH.relative_to(BACKEND_DIR)}`",
+            "- Metrics are generated by `python training/train_qwen3_grpo.py --reward-diagnostics --skip-model-load`.",
+        ]
+    )
+    output_md.parent.mkdir(parents=True, exist_ok=True)
+    output_md.write_text("\n".join(lines), encoding="utf-8")
 
 
 def metric_delta(model_metrics: dict[str, Any], baseline_metrics: dict[str, Any]) -> dict[str, float]:
@@ -2049,7 +2100,17 @@ def write_demo_benchmark_reports(
     for row in rows:
         values = " | ".join(f"{row[metric]:.3f}" for metric in DEMO_BENCHMARK_METRICS)
         md_lines.append(f"| {row['policy']} | {values} |")
-    md_lines.append("")
+    md_lines.extend(
+        [
+            "",
+            "## Metric Sources",
+            "",
+            f"- Validation dataset: `{DEFAULT_VAL_DATASET_PATH.relative_to(BACKEND_DIR)}`",
+            f"- Dataset audit: `{DEFAULT_DATASET_AUDIT_PATH.relative_to(BACKEND_DIR)}`",
+            "- Metrics are regenerated by `python training/train_qwen3_grpo.py --evaluate-baselines-only --skip-model-load`.",
+            "",
+        ]
+    )
     output_md.write_text("\n".join(md_lines), encoding="utf-8")
     return report
 

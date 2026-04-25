@@ -6,24 +6,24 @@ Samples: 100
 
 | Version | exact_match | reward_mean | misses |
 | --- | ---: | ---: | ---: |
-| Before | 0.930 | 1.866 | 7 |
-| After | 0.990 | 1.899 | 1 |
-| Oracle | 1.000 | 1.920 | 0 |
+| Before | 0.920 | 1.866 | 8 |
+| After | 0.990 | 1.920 | 1 |
+| Oracle | 1.000 | 1.942 | 0 |
 
 ## Top Reasons Q-aware Differs From Oracle
 
-- human review is sufficient; quarantine is too conservative: 1
+- ambiguous network/vendor exposure needs quarantine until evidence is provided: 1
 
 ## Domain Distribution Of Misses
 
-- AWS: 1
+- SOC: 1
 
 ## Missed Samples
 
-### val-00020
-- Domain: AWS
-- Q-aware: QUARANTINE
-- Oracle: FORK
-- Reward loss: 2.141
-- Reason: human review is sufficient; quarantine is too conservative
-- Payload: New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring.
+### val-00042
+- Domain: SOC
+- Q-aware: FORK
+- Oracle: QUARANTINE
+- Reward loss: 2.150
+- Reason: ambiguous network/vendor exposure needs quarantine until evidence is provided
+- Payload: SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.

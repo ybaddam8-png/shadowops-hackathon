@@ -26,6 +26,8 @@ from training.shadowops_training_common import (  # noqa: E402
 
 DEFAULT_ORACLE_GAP_JSON = REPORTS_DIR / "oracle_gap_analysis.json"
 DEFAULT_ORACLE_GAP_MD = REPORTS_DIR / "oracle_gap_analysis.md"
+DEFAULT_ORACLE_GAP_V2_JSON = REPORTS_DIR / "oracle_gap_report.json"
+DEFAULT_ORACLE_GAP_V2_MD = REPORTS_DIR / "oracle_gap_report.md"
 
 
 def _reason(sample: dict[str, Any], q_action: str, oracle_action: str) -> str:
@@ -43,6 +45,25 @@ def _reason(sample: dict[str, Any], q_action: str, oracle_action: str) -> str:
     if q_action == "ALLOW":
         return "policy allowed a case oracle handled conservatively"
     return "policy threshold differs from oracle reward preference"
+
+
+def _fix_assessment(sample: dict[str, Any], q_action: str, oracle_action: str, reason: str) -> dict[str, Any]:
+    safe_fix = False
+    recommendation = "do not fix"
+    hidden_eval_risk = "low"
+    if q_action == "FORK" and oracle_action == "QUARANTINE" and "network/vendor" in reason:
+        safe_fix = True
+        recommendation = "generic quarantine rule for medium/high ambiguous exposure with missing evidence"
+        hidden_eval_risk = "low if limited to exposure terms and missing evidence"
+    elif q_action == "ALLOW":
+        safe_fix = True
+        recommendation = "raise uncertainty when approval or identity evidence is absent"
+        hidden_eval_risk = "medium; validate false-positive traps before changing"
+    return {
+        "safe_to_fix_generically": safe_fix,
+        "recommended_policy_improvement": recommendation,
+        "would_hurt_hidden_eval": hidden_eval_risk,
+    }
 
 
 def _outputs(samples: list[dict[str, Any]], config: dict[str, Any] | None = None) -> list[str]:
@@ -92,6 +113,7 @@ def build_oracle_gap_analysis(samples: list[dict[str, Any]] | None = None) -> di
             "reason": reason,
             "payload": sample.get("raw_payload", ""),
         }
+        row.update(_fix_assessment(sample, q_action, oracle_action, reason))
         misses.append(row)
         false_cases[q_action.lower()].append(row)
 
@@ -171,6 +193,32 @@ def write_oracle_gap_analysis(
         )
     output_md.write_text("\n".join(lines), encoding="utf-8")
 
+    v2_report = dict(report)
+    v2_report["title"] = "ShadowOps Oracle Gap Report v2"
+    v2_report["guidance"] = (
+        "Do not overfit the final miss. Only apply a policy improvement when the rule is generic, "
+        "hidden evaluation does not degrade, and false positives do not increase."
+    )
+    write_json(DEFAULT_ORACLE_GAP_V2_JSON, v2_report)
+    v2_lines = list(lines)
+    v2_lines.extend(
+        [
+            "",
+            "## Fix Safety Assessment",
+            "",
+            v2_report["guidance"],
+            "",
+        ]
+    )
+    for row in report["missed_samples"][:20]:
+        v2_lines.extend(
+            [
+                f"- `{row.get('sample_id')}`: safe_to_fix_generically={row.get('safe_to_fix_generically')} | "
+                f"hidden_eval_risk={row.get('would_hurt_hidden_eval')} | recommendation={row.get('recommended_policy_improvement')}",
+            ]
+        )
+    DEFAULT_ORACLE_GAP_V2_MD.write_text("\n".join(v2_lines), encoding="utf-8")
+
 
 def main() -> int:
     report = build_oracle_gap_analysis()
@@ -179,6 +227,8 @@ def main() -> int:
     print(f"Oracle gap after: {report['after']['miss_count']} misses")
     print(f"Saved: {DEFAULT_ORACLE_GAP_JSON.relative_to(BACKEND_DIR)}")
     print(f"Saved: {DEFAULT_ORACLE_GAP_MD.relative_to(BACKEND_DIR)}")
+    print(f"Saved: {DEFAULT_ORACLE_GAP_V2_JSON.relative_to(BACKEND_DIR)}")
+    print(f"Saved: {DEFAULT_ORACLE_GAP_V2_MD.relative_to(BACKEND_DIR)}")
     return 0
 
 

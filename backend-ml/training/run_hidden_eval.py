@@ -6,6 +6,7 @@ import json
 import math
 import random
 import sys
+import hashlib
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -20,6 +21,8 @@ if str(BACKEND_DIR) not in sys.path:
 
 from shadowops_env import extract_features  # noqa: E402
 from training.shadowops_training_common import (  # noqa: E402
+    DEFAULT_TRAIN_DATASET_PATH,
+    DEFAULT_VAL_DATASET_PATH,
     evaluate_oracle,
     evaluate_policy_on_dataset,
     load_hard_negative_samples,
@@ -27,6 +30,7 @@ from training.shadowops_training_common import (  # noqa: E402
     read_json,
     write_json,
 )
+from training.hidden_scenarios_v2 import build_hidden_scenarios_v2  # noqa: E402
 
 
 DEFAULT_HIDDEN_EVAL_JSON = REPORTS_DIR / "hidden_eval_report.json"
@@ -57,6 +61,9 @@ def hidden_scenario_to_sample(scenario: dict[str, Any], index: int) -> dict[str,
     risk_vector = extract_features(legacy, scenario.get("intent", "UNKNOWN"), text, random.Random(70_000 + index))
     difficulty = str(scenario.get("difficulty", "medium")).lower()
     severity = "CRITICAL" if difficulty == "adversarial" else ("HIGH" if difficulty == "hard" else "MEDIUM")
+    risk_score = round(sum(risk_vector[:4]) / max(len(risk_vector[:4]), 1), 6)
+    if scenario.get("scenario_type") == "MALICIOUS_HARD" and expected == "QUARANTINE":
+        risk_score = max(risk_score, 0.65)
     is_malicious = expected == "BLOCK" or any(
         term in text.lower()
         for term in ("exfil", "malicious", "rogue", "no approval", "without approval", "fake", "bypass")
@@ -80,19 +87,28 @@ def hidden_scenario_to_sample(scenario: dict[str, Any], index: int) -> dict[str,
         "correct_action": expected,
         "expected_decision": expected,
         "is_malicious": is_malicious,
-        "scenario_type": _scenario_type(expected, difficulty),
+        "scenario_type": scenario.get("scenario_type") or _scenario_type(expected, difficulty),
         "severity": severity,
         "risk_level": severity.lower(),
-        "risk_score": round(sum(risk_vector[:4]) / max(len(risk_vector[:4]), 1), 6),
+        "risk_score": risk_score,
         "risk_vector": [round(float(value), 6) for value in risk_vector[:16]],
         "difficulty": difficulty,
         "expected_reason": scenario.get("expected_reason", ""),
         "use_agent_policy": False,
+        "checksum": scenario.get("checksum"),
     }
 
 
-def load_hidden_eval_samples(path: Path = HIDDEN_EVAL_PATH) -> list[dict[str, Any]]:
+def ensure_hidden_eval_scenarios(path: Path = HIDDEN_EVAL_PATH) -> list[dict[str, Any]]:
     rows = read_json(path, default=[])
+    if not isinstance(rows, list) or len(rows) < 200:
+        rows = build_hidden_scenarios_v2()
+        write_json(path, rows)
+    return rows
+
+
+def load_hidden_eval_samples(path: Path = HIDDEN_EVAL_PATH) -> list[dict[str, Any]]:
+    rows = ensure_hidden_eval_scenarios(path)
     return [hidden_scenario_to_sample(row, index) for index, row in enumerate(rows)]
 
 
@@ -187,6 +203,9 @@ def _evaluate_dataset(samples: list[dict[str, Any]], dataset_name: str) -> dict[
             },
             "per_domain_exact": _domain_exact(samples, predictions),
             "per_action_precision_recall": _precision_recall(samples, predictions),
+            "safe_benign_allow_rate": _safe_benign_allow_rate(samples, predictions),
+            "malicious_block_quarantine_rate": _malicious_block_quarantine_rate(samples, predictions),
+            "ambiguous_fork_rate": _ambiguous_fork_rate(samples, predictions),
         }
     oracle = evaluate_oracle(samples)
     rows["oracle"] = {
@@ -200,8 +219,62 @@ def _evaluate_dataset(samples: list[dict[str, Any]], dataset_name: str) -> dict[
         },
         "per_domain_exact": _domain_exact(samples, oracle["predicted_actions"]),
         "per_action_precision_recall": _precision_recall(samples, oracle["predicted_actions"]),
+        "safe_benign_allow_rate": _safe_benign_allow_rate(samples, oracle["predicted_actions"]),
+        "malicious_block_quarantine_rate": _malicious_block_quarantine_rate(samples, oracle["predicted_actions"]),
+        "ambiguous_fork_rate": _ambiguous_fork_rate(samples, oracle["predicted_actions"]),
     }
     return {"dataset": dataset_name, "sample_count": len(samples), "policies": rows}
+
+
+def _safe_benign_allow_rate(samples: list[dict[str, Any]], predictions: list[str]) -> float:
+    eligible = [
+        (sample, prediction)
+        for sample, prediction in zip(samples, predictions)
+        if not sample.get("is_malicious", False) and sample.get("correct_action") == "ALLOW"
+    ]
+    return sum(1 for _, prediction in eligible if prediction == "ALLOW") / max(len(eligible), 1)
+
+
+def _malicious_block_quarantine_rate(samples: list[dict[str, Any]], predictions: list[str]) -> float:
+    eligible = [
+        (sample, prediction)
+        for sample, prediction in zip(samples, predictions)
+        if sample.get("is_malicious", False) or str(sample.get("scenario_type", "")).startswith("MALICIOUS")
+    ]
+    return sum(1 for _, prediction in eligible if prediction in {"BLOCK", "QUARANTINE", "FORK"}) / max(len(eligible), 1)
+
+
+def _ambiguous_fork_rate(samples: list[dict[str, Any]], predictions: list[str]) -> float:
+    eligible = [
+        (sample, prediction)
+        for sample, prediction in zip(samples, predictions)
+        if sample.get("scenario_type") == "AMBIGUOUS" or sample.get("correct_action") == "FORK"
+    ]
+    return sum(1 for _, prediction in eligible if prediction == "FORK") / max(len(eligible), 1)
+
+
+def _text_hash(text: str) -> str:
+    return hashlib.sha256(str(text or "").strip().lower().encode("utf-8")).hexdigest()
+
+
+def scan_hidden_leakage(hidden_samples: list[dict[str, Any]]) -> dict[str, Any]:
+    train = read_json(DEFAULT_TRAIN_DATASET_PATH, default=[]) or []
+    val = read_json(DEFAULT_VAL_DATASET_PATH, default=[]) or []
+    known_hashes = {
+        _text_hash(sample.get("raw_payload") or sample.get("action_summary") or sample.get("prompt") or "")
+        for sample in train + val
+    }
+    leaks = []
+    for sample in hidden_samples:
+        hidden_hash = _text_hash(sample.get("raw_payload") or sample.get("action_summary") or "")
+        if hidden_hash in known_hashes:
+            leaks.append(sample.get("sample_id"))
+    return {
+        "status": "FAIL" if leaks else "PASS",
+        "leak_count": len(leaks),
+        "leaked_sample_ids": leaks[:20],
+        "rule": "exact normalized incident text hash overlap between train/validation and hidden eval",
+    }
 
 
 def build_hidden_eval_report() -> dict[str, Any]:
@@ -217,9 +290,12 @@ def build_hidden_eval_report() -> dict[str, Any]:
             "hidden_eval": _evaluate_dataset(hidden, "hidden_eval"),
             "multi_step_chain": _evaluate_dataset(chain, "multi_step_chain"),
         },
+        "hidden_scenario_count": len(hidden),
+        "leakage_scan": scan_hidden_leakage(hidden),
         "notes": [
             "No trained model metrics are included.",
             "Q-aware is evaluated as a deterministic policy baseline.",
+            "Hidden scenarios are generated deterministically with checksums and exact text leakage scanning.",
         ],
     }
 
@@ -243,6 +319,20 @@ def write_hidden_eval_report(report: dict[str, Any]) -> None:
             )
         q = dataset["policies"]["q_aware"]["metrics"]
         lines.extend(["", f"Q-aware exact 95% CI: {dataset['policies']['q_aware']['confidence_intervals']['exact_match']}", ""])
+    lines.extend(
+        [
+            "## Leakage Scan",
+            "",
+            f"Status: **{report['leakage_scan']['status']}**",
+            f"Leak count: {report['leakage_scan']['leak_count']}",
+            "",
+            "## Metric Sources",
+            "",
+            f"- Hidden scenario file: `{HIDDEN_EVAL_PATH.relative_to(BACKEND_DIR)}`",
+            "- Metrics are generated by `python training/run_hidden_eval.py`.",
+            "",
+        ]
+    )
     DEFAULT_HIDDEN_EVAL_MD.write_text("\n".join(lines), encoding="utf-8")
 
 

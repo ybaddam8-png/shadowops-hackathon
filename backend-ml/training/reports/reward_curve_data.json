@@ -1,0 +1,655 @@
+{
+  "generated_at": "2026-04-25T18:53:33.106493+00:00",
+  "source_files_used": [
+    "reward_curves_qwen3.json",
+    "training\\demo_benchmark_report.json",
+    "training\\model_eval_report.json",
+    "training\\model_policy_comparison.json",
+    "training\\reports\\reward_diagnostics.json",
+    "training\\reports\\reward_diagnostics_report.json"
+  ],
+  "source_summaries": [
+    {
+      "source_file": "reward_curves_qwen3.json",
+      "points": {
+        "reward_mean": [
+          {
+            "step": 1.0,
+            "value": 1990.0,
+            "series": "train"
+          },
+          {
+            "step": 2.0,
+            "value": 1858.0,
+            "series": "train"
+          },
+          {
+            "step": 3.0,
+            "value": 1846.0,
+            "series": "train"
+          },
+          {
+            "step": 4.0,
+            "value": 1807.0,
+            "series": "train"
+          },
+          {
+            "step": 5.0,
+            "value": 1692.0,
+            "series": "train"
+          },
+          {
+            "step": 6.0,
+            "value": 1869.0,
+            "series": "train"
+          },
+          {
+            "step": 7.0,
+            "value": 1414.0,
+            "series": "train"
+          },
+          {
+            "step": 8.0,
+            "value": 1438.0,
+            "series": "train"
+          },
+          {
+            "step": 9.0,
+            "value": 1991.0,
+            "series": "train"
+          },
+          {
+            "step": 10.0,
+            "value": 1477.0,
+            "series": "train"
+          },
+          {
+            "step": 11.0,
+            "value": 1319.0,
+            "series": "train"
+          },
+          {
+            "step": 12.0,
+            "value": 1880.0,
+            "series": "train"
+          },
+          {
+            "step": 13.0,
+            "value": 1446.0,
+            "series": "train"
+          },
+          {
+            "step": 14.0,
+            "value": 1507.0,
+            "series": "train"
+          },
+          {
+            "step": 15.0,
+            "value": 1700.0,
+            "series": "train"
+          },
+          {
+            "step": 16.0,
+            "value": 2088.0,
+            "series": "train"
+          },
+          {
+            "step": 17.0,
+            "value": 1518.0,
+            "series": "train"
+          },
+          {
+            "step": 18.0,
+            "value": 1650.0,
+            "series": "train"
+          },
+          {
+            "step": 19.0,
+            "value": 1758.0,
+            "series": "train"
+          },
+          {
+            "step": 20.0,
+            "value": 1931.0,
+            "series": "train"
+          },
+          {
+            "step": 21.0,
+            "value": 1895.0,
+            "series": "train"
+          },
+          {
+            "step": 22.0,
+            "value": 1562.0,
+            "series": "train"
+          },
+          {
+            "step": 23.0,
+            "value": 1610.0,
+            "series": "train"
+          },
+          {
+            "step": 24.0,
+            "value": 1844.0,
+            "series": "train"
+          },
+          {
+            "step": 25.0,
+            "value": 1813.0,
+            "series": "train"
+          },
+          {
+            "step": 26.0,
+            "value": 1576.0,
+            "series": "train"
+          },
+          {
+            "step": 27.0,
+            "value": 1889.0,
+            "series": "train"
+          },
+          {
+            "step": 28.0,
+            "value": 1809.0,
+            "series": "train"
+          },
+          {
+            "step": 29.0,
+            "value": 1613.0,
+            "series": "train"
+          },
+          {
+            "step": 30.0,
+            "value": 1903.0,
+            "series": "train"
+          },
+          {
+            "step": 31.0,
+            "value": 1757.0,
+            "series": "train"
+          },
+          {
+            "step": 32.0,
+            "value": 1934.0,
+            "series": "train"
+          },
+          {
+            "step": 33.0,
+            "value": 1715.0,
+            "series": "train"
+          },
+          {
+            "step": 34.0,
+            "value": 2069.0,
+            "series": "train"
+          },
+          {
+            "step": 35.0,
+            "value": 1390.0,
+            "series": "train"
+          },
+          {
+            "step": 36.0,
+            "value": 1871.0,
+            "series": "train"
+          },
+          {
+            "step": 37.0,
+            "value": 1901.0,
+            "series": "train"
+          },
+          {
+            "step": 38.0,
+            "value": 1665.0,
+            "series": "train"
+          },
+          {
+            "step": 39.0,
+            "value": 1861.0,
+            "series": "train"
+          },
+          {
+            "step": 40.0,
+            "value": 1794.0,
+            "series": "train"
+          },
+          {
+            "step": 41.0,
+            "value": 1618.0,
+            "series": "train"
+          },
+          {
+            "step": 42.0,
+            "value": 2003.0,
+            "series": "train"
+          },
+          {
+            "step": 43.0,
+            "value": 1536.0,
+            "series": "train"
+          },
+          {
+            "step": 44.0,
+            "value": 1571.0,
+            "series": "train"
+          },
+          {
+            "step": 45.0,
+            "value": 1840.0,
+            "series": "train"
+          },
+          {
+            "step": 46.0,
+            "value": 2019.0,
+            "series": "train"
+          },
+          {
+            "step": 47.0,
+            "value": 1497.0,
+            "series": "train"
+          },
+          {
+            "step": 48.0,
+            "value": 1857.0,
+            "series": "train"
+          },
+          {
+            "step": 49.0,
+            "value": 1338.0,
+            "series": "train"
+          },
+          {
+            "step": 50.0,
+            "value": 1669.0,
+            "series": "train"
+          },
+          {
+            "step": 1.0,
+            "value": 1900.0,
+            "series": "val"
+          },
+          {
+            "step": 2.0,
+            "value": 1646.0,
+            "series": "val"
+          },
+          {
+            "step": 3.0,
+            "value": 1438.0,
+            "series": "val"
+          },
+          {
+            "step": 4.0,
+            "value": 1629.0,
+            "series": "val"
+          },
+          {
+            "step": 5.0,
+            "value": 1679.0,
+            "series": "val"
+          },
+          {
+            "step": 6.0,
+            "value": 2029.0,
+            "series": "val"
+          },
+          {
+            "step": 7.0,
+            "value": 1286.0,
+            "series": "val"
+          },
+          {
+            "step": 8.0,
+            "value": 2122.0,
+            "series": "val"
+          },
+          {
+            "step": 9.0,
+            "value": 1549.0,
+            "series": "val"
+          },
+          {
+            "step": 10.0,
+            "value": 1443.0,
+            "series": "val"
+          },
+          {
+            "step": 11.0,
+            "value": 1737.0,
+            "series": "val"
+          },
+          {
+            "step": 12.0,
+            "value": 1493.0,
+            "series": "val"
+          },
+          {
+            "step": 13.0,
+            "value": 1578.0,
+            "series": "val"
+          },
+          {
+            "step": 14.0,
+            "value": 1740.0,
+            "series": "val"
+          },
+          {
+            "step": 15.0,
+            "value": 1979.0,
+            "series": "val"
+          },
+          {
+            "step": 16.0,
+            "value": 1756.0,
+            "series": "val"
+          },
+          {
+            "step": 17.0,
+            "value": 1733.0,
+            "series": "val"
+          },
+          {
+            "step": 18.0,
+            "value": 1941.0,
+            "series": "val"
+          },
+          {
+            "step": 19.0,
+            "value": 1612.0,
+            "series": "val"
+          },
+          {
+            "step": 20.0,
+            "value": 1561.0,
+            "series": "val"
+          },
+          {
+            "step": 21.0,
+            "value": 1805.0,
+            "series": "val"
+          },
+          {
+            "step": 22.0,
+            "value": 1702.0,
+            "series": "val"
+          },
+          {
+            "step": 23.0,
+            "value": 1311.0,
+            "series": "val"
+          },
+          {
+            "step": 24.0,
+            "value": 1872.0,
+            "series": "val"
+          },
+          {
+            "step": 25.0,
+            "value": 1570.0,
+            "series": "val"
+          },
+          {
+            "step": 26.0,
+            "value": 1484.0,
+            "series": "val"
+          },
+          {
+            "step": 27.0,
+            "value": 1906.0,
+            "series": "val"
+          },
+          {
+            "step": 28.0,
+            "value": 1585.0,
+            "series": "val"
+          },
+          {
+            "step": 29.0,
+            "value": 1574.0,
+            "series": "val"
+          },
+          {
+            "step": 30.0,
+            "value": 1865.0,
+            "series": "val"
+          },
+          {
+            "step": 31.0,
+            "value": 1724.0,
+            "series": "val"
+          },
+          {
+            "step": 32.0,
+            "value": 1733.0,
+            "series": "val"
+          },
+          {
+            "step": 33.0,
+            "value": 2037.0,
+            "series": "val"
+          },
+          {
+            "step": 34.0,
+            "value": 1900.0,
+            "series": "val"
+          },
+          {
+            "step": 35.0,
+            "value": 1826.0,
+            "series": "val"
+          },
+          {
+            "step": 36.0,
+            "value": 1612.0,
+            "series": "val"
+          },
+          {
+            "step": 37.0,
+            "value": 948.0,
+            "series": "val"
+          },
+          {
+            "step": 38.0,
+            "value": 1635.0,
+            "series": "val"
+          },
+          {
+            "step": 39.0,
+            "value": 1368.0,
+            "series": "val"
+          },
+          {
+            "step": 40.0,
+            "value": 1786.0,
+            "series": "val"
+          },
+          {
+            "step": 41.0,
+            "value": 1952.0,
+            "series": "val"
+          },
+          {
+            "step": 42.0,
+            "value": 1359.0,
+            "series": "val"
+          },
+          {
+            "step": 43.0,
+            "value": 1508.0,
+            "series": "val"
+          },
+          {
+            "step": 44.0,
+            "value": 1782.0,
+            "series": "val"
+          },
+          {
+            "step": 45.0,
+            "value": 1599.0,
+            "series": "val"
+          },
+          {
+            "step": 46.0,
+            "value": 1670.0,
+            "series": "val"
+          },
+          {
+            "step": 47.0,
+            "value": 1868.0,
+            "series": "val"
+          },
+          {
+            "step": 48.0,
+            "value": 1752.0,
+            "series": "val"
+          },
+          {
+            "step": 49.0,
+            "value": 1687.0,
+            "series": "val"
+          },
+          {
+            "step": 50.0,
+            "value": 1589.0,
+            "series": "val"
+          }
+        ],
+        "loss": [],
+        "reward_std": [],
+        "grad_norm": [],
+        "completion_length": [],
+        "invalid_output_rate": []
+      },
+      "point_count": 100
+    },
+    {
+      "source_file": "training\\demo_benchmark_report.json",
+      "points": {
+        "reward_mean": [
+          {
+            "step": 1.0,
+            "value": 0.06534407000000003
+          },
+          {
+            "step": 2.0,
+            "value": 1.14566684
+          },
+          {
+            "step": 3.0,
+            "value": 1.9203646
+          },
+          {
+            "step": 4.0,
+            "value": 1.94186906
+          }
+        ],
+        "loss": [],
+        "reward_std": [],
+        "grad_norm": [],
+        "completion_length": [],
+        "invalid_output_rate": []
+      },
+      "point_count": 4
+    },
+    {
+      "source_file": "training\\model_eval_report.json",
+      "points": {
+        "reward_mean": [
+          {
+            "step": 1.0,
+            "value": 1.86648566
+          }
+        ],
+        "loss": [],
+        "reward_std": [
+          {
+            "step": 1.0,
+            "value": 0.3292981702841733
+          }
+        ],
+        "grad_norm": [],
+        "completion_length": [
+          {
+            "step": 1.0,
+            "value": 1.0
+          }
+        ],
+        "invalid_output_rate": [
+          {
+            "step": 1.0,
+            "value": 0.0
+          }
+        ]
+      },
+      "point_count": 4
+    },
+    {
+      "source_file": "training\\model_policy_comparison.json",
+      "points": {
+        "reward_mean": [],
+        "loss": [],
+        "reward_std": [],
+        "grad_norm": [],
+        "completion_length": [],
+        "invalid_output_rate": []
+      },
+      "point_count": 0
+    },
+    {
+      "source_file": "training\\reports\\reward_diagnostics.json",
+      "points": {
+        "reward_mean": [],
+        "loss": [],
+        "reward_std": [],
+        "grad_norm": [],
+        "completion_length": [],
+        "invalid_output_rate": []
+      },
+      "point_count": 0
+    },
+    {
+      "source_file": "training\\reports\\reward_diagnostics_report.json",
+      "points": {
+        "reward_mean": [],
+        "loss": [],
+        "reward_std": [],
+        "grad_norm": [],
+        "completion_length": [],
+        "invalid_output_rate": []
+      },
+      "point_count": 0
+    }
+  ],
+  "metrics_found": {
+    "reward_mean": 105,
+    "loss": 0,
+    "reward_std": 1,
+    "grad_norm": 0,
+    "completion_length": 1,
+    "invalid_output_rate": 1
+  },
+  "missing_metrics": [
+    "loss",
+    "grad_norm"
+  ],
+  "has_real_training_logs": false,
+  "warning": "No trainer_state.json logs found; training curves are pending unless another real curve artifact exists.",
+  "generated_plot_paths": [
+    "C:\\Users\\JASHWANTH\\AppData\\Local\\Temp\\pytest-of-JASHWANTH\\pytest-14\\test_generate_reward_curves_wr0\\reward_curve.png",
+    "C:\\Users\\JASHWANTH\\AppData\\Local\\Temp\\pytest-of-JASHWANTH\\pytest-14\\test_generate_reward_curves_wr0\\reward_std_curve.png",
+    "C:\\Users\\JASHWANTH\\AppData\\Local\\Temp\\pytest-of-JASHWANTH\\pytest-14\\test_generate_reward_curves_wr0\\completion_length_curve.png",
+    "C:\\Users\\JASHWANTH\\AppData\\Local\\Temp\\pytest-of-JASHWANTH\\pytest-14\\test_generate_reward_curves_wr0\\invalid_output_rate_curve.png",
+    "C:\\Users\\JASHWANTH\\AppData\\Local\\Temp\\pytest-of-JASHWANTH\\pytest-14\\test_generate_reward_curves_wr0\\model_policy_comparison.png",
+    "C:\\Users\\JASHWANTH\\AppData\\Local\\Temp\\pytest-of-JASHWANTH\\pytest-14\\test_generate_reward_curves_wr0\\safety_reward_comparison.png"
+  ],
+  "skipped_plots": [
+    "loss_curve.png",
+    "grad_norm_curve.png"
+  ],
+  "policy_rows_used": [
+    "Random",
+    "Heuristic",
+    "Q-aware",
+    "Oracle"
+  ]
+}
