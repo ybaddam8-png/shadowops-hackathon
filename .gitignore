@@ -8,3 +8,14 @@ backend-ml/**/__pycache__/
 *.pt
 *.pth
 *.safetensors
+.venv311/
+__pycache__/
+*.pyc
+*.pyo
+unsloth_compiled_cache/
+*.safetensors
+*.pt
+*.pth
+*.bin
+training/checkpoints/
+!training/checkpoints/qwen3_sft_grpo_adapter_explore/
