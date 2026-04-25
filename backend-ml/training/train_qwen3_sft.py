@@ -1,206 +1,229 @@
 """
-train_qwen3_sft.py - Supervised fine-tuning for ShadowOps action policy.
+Supervised fine-tuning warm-start for ShadowOps Qwen3 adapters.
 
-This script replaces unstable GRPO with SFT on teacher-labeled actions.
-Dataset format (JSONL preferred):
-  {"prompt": "...", "completion": "ALLOW|BLOCK|FORK|QUARANTINE", "metadata": {...}}
-
-Usage:
-  python training/train_qwen3_sft.py
-  python training/train_qwen3_sft.py --max-steps 400 --output-dir ./shadowops_qwen3_1p7b_sft_model
+This script prepares the action-only ShadowOps task before GRPO.
+It is intentionally safe to smoke-test on a laptop with --smoke-test
+or --skip-model-load and is intended to run full training on cloud GPU.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
-import random
+import inspect
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-VALID_ACTIONS = {"ALLOW", "BLOCK", "FORK", "QUARANTINE"}
-
-
-def load_dataset(path: Path) -> list[dict]:
-    if not path.exists():
-        raise FileNotFoundError(f"Dataset file not found: {path}")
-
-    text = path.read_text(encoding="utf-8").strip()
-    if not text:
-        return []
-
-    records: list[dict] = []
-
-    # Support JSON array and JSONL.
-    if text.startswith("["):
-        parsed = json.loads(text)
-        if not isinstance(parsed, list):
-            raise ValueError("JSON dataset must be a list of records.")
-        records = parsed
-    else:
-        for line in text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            records.append(json.loads(line))
-
-    return records
-
-
-def normalize_records(records: list[dict]) -> list[dict]:
-    normalized: list[dict] = []
-    dropped = 0
-
-    for rec in records:
-        prompt = str(rec.get("prompt", "")).strip()
-        completion = rec.get("completion", rec.get("response", ""))
-        completion = str(completion).strip().upper()
-
-        if not prompt or completion not in VALID_ACTIONS:
-            dropped += 1
-            continue
-
-        # Keep training target concise and deterministic.
-        normalized.append(
-            {
-                "prompt": prompt,
-                "completion": completion,
-                "text": f"{prompt}{completion}",
-            }
-        )
-
-    if not normalized:
-        raise ValueError("No valid records found after normalization.")
-
-    print(f"Loaded valid records: {len(normalized)} (dropped: {dropped})")
-    return normalized
+from training.shadowops_training_common import (  # noqa: E402
+    DEFAULT_SFT_METRICS_PATH,
+    DEFAULT_SFT_OUTPUT_DIR,
+    MODEL_OPTIONS,
+    add_shared_smoke_args,
+    build_sft_training_text,
+    compact_metrics,
+    compute_parameter_delta,
+    configure_runtime_noise_filters,
+    configure_torch_runtime,
+    count_trainable_parameters,
+    ensure_dirs,
+    ensure_trainable_lora,
+    evaluate_model_on_dataset,
+    generate_datasets,
+    load_fast_model,
+    load_training_stack,
+    preflight_dataset_check,
+    run_logic_smoke_test,
+    run_parse_action_tests,
+    select_supported_kwargs,
+    validate_training_runtime,
+    capture_trainable_snapshot,
+    write_json,
+)
 
 
-def train_sft(args: argparse.Namespace) -> None:
-    # Import Unsloth before Transformers to avoid patch-order warnings.
-    from unsloth import FastLanguageModel
-    from datasets import Dataset
-    from trl import SFTConfig, SFTTrainer
+def build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Train ShadowOps SFT warm-start adapter.")
+    parser.add_argument("--run-sft", action="store_true", help="Explicit compatibility flag; SFT is the default action for this script.")
+    parser.add_argument("--skip-grpo", action="store_true", help="Compatibility flag for combined pipelines; ignored in this script.")
+    parser.add_argument("--model-name", default=MODEL_OPTIONS["1.7b"], help="Base Qwen3 model name.")
+    parser.add_argument("--sft-epochs", type=float, default=2.0, help="Number of SFT epochs.")
+    parser.add_argument("--learning-rate", "--sft-learning-rate", dest="learning_rate", type=float, default=2e-4, help="SFT learning rate.")
+    parser.add_argument("--batch-size", type=int, default=1, help="Per-device batch size.")
+    parser.add_argument("--grad-accum", type=int, default=8, help="Gradient accumulation steps.")
+    parser.add_argument("--max-seq-len", type=int, default=256, help="Maximum sequence length.")
+    parser.add_argument("--sft-output-dir", type=Path, default=DEFAULT_SFT_OUTPUT_DIR, help="Adapter output directory.")
+    parser.add_argument("--sft-train-size", type=int, default=500, help="Training sample count.")
+    parser.add_argument("--sft-val-size", type=int, default=100, help="Validation sample count.")
+    parser.add_argument("--logging-steps", type=int, default=5, help="Trainer logging interval.")
+    parser.add_argument("--save-steps", type=int, default=50, help="Checkpoint save interval.")
+    add_shared_smoke_args(parser)
+    return parser
 
-    dataset_path = Path(args.dataset)
-    raw_records = load_dataset(dataset_path)
-    records = normalize_records(raw_records)
 
-    random.Random(args.seed).shuffle(records)
+def train_sft(args: argparse.Namespace) -> int:
+    ensure_dirs()
 
-    split_idx = int(len(records) * (1.0 - args.eval_ratio))
-    split_idx = max(1, min(split_idx, len(records) - 1))
-    train_records = records[:split_idx]
-    eval_records = records[split_idx:]
+    if args.smoke_test:
+        smoke = run_logic_smoke_test()
+        print("SFT smoke test:", "PASS" if smoke["smoke_test_passed"] else "FAIL")
+        print(f"Final report: training/final_training_report.json")
+        return 0 if smoke["smoke_test_passed"] else 1
 
-    print(f"Train/Eval split: {len(train_records)} / {len(eval_records)}")
-
-    train_ds = Dataset.from_list(train_records)
-    eval_ds = Dataset.from_list(eval_records)
-
-    print(f"Loading base model: {args.model_name}")
-    model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name=args.model_name,
-        max_seq_length=args.max_seq_len,
-        load_in_4bit=True,
-        load_in_8bit=False,
-        full_finetuning=False,
-        fast_inference=False,
+    train_samples, val_samples, audit = generate_datasets(
+        train_size=args.sft_train_size,
+        val_size=args.sft_val_size,
+        save=True,
     )
+    preflight_dataset_check(audit)
 
-    tokenizer.padding_side = "right"
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
+    if args.dry_run or args.skip_model_load:
+        parse_tests = run_parse_action_tests()
+        dry_metrics = {
+            "mode": "dry-run" if args.dry_run else "skip-model-load",
+            "parse_tests": parse_tests,
+            "dataset_audit_path": "training/dataset_audit.json",
+            "output_dir": str(args.sft_output_dir.relative_to(ROOT_DIR)),
+        }
+        write_json(DEFAULT_SFT_METRICS_PATH, dry_metrics)
+        print("SFT dry-run complete.")
+        return 0
 
-    model = FastLanguageModel.get_peft_model(
+    if not validate_training_runtime(args.model_name):
+        return 1
+
+    configure_runtime_noise_filters()
+    training_stack = load_training_stack("sft")
+    if training_stack is None:
+        return 1
+
+    torch_module = training_stack["torch"]
+    configure_torch_runtime(torch_module)
+    Dataset = training_stack["Dataset"]
+    TrainerConfig = training_stack["TrainerConfig"]
+    TrainerClass = training_stack["TrainerClass"]
+    FastModel = training_stack["FastModel"]
+
+    print(f"Loading SFT base model: {args.model_name}")
+    model, tokenizer = load_fast_model(FastModel, args.model_name, max_seq_len=args.max_seq_len)
+    model = ensure_trainable_lora(
+        FastModel,
         model,
-        r=args.lora_r,
-        target_modules=[
-            "q_proj", "k_proj", "v_proj", "o_proj",
-            "gate_proj", "up_proj", "down_proj",
-        ],
-        lora_alpha=args.lora_alpha,
-        lora_dropout=args.lora_dropout,
-        bias="none",
-        use_gradient_checkpointing="unsloth",
-        random_state=args.seed,
-        use_rslora=False,
-        loftq_config=None,
+        lora_r=8,
+        lora_alpha=16,
+        lora_dropout=0.0,
     )
 
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    sft_args = SFTConfig(
-        output_dir=str(output_dir),
-        learning_rate=args.learning_rate,
-        max_steps=args.max_steps,
-        per_device_train_batch_size=args.batch_size,
-        gradient_accumulation_steps=args.grad_accum,
-        warmup_ratio=args.warmup_ratio,
-        logging_steps=args.logging_steps,
-        save_steps=args.save_steps,
-        eval_steps=args.eval_steps,
-        eval_strategy="steps",
-        save_strategy="steps",
-        report_to="none",
-        bf16=args.bf16,
-        fp16=not args.bf16,
-        max_seq_length=args.max_seq_len,
-        dataset_text_field="text",
-        packing=False,
-        optim="paged_adamw_8bit",
-        lr_scheduler_type="cosine",
-        weight_decay=0.01,
-        seed=args.seed,
+    base_metrics = evaluate_model_on_dataset(
+        model,
+        tokenizer,
+        val_samples,
+        batch_size=4,
+        max_seq_len=args.max_seq_len,
+        max_new_tokens=8,
     )
+    base_metrics["label"] = "raw_model_before_sft"
 
-    trainer = SFTTrainer(
-        model=model,
-        tokenizer=tokenizer,
-        train_dataset=train_ds,
-        eval_dataset=eval_ds,
-        args=sft_args,
-    )
+    trainable_params, total_params = count_trainable_parameters(model)
+    print(f"Trainable parameters: {trainable_params:,} / {total_params:,}")
 
+    train_records = [
+        {"text": build_sft_training_text(tokenizer, sample["prompt"], sample["completion"])}
+        for sample in train_samples
+    ]
+    val_records = [
+        {"text": build_sft_training_text(tokenizer, sample["prompt"], sample["completion"])}
+        for sample in val_samples
+    ]
+    train_dataset = Dataset.from_list(train_records)
+    eval_dataset = Dataset.from_list(val_records)
+
+    trainer_config_kwargs = {
+        "output_dir": str(args.sft_output_dir),
+        "per_device_train_batch_size": args.batch_size,
+        "gradient_accumulation_steps": args.grad_accum,
+        "num_train_epochs": args.sft_epochs,
+        "learning_rate": args.learning_rate,
+        "logging_steps": args.logging_steps,
+        "save_steps": args.save_steps,
+        "save_strategy": "steps",
+        "save_total_limit": 2,
+        "report_to": "none",
+        "seed": 42,
+        "max_seq_length": args.max_seq_len,
+        "fp16": not torch_module.cuda.is_bf16_supported(),
+        "bf16": torch_module.cuda.is_bf16_supported(),
+        "remove_unused_columns": False,
+        "packing": False,
+    }
+    trainer_config_kwargs, dropped_config = select_supported_kwargs(TrainerConfig.__init__, trainer_config_kwargs)
+    if dropped_config:
+        print("Skipping unsupported SFTConfig args:", ", ".join(dropped_config))
+    trainer_config = TrainerConfig(**trainer_config_kwargs)
+
+    trainer_kwargs = {
+        "model": model,
+        "train_dataset": train_dataset,
+        "eval_dataset": eval_dataset,
+        "dataset_text_field": "text",
+    }
+    trainer_signature = inspect.signature(TrainerClass.__init__)
+    trainer_param_names = set(trainer_signature.parameters)
+    if "args" in trainer_param_names:
+        trainer_kwargs["args"] = trainer_config
+    elif "config" in trainer_param_names:
+        trainer_kwargs["config"] = trainer_config
+    if "processing_class" in trainer_param_names:
+        trainer_kwargs["processing_class"] = tokenizer
+    elif "tokenizer" in trainer_param_names:
+        trainer_kwargs["tokenizer"] = tokenizer
+
+    trainer_kwargs, dropped_trainer = select_supported_kwargs(TrainerClass.__init__, trainer_kwargs)
+    if dropped_trainer:
+        print("Skipping unsupported SFTTrainer args:", ", ".join(dropped_trainer))
+
+    before_snapshot = capture_trainable_snapshot(model)
+    trainer = TrainerClass(**trainer_kwargs)
     print("Starting SFT training...")
-    result = trainer.train()
-    metrics = result.metrics if hasattr(result, "metrics") else {}
-    print(f"Training complete. Metrics: {metrics}")
+    trainer.train()
 
-    trainer.save_model(str(output_dir))
-    tokenizer.save_pretrained(str(output_dir))
-    print(f"Model saved to: {output_dir}")
+    FastModel.for_inference(model)
+    sft_metrics = evaluate_model_on_dataset(
+        model,
+        tokenizer,
+        val_samples,
+        batch_size=4,
+        max_seq_len=args.max_seq_len,
+        max_new_tokens=8,
+    )
+    sft_metrics["label"] = "sft_model"
+
+    args.sft_output_dir.mkdir(parents=True, exist_ok=True)
+    model.save_pretrained(str(args.sft_output_dir))
+    tokenizer.save_pretrained(str(args.sft_output_dir))
+
+    metrics_payload = {
+        "model_name": args.model_name,
+        "train_sample_count": len(train_samples),
+        "val_sample_count": len(val_samples),
+        "base_model_metrics": compact_metrics(base_metrics),
+        "sft_metrics": compact_metrics(sft_metrics),
+        "lora_parameter_delta": compute_parameter_delta(before_snapshot, model),
+        "output_dir": str(args.sft_output_dir.relative_to(ROOT_DIR)),
+    }
+    write_json(DEFAULT_SFT_METRICS_PATH, metrics_payload)
+    print(f"SFT adapter saved to {args.sft_output_dir}")
+    print("SFT metrics written to training/sft_metrics.json")
+    return 0
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="ShadowOps SFT trainer (Qwen3-1.7B + LoRA)")
-    parser.add_argument("--dataset", default="training/qwen3_train_dataset.json")
-    parser.add_argument("--model-name", default="unsloth/Qwen3-1.7B")
-    parser.add_argument("--output-dir", default="./shadowops_qwen3_1p7b_sft_model")
-
-    parser.add_argument("--max-seq-len", type=int, default=256)
-    parser.add_argument("--max-steps", type=int, default=300)
-    parser.add_argument("--batch-size", type=int, default=1)
-    parser.add_argument("--grad-accum", type=int, default=8)
-    parser.add_argument("--learning-rate", type=float, default=2e-4)
-    parser.add_argument("--warmup-ratio", type=float, default=0.05)
-    parser.add_argument("--logging-steps", type=int, default=10)
-    parser.add_argument("--save-steps", type=int, default=50)
-    parser.add_argument("--eval-steps", type=int, default=50)
-    parser.add_argument("--eval-ratio", type=float, default=0.05)
-
-    parser.add_argument("--lora-r", type=int, default=16)
-    parser.add_argument("--lora-alpha", type=int, default=32)
-    parser.add_argument("--lora-dropout", type=float, default=0.0)
-
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--bf16", action="store_true", help="Use BF16 instead of FP16")
-    return parser.parse_args()
+def main() -> None:
+    parser = build_arg_parser()
+    args = parser.parse_args()
+    raise SystemExit(train_sft(args))
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    train_sft(args)
+    main()
