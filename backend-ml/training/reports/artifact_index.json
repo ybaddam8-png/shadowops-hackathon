@@ -1,0 +1,25 @@
+{
+  "output_dir": "training\\reports",
+  "artifacts": [
+    "artifact_index.json",
+    "benchmark_table.md",
+    "model_policy_comparison.json",
+    "model_policy_comparison.md",
+    "openenv_loop_eval.json",
+    "openenv_loop_eval.md",
+    "reward_curve.png",
+    "reward_curve_status.md",
+    "reward_diagnostics.json",
+    "reward_diagnostics.md"
+  ],
+  "benchmark_policy_count": 4,
+  "model_policy_datasets": [
+    "hard_negative",
+    "validation"
+  ],
+  "openenv_loop": {
+    "episodes": 3,
+    "total_steps": 15,
+    "unsafe_allow_rate": 0.0
+  }
+}

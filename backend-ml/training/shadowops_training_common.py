@@ -641,6 +641,8 @@ def q_aware_policy_action(sample: dict[str, Any]) -> str:
     if scenario_type in {"BENIGN_CLEAN", "BENIGN_NOISY"}:
         return "ALLOW"
     if scenario_type == "MALICIOUS_SOFT":
+        if any_cue(text, CRITICAL_QUARANTINE_CUES) or severity == "CRITICAL":
+            return "QUARANTINE"
         return "BLOCK"
     if scenario_type == "MALICIOUS_HARD":
         if any_cue(text, CRITICAL_QUARANTINE_CUES) and risk_score >= 0.40:

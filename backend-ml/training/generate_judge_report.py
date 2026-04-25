@@ -17,6 +17,7 @@ from agent_memory import ActionMemoryRecord, SessionMemory  # noqa: E402
 from evidence_planner import build_evidence_plan  # noqa: E402
 from safe_outcome import generate_structured_safe_outcome  # noqa: E402
 from training.dataset_audit import run_dataset_audit  # noqa: E402
+from training.generate_report_artifacts import generate_report_artifacts  # noqa: E402
 from training.generate_replay_report import build_replay_report  # noqa: E402
 from training.shadowops_training_common import (  # noqa: E402
     DEFAULT_DEMO_BENCHMARK_JSON,
@@ -118,6 +119,7 @@ def build_judge_report() -> dict[str, Any]:
     dataset_audit = run_dataset_audit()
     evidence_examples = _evidence_examples()
     replay_report = build_replay_report()
+    report_artifacts = generate_report_artifacts()
     gate = _gate_summary(benchmark)
     return {
         "status": "judge_ready_laptop_safe",
@@ -162,6 +164,7 @@ def build_judge_report() -> dict[str, Any]:
             "scenario_count": replay_report["scenario_count"],
             "pass_count": replay_report["pass_count"],
         },
+        "report_artifacts": report_artifacts,
         "gpu_training_handoff": [
             "Pull shadowops-backend-agent-upgrade.",
             "Run laptop-safe baseline/eval first.",
@@ -284,6 +287,7 @@ def write_judge_report(
             "## Replay Summary",
             "",
             f"- Replay scenarios passed: {report['replay_summary']['pass_count']}/{report['replay_summary']['scenario_count']}",
+            f"- README-ready artifacts: `{report['report_artifacts']['output_dir']}`",
         ]
     )
     output_md.write_text("\n".join(lines), encoding="utf-8")

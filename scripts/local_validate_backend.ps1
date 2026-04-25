@@ -10,7 +10,11 @@ try {
     python -m py_compile backend-ml/agent_memory.py
     python -m py_compile backend-ml/risk_accumulator.py
     python -m py_compile backend-ml/safe_outcome.py
+    python -m py_compile backend-ml/openenv_shadowops.py
     python -m py_compile backend-ml/main.py
+    python -m py_compile backend-ml/training/reward_rubric.py
+    python -m py_compile backend-ml/training/openenv_eval.py
+    python -m py_compile backend-ml/training/generate_report_artifacts.py
     python -m py_compile backend-ml/training/train_qwen3_grpo.py
 
     Push-Location backend-ml
@@ -25,6 +29,9 @@ try {
         }
         if (Test-Path training/latency_determinism_check.py) {
             python training/latency_determinism_check.py
+        }
+        if (Test-Path training/generate_report_artifacts.py) {
+            python training/generate_report_artifacts.py
         }
         python demo_judge.py
         python -m pytest tests -q

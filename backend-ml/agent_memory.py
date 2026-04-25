@@ -128,6 +128,12 @@ class SessionMemory:
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
         self.storage_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
+    def clear(self) -> None:
+        """Clear all memory records and persist the empty state when enabled."""
+
+        self._by_session.clear()
+        self.save()
+
     def add_record(self, record: ActionMemoryRecord | dict[str, Any]) -> ActionMemoryRecord:
         if isinstance(record, dict):
             record = ActionMemoryRecord.from_mapping(record)
@@ -266,3 +272,7 @@ def detect_risky_chains(session_id: str) -> list[str]:
 
 def summarize_memory_context(session_id: str) -> dict[str, Any]:
     return DEFAULT_MEMORY.summarize_memory_context(session_id)
+
+
+def clear_memory() -> None:
+    DEFAULT_MEMORY.clear()
