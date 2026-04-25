@@ -100,6 +100,14 @@ Credit safety:
 - Stop/cancel stuck jobs immediately.
 - Keep $30 credits safe by doing eval -> SFT smoke -> GRPO smoke.
 
+Training gate:
+
+- Run eval-only and reward diagnostics before any GPU job.
+- Evaluate every SFT/GRPO checkpoint with `--evaluate-model --model-path <checkpoint> --compare-against-policy`.
+- Do not claim model improvement unless the model evaluation report shows safety/reward improvement over raw or SFT and compares cleanly against Q-aware.
+- Long training should wait until `training/model_eval_report.json` exists and the gate is PASS or an intentional WARN with a clear next action.
+- Stop spending credits if unsafe decisions increase, invalid output rate increases, or reward diagnostics show no useful reward variation.
+
 ## Credit Safety
 
 - Hugging Face Jobs can consume credits while Starting or Running.

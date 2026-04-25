@@ -1,0 +1,9 @@
+{
+  "name": "grpo_explore",
+  "purpose": "Explore whether GRPO improves reward/safety over SFT after smoke tests pass.",
+  "command": "python training/train_qwen3_grpo.py --resume-from-sft training/checkpoints/qwen3_sft_adapter --output-dir training/cloud_runs/grpo_explore --max-steps 300 --batch-size 1 --grad-accum 4 --num-generations 6 --eval-steps 50 --val-eval-eps 100 --eval-batch-size 4 --max-seq-len 256",
+  "max_steps": 300,
+  "num_generations": 6,
+  "batch_size": 1,
+  "required_before_run": ["baseline-only validation", "SFT smoke", "SFT checkpoint evaluation", "GRPO smoke"]
+}

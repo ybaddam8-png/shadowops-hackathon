@@ -47,6 +47,12 @@ class SupervisorDecision(BaseModel):
     domain:                     Optional[str] = None
     mitre_tactic:               Optional[str] = None
     mitre_technique:            Optional[str] = None
+    evidence_plan:              List[Dict[str, Any]] = Field(default_factory=list)
+    structured_safe_outcome:    Dict[str, Any] = Field(default_factory=dict)
+    memory_context:             Dict[str, Any] = Field(default_factory=dict)
+    cumulative_risk_reason:     Optional[str] = None
+    risk_indicators:            List[str] = Field(default_factory=list)
+    safe_indicators:            List[str] = Field(default_factory=list)
 
 
 class EnvironmentState(BaseModel):

@@ -1,0 +1,9 @@
+{
+  "name": "grpo_smoke",
+  "purpose": "Verify GRPO reward, parsing, checkpoint save, and evaluation plumbing.",
+  "command": "python training/train_qwen3_grpo.py --run-sft --train-size 50 --val-size 50 --val-eval-eps 50 --sft-epochs 1 --sft-output-dir training/cloud_runs/grpo_smoke/sft_warm_start --resume-from-sft training/cloud_runs/grpo_smoke/sft_warm_start --output-dir training/cloud_runs/grpo_smoke --max-steps 50 --batch-size 1 --grad-accum 1 --num-generations 2 --eval-steps 25 --eval-batch-size 2 --max-seq-len 256",
+  "max_steps": 50,
+  "num_generations": 2,
+  "batch_size": 1,
+  "gate": "Run --evaluate-model after completion before claiming success."
+}

@@ -1,0 +1,94 @@
+{
+  "model_name_or_path": "training\\checkpoints\\qwen3_sft_grpo_adapter",
+  "checkpoint_path": "training\\checkpoints\\qwen3_sft_grpo_adapter",
+  "eval_split": "validation",
+  "sample_count": 100,
+  "dataset_audit": {
+    "train_sample_count": 500,
+    "val_sample_count": 100,
+    "train_val_overlap_count": 0
+  },
+  "model_metrics": null,
+  "q_aware_baseline": {
+    "label": "q_aware",
+    "sample_count": 100,
+    "exact_match": 0.85,
+    "safety_accuracy": 1.0,
+    "valid_action_rate": 1.0,
+    "invalid_action_rate": 0.0,
+    "invalid_output_rate": 0.0,
+    "parse_failure_rate": 0.0,
+    "unsafe_decision_rate": 0.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0,
+    "reward_mean": 1.80156036,
+    "reward_std": 0.4189260979979529,
+    "allow_precision": 1.0,
+    "block_precision": 0.6521739130434783,
+    "fork_precision": 0.8,
+    "quarantine_precision": 1.0,
+    "per_action_accuracy": {
+      "ALLOW": 1.0,
+      "BLOCK": 1.0,
+      "FORK": 1.0,
+      "QUARANTINE": 0.3181818181818182
+    },
+    "confusion_matrix": {
+      "ALLOW": {
+        "ALLOW": 35,
+        "BLOCK": 0,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 0
+      },
+      "BLOCK": {
+        "ALLOW": 0,
+        "BLOCK": 15,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 0
+      },
+      "FORK": {
+        "ALLOW": 0,
+        "BLOCK": 0,
+        "FORK": 28,
+        "QUARANTINE": 0,
+        "INVALID": 0
+      },
+      "QUARANTINE": {
+        "ALLOW": 0,
+        "BLOCK": 8,
+        "FORK": 7,
+        "QUARANTINE": 7,
+        "INVALID": 0
+      }
+    },
+    "avg_completion_length": 1.0,
+    "action_distribution": {
+      "ALLOW": 0.35,
+      "BLOCK": 0.23,
+      "FORK": 0.35,
+      "QUARANTINE": 0.07
+    },
+    "invalid_output_count": 0,
+    "multi_action_warnings": 0,
+    "multi_action_warning_rate": 0.0,
+    "entropy": 1.8164239834761031,
+    "reward_breakdown": {
+      "exact_correct": 50,
+      "exact_conservative": 35,
+      "safe_conservative": 15
+    }
+  },
+  "delta_vs_q_aware": null,
+  "training_gate": {
+    "training_gate_status": "FAIL",
+    "training_gate_passed": false,
+    "reason": "No model metrics are available; checkpoint was not loaded or evaluation failed.",
+    "recommended_next_action": "Run --evaluate-model with a valid --model-path after SFT/GRPO smoke training."
+  },
+  "training_gate_status": "FAIL",
+  "training_gate_passed": false,
+  "reason": "No model metrics are available; checkpoint was not loaded or evaluation failed.",
+  "model_load_error": "Model loading skipped by --skip-model-load."
+}
