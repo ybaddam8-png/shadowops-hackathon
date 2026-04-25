@@ -63,6 +63,16 @@ except ImportError:
     def compute_ambiguity(v): return 0.5
     def build_llama_prompt(*a, **kw): return ""
 
+try:
+    from training.shadowops_training_common import build_q_aware_decision, q_aware_demo_policy_action
+    _Q_AWARE_POLICY_AVAILABLE = True
+except Exception:
+    build_q_aware_decision = None
+    q_aware_demo_policy_action = None
+    _Q_AWARE_POLICY_AVAILABLE = False
+
+DEMO_POLICY_NAME = "q_aware_demo_policy"
+
 # ─────────────────────────────────────────────────────────────
 # Colour map
 # ─────────────────────────────────────────────────────────────
@@ -76,15 +86,54 @@ DOMAIN_ICON = {"SOC": "🛡 ", "GITHUB": "🐙", "AWS": "☁️ "}
 SEVERITY_STYLE = {"CRITICAL": "bold red", "HIGH": "yellow", "MEDIUM": "cyan"}
 
 # ─────────────────────────────────────────────────────────────
-# Mock supervisor (used when env not available or mock mode)
+# Demo supervisor
 # ─────────────────────────────────────────────────────────────
-def mock_supervisor(risk_vec: list, ambiguity: float) -> str:
+def threshold_heuristic_supervisor(risk_vec: list, ambiguity: float) -> str:
     risk = (risk_vec[0] * 0.35 + risk_vec[1] * 0.25 +
             risk_vec[3] * 0.20 + risk_vec[6] * 0.20)
     if risk > 0.65:   return "FORK"
     if ambiguity > 0.40: return "QUARANTINE"
     if risk > 0.35:   return "BLOCK"
     return "ALLOW"
+
+
+def mock_supervisor(
+    risk_vec: list,
+    ambiguity: float,
+    domain: str = "SOC",
+    intent: str = "",
+    raw_payload: str = "",
+) -> str:
+    if _Q_AWARE_POLICY_AVAILABLE and q_aware_demo_policy_action is not None:
+        try:
+            return q_aware_demo_policy_action(domain, intent, raw_payload, risk_vec)
+        except Exception:
+            pass
+    return threshold_heuristic_supervisor(risk_vec, ambiguity)
+
+
+def mock_supervisor_details(
+    risk_vec: list,
+    ambiguity: float,
+    domain: str = "SOC",
+    intent: str = "",
+    raw_payload: str = "",
+) -> dict:
+    if _Q_AWARE_POLICY_AVAILABLE and build_q_aware_decision is not None:
+        try:
+            return build_q_aware_decision(domain, intent, raw_payload, risk_vec)
+        except Exception:
+            pass
+    decision = threshold_heuristic_supervisor(risk_vec, ambiguity)
+    risk = risk_vec[0] * 0.35 + risk_vec[1] * 0.25 + risk_vec[3] * 0.20 + risk_vec[6] * 0.20
+    return {
+        "decision": decision,
+        "confidence": 1.0 - min(1.0, ambiguity * 0.5),
+        "uncertainty": ambiguity,
+        "cumulative_risk_score": risk,
+        "missing_evidence": [],
+        "safe_outcome": "Threshold fallback decision.",
+    }
 
 # ─────────────────────────────────────────────────────────────
 # Sparkline helper
@@ -183,6 +232,11 @@ def build_decision_feed(state: DashboardState) -> Panel:
     table.add_column("Domain",  width=8)
     table.add_column("Intent",  width=20)
     table.add_column("Action",  width=12)
+    table.add_column("Conf",    width=6)
+    table.add_column("Unc",     width=6)
+    table.add_column("CumRisk", width=7)
+    table.add_column("Missing", width=20)
+    table.add_column("Safe Outcome", width=28)
     table.add_column("Mal?",    width=5)
     table.add_column("Reward",  width=8)
     table.add_column("Outcome", width=22)
@@ -202,6 +256,11 @@ def build_decision_feed(state: DashboardState) -> Panel:
             f"[bold]{row['domain']}[/bold]",
             row["intent"][:20],
             f"[{ACTION_STYLE[action_str]}]{action_str}[/{ACTION_STYLE[action_str]}]",
+            f"{row.get('confidence', 0.0):.2f}",
+            f"{row.get('uncertainty', 0.0):.2f}",
+            f"{row.get('cumulative_risk_score', 0.0):.2f}",
+            ", ".join(row.get("missing_evidence", []))[:20],
+            row.get("safe_outcome", "")[:28],
             mal_str,
             reward_str,
             f"[{out_col}]{outcome[:22]}[/{out_col}]",
@@ -351,9 +410,17 @@ def run_dashboard(n_episodes: int, speed: float, malicious_rate: float, seed: in
 
             while not done:
                 # ── Decide ────────────────────────────────
+                scenario = getattr(env, "_current_scenario", {}) or {}
                 risk_vec  = obs_vec[:16]
                 ambiguity = compute_ambiguity(risk_vec)
-                action_str = mock_supervisor(risk_vec, ambiguity)
+                decision_details = mock_supervisor_details(
+                    risk_vec,
+                    ambiguity,
+                    scenario.get("domain", "SOC"),
+                    scenario.get("intent", ""),
+                    scenario.get("raw_payload", ""),
+                )
+                action_str = decision_details["decision"]
                 action_int = {"ALLOW": 0, "BLOCK": 1, "FORK": 2, "QUARANTINE": 3}[action_str]
 
                 obs_text, obs_vec, reward, done, info = env.step(action_int)
@@ -398,6 +465,11 @@ def run_dashboard(n_episodes: int, speed: float, malicious_rate: float, seed: in
                     "domain":       info["domain"],
                     "intent":       info["intent"],
                     "action":       action_str,
+                    "confidence":   decision_details.get("confidence", 0.0),
+                    "uncertainty":  decision_details.get("uncertainty", 0.0),
+                    "cumulative_risk_score": decision_details.get("cumulative_risk_score", 0.0),
+                    "missing_evidence": decision_details.get("missing_evidence", []),
+                    "safe_outcome": decision_details.get("safe_outcome", ""),
                     "is_malicious": is_mal,
                     "reward":       reward,
                     "outcome":      info.get("outcome", ""),
@@ -509,6 +581,11 @@ def _demo_step(rng, state, step_n, ep_n):
     state.feed.append({
         "step": step_n, "domain": domain, "intent": intent,
         "action": action, "is_malicious": is_mal,
+        "confidence": 0.70,
+        "uncertainty": 0.30,
+        "cumulative_risk_score": 0.50 if is_mal else 0.20,
+        "missing_evidence": [],
+        "safe_outcome": "Synthetic demo outcome.",
         "reward": reward, "outcome": outcome,
     })
     return reward

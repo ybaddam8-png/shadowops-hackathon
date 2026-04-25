@@ -1,0 +1,223 @@
+{
+  "model_metrics_note": "Model rows are unavailable unless raw/SFT/GRPO models are explicitly loaded and evaluated.",
+  "datasets": {
+    "validation": {
+      "sample_count": 100,
+      "oracle_check": {
+        "passed": true,
+        "oracle_reward_mean": 1.75,
+        "inconsistency_count": 0,
+        "output_path": "training\\oracle_inconsistency_examples.json"
+      },
+      "rows": [
+        {
+          "policy": "random",
+          "available": true,
+          "exact_match": 0.36,
+          "safety_accuracy": 0.8,
+          "unsafe_decision_rate": 0.2,
+          "false_positive_rate": 0.16279069767441862,
+          "false_negative_rate": 0.22807017543859648,
+          "reward_mean": 0.069,
+          "quarantine_precision": 0.29411764705882354,
+          "fork_precision": 0.45,
+          "allow_precision": 0.375,
+          "block_precision": 0.36363636363636365
+        },
+        {
+          "policy": "heuristic",
+          "available": true,
+          "exact_match": 0.52,
+          "safety_accuracy": 0.92,
+          "unsafe_decision_rate": 0.08,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.14035087719298245,
+          "reward_mean": 1.04,
+          "quarantine_precision": 0.0,
+          "fork_precision": 0.5517241379310345,
+          "allow_precision": 0.813953488372093,
+          "block_precision": 0.03571428571428571
+        },
+        {
+          "policy": "q_aware_policy",
+          "available": true,
+          "exact_match": 0.85,
+          "safety_accuracy": 1.0,
+          "unsafe_decision_rate": 0.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "reward_mean": 1.645,
+          "quarantine_precision": 1.0,
+          "fork_precision": 0.8,
+          "allow_precision": 1.0,
+          "block_precision": 0.6521739130434783
+        },
+        {
+          "policy": "oracle",
+          "available": true,
+          "exact_match": 1.0,
+          "safety_accuracy": 1.0,
+          "unsafe_decision_rate": 0.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "reward_mean": 1.75,
+          "quarantine_precision": 1.0,
+          "fork_precision": 1.0,
+          "allow_precision": 1.0,
+          "block_precision": 1.0
+        },
+        {
+          "policy": "raw_model",
+          "available": false,
+          "exact_match": null,
+          "safety_accuracy": null,
+          "unsafe_decision_rate": null,
+          "false_positive_rate": null,
+          "false_negative_rate": null,
+          "reward_mean": null,
+          "quarantine_precision": null,
+          "fork_precision": null,
+          "allow_precision": null,
+          "block_precision": null
+        },
+        {
+          "policy": "sft_model",
+          "available": false,
+          "exact_match": null,
+          "safety_accuracy": null,
+          "unsafe_decision_rate": null,
+          "false_positive_rate": null,
+          "false_negative_rate": null,
+          "reward_mean": null,
+          "quarantine_precision": null,
+          "fork_precision": null,
+          "allow_precision": null,
+          "block_precision": null
+        },
+        {
+          "policy": "grpo_model",
+          "available": false,
+          "exact_match": null,
+          "safety_accuracy": null,
+          "unsafe_decision_rate": null,
+          "false_positive_rate": null,
+          "false_negative_rate": null,
+          "reward_mean": null,
+          "quarantine_precision": null,
+          "fork_precision": null,
+          "allow_precision": null,
+          "block_precision": null
+        }
+      ]
+    },
+    "hard_negative": {
+      "sample_count": 40,
+      "oracle_check": {
+        "passed": true,
+        "oracle_reward_mean": 2.1374999999999997,
+        "inconsistency_count": 0,
+        "output_path": "training\\oracle_inconsistency_examples.json"
+      },
+      "rows": [
+        {
+          "policy": "random",
+          "available": true,
+          "exact_match": 0.15,
+          "safety_accuracy": 0.55,
+          "unsafe_decision_rate": 0.45,
+          "false_positive_rate": 0.2962962962962963,
+          "false_negative_rate": 0.5384615384615384,
+          "reward_mean": -0.8624999999999999,
+          "quarantine_precision": 0.2857142857142857,
+          "fork_precision": 0.0,
+          "allow_precision": 0.15384615384615385,
+          "block_precision": 0.0
+        },
+        {
+          "policy": "heuristic",
+          "available": true,
+          "exact_match": 0.725,
+          "safety_accuracy": 0.975,
+          "unsafe_decision_rate": 0.025,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.07692307692307693,
+          "reward_mean": 1.375,
+          "quarantine_precision": 0.0,
+          "fork_precision": 0.23076923076923078,
+          "allow_precision": 0.9333333333333333,
+          "block_precision": 1.0
+        },
+        {
+          "policy": "q_aware_policy",
+          "available": true,
+          "exact_match": 0.35,
+          "safety_accuracy": 0.975,
+          "unsafe_decision_rate": 0.025,
+          "false_positive_rate": 0.037037037037037035,
+          "false_negative_rate": 0.0,
+          "reward_mean": 0.83,
+          "quarantine_precision": 0.35,
+          "fork_precision": 0.0,
+          "allow_precision": 0.6666666666666666,
+          "block_precision": 0.8333333333333334
+        },
+        {
+          "policy": "oracle",
+          "available": true,
+          "exact_match": 1.0,
+          "safety_accuracy": 1.0,
+          "unsafe_decision_rate": 0.0,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0,
+          "reward_mean": 2.1374999999999997,
+          "quarantine_precision": 1.0,
+          "fork_precision": 1.0,
+          "allow_precision": 1.0,
+          "block_precision": 1.0
+        },
+        {
+          "policy": "raw_model",
+          "available": false,
+          "exact_match": null,
+          "safety_accuracy": null,
+          "unsafe_decision_rate": null,
+          "false_positive_rate": null,
+          "false_negative_rate": null,
+          "reward_mean": null,
+          "quarantine_precision": null,
+          "fork_precision": null,
+          "allow_precision": null,
+          "block_precision": null
+        },
+        {
+          "policy": "sft_model",
+          "available": false,
+          "exact_match": null,
+          "safety_accuracy": null,
+          "unsafe_decision_rate": null,
+          "false_positive_rate": null,
+          "false_negative_rate": null,
+          "reward_mean": null,
+          "quarantine_precision": null,
+          "fork_precision": null,
+          "allow_precision": null,
+          "block_precision": null
+        },
+        {
+          "policy": "grpo_model",
+          "available": false,
+          "exact_match": null,
+          "safety_accuracy": null,
+          "unsafe_decision_rate": null,
+          "false_positive_rate": null,
+          "false_negative_rate": null,
+          "reward_mean": null,
+          "quarantine_precision": null,
+          "fork_precision": null,
+          "allow_precision": null,
+          "block_precision": null
+        }
+      ]
+    }
+  }
+}
