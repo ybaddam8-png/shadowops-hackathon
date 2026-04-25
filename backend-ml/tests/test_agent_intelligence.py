@@ -11,7 +11,14 @@ if str(BACKEND_DIR) not in sys.path:
 from agent_memory import ActionMemoryRecord, SessionMemory
 from evidence_planner import build_evidence_plan
 from safe_outcome import generate_structured_safe_outcome
-from training.shadowops_training_common import build_q_aware_decision, evaluate_training_gate
+from training.dataset_audit import build_dataset_audit
+from training.shadowops_training_common import (
+    analyze_action_output,
+    build_q_aware_decision,
+    evaluate_outputs,
+    evaluate_training_gate,
+    parse_action,
+)
 
 
 def _record(session_id: str, action_summary: str, risk_score: float, timestamp: int) -> ActionMemoryRecord:
@@ -171,3 +178,139 @@ def test_model_vs_policy_gate_reports_baseline_only_no_model() -> None:
     assert gate["training_gate_status"] == "FAIL"
     assert gate["training_gate_passed"] is False
     assert "No model metrics" in gate["reason"]
+
+
+def test_unknown_domain_does_not_crash() -> None:
+    decision = build_q_aware_decision(
+        "UNKNOWN_VENDOR",
+        "DO_THING",
+        "Routine staging change with no public exposure.",
+        [0.0] * 16,
+        actor="unknown",
+        session_id="unknown-domain",
+        service="unknown",
+        environment="staging",
+        provided_evidence=[],
+    )
+
+    assert decision["decision"] in {"ALLOW", "BLOCK", "FORK", "QUARANTINE"}
+    assert decision["policy_name"] == "q_aware_demo_policy"
+    assert isinstance(decision["missing_evidence"], list)
+
+
+def test_empty_evidence_does_not_crash() -> None:
+    decision = build_q_aware_decision(
+        "AWS",
+        "UPDATE_IAM",
+        "Create temporary admin role for production recovery.",
+        [0.0] * 16,
+        actor="unknown",
+        session_id="empty-evidence",
+        service="iam",
+        environment="production",
+        provided_evidence=[],
+    )
+
+    assert decision["required_evidence"]
+    assert decision["missing_evidence"]
+    assert decision["structured_safe_outcome"]["remediation_steps"]
+
+
+def test_invalid_model_output_is_rejected() -> None:
+    analysis = analyze_action_output("please allow this because it is fine")
+
+    assert analysis["parsed_action"] is None
+    assert analysis["invalid_output"] is True
+
+
+def test_action_normalization_accepts_clear_labels_and_synonyms() -> None:
+    assert parse_action(" allow. ") == "ALLOW"
+    assert parse_action("decision=quarantine") == "QUARANTINE"
+    assert parse_action("deny") == "BLOCK"
+    assert parse_action("human_review") == "FORK"
+    assert parse_action("please allow this") is None
+
+
+def test_evaluate_outputs_reports_normalized_action_distribution() -> None:
+    sample = {
+        "sample_id": "unit-1",
+        "correct_action": "ALLOW",
+        "is_malicious": False,
+        "severity": "LOW",
+        "scenario_type": "BENIGN_CLEAN",
+        "risk_score": 0.0,
+        "raw_payload": "Routine approved staging change.",
+        "provided_evidence": ["approved ticket"],
+        "required_evidence": [],
+    }
+
+    metrics = evaluate_outputs([sample], [" allow. "], "unit")
+
+    assert metrics["invalid_output_rate"] == 0.0
+    assert metrics["parse_failure_rate"] == 0.0
+    assert metrics["normalized_action_distribution"]["ALLOW"] == 1.0
+
+
+def test_dataset_audit_detects_duplicates_and_invalid_labels() -> None:
+    train = [
+        {
+            "prompt": "same prompt",
+            "correct_action": "ALLOW",
+            "domain": "AWS",
+            "is_malicious": False,
+            "scenario_type": "BENIGN_CLEAN",
+            "severity": "LOW",
+        }
+    ]
+    val = [
+        {
+            "prompt": "same prompt",
+            "correct_action": "BOGUS",
+            "domain": "AWS",
+            "is_malicious": False,
+            "scenario_type": "BENIGN_NOISY",
+            "severity": "MEDIUM",
+        },
+        {
+            "prompt": "missing label",
+            "domain": "GITHUB",
+            "is_malicious": False,
+            "scenario_type": "BENIGN_CLEAN",
+            "severity": "LOW",
+        },
+    ]
+
+    audit = build_dataset_audit(train, val, hard_negative_samples=[])
+
+    assert audit["duplicate_prompt_count"] == 1
+    assert audit["train_val_overlap_count"] == 1
+    assert audit["missing_label_count"] == 1
+    assert audit["invalid_action_label_count"] == 1
+    assert audit["passed_preflight"] is False
+
+
+def test_structured_safe_outcome_always_includes_remediation_steps() -> None:
+    outcome = generate_structured_safe_outcome(
+        "ALLOW",
+        "github_ci",
+        [],
+        ["approved_change_ticket"],
+        [],
+        "staging",
+    )
+
+    assert outcome["remediation_steps"]
+    assert isinstance(outcome["allowed_next_actions"], list)
+
+
+def test_evidence_plan_step_numbers_are_ordered() -> None:
+    plan = build_evidence_plan(
+        "network_firewall",
+        ["public_exposure"],
+        "QUARANTINE",
+        "production",
+        ["rollback plan", "change ticket", "source/destination justification"],
+        risk_score=0.7,
+    )
+
+    assert [item["step"] for item in plan] == list(range(1, len(plan) + 1))

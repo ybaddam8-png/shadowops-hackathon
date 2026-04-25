@@ -59,6 +59,25 @@ MODEL_OPTIONS = {
 VALID_ACTIONS = tuple(ACTIONS.values())
 VALID_ACTION_SET = set(VALID_ACTIONS)
 ACTION_RE = re.compile(r"\b(ALLOW|BLOCK|FORK|QUARANTINE)\b", re.IGNORECASE)
+ACTION_OR_SYNONYM_RE = re.compile(
+    r"\b(ALLOW|BLOCK|FORK|QUARANTINE|APPROVE|APPROVED|DENY|DENIED|REJECT|REJECTED|HOLD|ISOLATE|ESCALATE|REVIEW|HUMAN_REVIEW|HUMAN REVIEW)\b",
+    re.IGNORECASE,
+)
+ACTION_PREFIX_RE = re.compile(r"^\s*(?:action|decision|supervisor decision)\s*[:=\-]\s*", re.IGNORECASE)
+ACTION_SYNONYMS = {
+    "APPROVE": "ALLOW",
+    "APPROVED": "ALLOW",
+    "DENY": "BLOCK",
+    "DENIED": "BLOCK",
+    "REJECT": "BLOCK",
+    "REJECTED": "BLOCK",
+    "HOLD": "QUARANTINE",
+    "ISOLATE": "QUARANTINE",
+    "ESCALATE": "FORK",
+    "REVIEW": "FORK",
+    "HUMAN REVIEW": "FORK",
+    "HUMAN_REVIEW": "FORK",
+}
 THINK_BLOCK_RE = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
 
 DEFAULT_TRAIN_SIZE = 500
@@ -383,27 +402,68 @@ def strip_think_blocks(text: str) -> str:
     return THINK_BLOCK_RE.sub(" ", text or "").strip()
 
 
-def parse_action(text: str) -> Optional[str]:
-    cleaned = strip_think_blocks(text).upper()
-    matches = ACTION_RE.findall(cleaned)
+def _clean_action_candidate(text: str) -> str:
+    cleaned = strip_think_blocks(str(text or ""))
+    cleaned = ACTION_PREFIX_RE.sub("", cleaned).strip()
+    return cleaned.strip(" \t\r\n`'\".,;:!?[](){}")
+
+
+def _canonical_action_token(token: str) -> Optional[str]:
+    normalized = " ".join(str(token or "").replace("_", " ").replace("-", " ").split()).upper()
+    if normalized in VALID_ACTION_SET:
+        return normalized
+    return ACTION_SYNONYMS.get(normalized)
+
+
+def _find_action_matches(cleaned: str) -> list[tuple[str, int, int]]:
+    matches: list[tuple[str, int, int]] = []
+    for match in ACTION_OR_SYNONYM_RE.finditer(cleaned):
+        action = _canonical_action_token(match.group(1))
+        if action is not None:
+            matches.append((action, match.start(), match.end()))
+    return matches
+
+
+def normalize_action_output(text: str) -> Optional[str]:
+    """Normalize a model completion to one valid action label.
+
+    This accepts clear labels such as ``allow``, ``BLOCK.``, ``Action: fork``,
+    and a small set of operational synonyms. General free text is rejected
+    unless the normalized action is the first meaningful token, which keeps
+    action parsing deterministic and avoids treating prose as a decision.
+    """
+
+    cleaned = _clean_action_candidate(text)
+    if not cleaned:
+        return None
+    compact = " ".join(cleaned.replace("_", " ").replace("-", " ").split()).upper()
+    direct = _canonical_action_token(compact)
+    if direct is not None:
+        return direct
+
+    matches = _find_action_matches(cleaned)
     if not matches:
         return None
-    final_action = matches[-1].upper()
-    if final_action not in VALID_ACTION_SET:
+    first_action, first_start, _ = matches[0]
+    if first_start != 0:
         return None
-    return final_action
+    return matches[-1][0] if len(matches) > 1 else first_action
+
+
+def parse_action(text: str) -> Optional[str]:
+    return normalize_action_output(text)
 
 
 def analyze_action_output(text: str) -> dict[str, Any]:
-    cleaned = strip_think_blocks(text).strip()
-    matches = ACTION_RE.findall(cleaned.upper())
+    cleaned = _clean_action_candidate(text)
+    matches = _find_action_matches(cleaned)
     parsed_action = parse_action(cleaned)
     return {
         "cleaned_text": cleaned,
         "parsed_action": parsed_action,
         "invalid_output": parsed_action is None,
         "multi_action_warning": len(matches) > 1,
-        "matches": [match.upper() for match in matches],
+        "matches": [match[0] for match in matches],
     }
 
 
@@ -874,16 +934,26 @@ def audit_datasets(
     val_samples: list[dict[str, Any]],
     duplicate_prompt_count: int = 0,
 ) -> dict[str, Any]:
-    train_counts = Counter(sample["correct_action"] for sample in train_samples)
-    val_counts = Counter(sample["correct_action"] for sample in val_samples)
+    all_samples = train_samples + val_samples
+    missing_label_count = sum(
+        1 for sample in all_samples if not (sample.get("correct_action") or sample.get("expected_decision"))
+    )
+    invalid_action_label_count = sum(
+        1
+        for sample in all_samples
+        if (sample.get("correct_action") or sample.get("expected_decision")) is not None
+        and (sample.get("correct_action") or sample.get("expected_decision")) not in VALID_ACTION_SET
+    )
+    train_counts = Counter(sample.get("correct_action") for sample in train_samples if sample.get("correct_action") in VALID_ACTION_SET)
+    val_counts = Counter(sample.get("correct_action") for sample in val_samples if sample.get("correct_action") in VALID_ACTION_SET)
     combined_counts = Counter(train_counts)
     combined_counts.update(val_counts)
 
     train_mal = Counter("malicious" if sample["is_malicious"] else "benign" for sample in train_samples)
     val_mal = Counter("malicious" if sample["is_malicious"] else "benign" for sample in val_samples)
-    scenario_counts = Counter(sample["scenario_type"] for sample in train_samples + val_samples)
-    domain_counts = Counter(sample.get("domain", "unknown") for sample in train_samples + val_samples)
-    risk_type_counts = Counter(sample.get("severity", "UNKNOWN") for sample in train_samples + val_samples)
+    scenario_counts = Counter(sample["scenario_type"] for sample in all_samples)
+    domain_counts = Counter(sample.get("domain", "unknown") for sample in all_samples)
+    risk_type_counts = Counter(sample.get("severity", "UNKNOWN") for sample in all_samples)
     false_positive_challenge_count = sum(
         1
         for sample in train_samples + val_samples
@@ -899,8 +969,8 @@ def audit_datasets(
         with contextlib.suppress(Exception):
             hard_negative_count = len(read_json(DEFAULT_HARD_NEGATIVE_PATH, default=[]))
 
-    train_prompts = {sample["prompt"] for sample in train_samples}
-    val_prompts = {sample["prompt"] for sample in val_samples}
+    train_prompts = {sample["prompt"] for sample in train_samples if sample.get("prompt")}
+    val_prompts = {sample["prompt"] for sample in val_samples if sample.get("prompt")}
     overlap_count = len(train_prompts & val_prompts)
 
     train_distribution = summarize_action_distribution(train_counts, len(train_samples))
@@ -924,6 +994,10 @@ def audit_datasets(
     failures: list[str] = []
     if overlap_count > 0:
         failures.append("train/val prompt overlap > 0")
+    if missing_label_count > 0:
+        failures.append("missing action label")
+    if invalid_action_label_count > 0:
+        failures.append("invalid action label")
     for action, share in train_distribution.items():
         if share < 0.05:
             failures.append(f"{action} share below 5% in train split")
@@ -954,6 +1028,8 @@ def audit_datasets(
         "domain_distribution": dict(domain_counts),
         "hard_negative_count": hard_negative_count,
         "false_positive_challenge_count": false_positive_challenge_count,
+        "missing_label_count": missing_label_count,
+        "invalid_action_label_count": invalid_action_label_count,
         "duplicate_prompt_count": duplicate_prompt_count,
         "train_val_overlap_count": overlap_count,
         "examples_per_action": examples_per_action,
@@ -1274,6 +1350,7 @@ def evaluate_outputs(
         "confusion_matrix": confusion_matrix,
         "avg_completion_length": safe_mean(completion_lengths),
         "action_distribution": summarize_action_distribution(action_counts, total),
+        "normalized_action_distribution": summarize_action_distribution(action_counts, total),
         "invalid_output_count": parser_stats.invalid_outputs,
         "multi_action_warnings": parser_stats.multi_action_warnings,
         "multi_action_warning_rate": parser_stats.multi_action_warnings / max(total, 1),
@@ -1611,9 +1688,14 @@ def evaluate_training_gate(
 def run_parse_action_tests() -> dict[str, Any]:
     tests = [
         ("ALLOW", "ALLOW"),
+        (" allow. ", "ALLOW"),
         ("<think>abc</think> BLOCK", "BLOCK"),
         ("Action: FORK", "FORK"),
+        ("decision=quarantine", "QUARANTINE"),
+        ("deny", "BLOCK"),
+        ("human_review", "FORK"),
         ("hello", None),
+        ("please allow this", None),
         ("ALLOW then BLOCK", "BLOCK"),
         ("QUARANTINE because...", "QUARANTINE"),
     ]

@@ -24,6 +24,8 @@ COMPILE_TARGETS = (
     "evidence_planner.py",
     "domain_policies.py",
     "safe_outcome.py",
+    "training/dataset_audit.py",
+    "training/generate_judge_report.py",
     "training/shadowops_training_common.py",
     "training/train_qwen3_grpo.py",
     "demo_replays.py",
@@ -41,13 +43,15 @@ def compile_checks() -> None:
 
 def dataset_audit_summary() -> None:
     print("\n[2/5] Dataset audit summary")
+    from training.dataset_audit import run_dataset_audit
+
+    audit = run_dataset_audit()
     audit_path = ROOT_DIR / "training" / "dataset_audit.json"
     train_path = ROOT_DIR / "training" / "qwen3_train_dataset.json"
     val_path = ROOT_DIR / "training" / "qwen3_val_dataset.json"
 
     if not audit_path.exists():
         raise RuntimeError("training/dataset_audit.json is missing.")
-    audit = json.loads(audit_path.read_text(encoding="utf-8"))
     train_samples = json.loads(train_path.read_text(encoding="utf-8"))
     val_samples = json.loads(val_path.read_text(encoding="utf-8"))
 
@@ -64,6 +68,10 @@ def dataset_audit_summary() -> None:
     print(f"  validation samples: {expected_val}")
     print(f"  train/val overlap: {audit['train_val_overlap_count']}")
     print(f"  duplicate prompts: {audit['duplicate_prompt_count']}")
+    print(f"  hard negatives: {audit['hard_negative_count']}")
+    print(f"  false-positive challenges: {audit['false_positive_challenge_count']}")
+    print(f"  missing labels: {audit['missing_label_count']}")
+    print(f"  invalid action labels: {audit['invalid_action_label_count']}")
     print(f"  preflight: {'PASS' if audit.get('passed_preflight') else 'FAIL'}")
     print(f"  validation action distribution: {audit['action_distribution']['val']}")
 
@@ -89,6 +97,10 @@ def replay_scenarios() -> None:
 
 def dashboard_hint() -> None:
     print("\n[5/5] Optional CLI dashboard")
+    from training.generate_judge_report import generate_judge_report
+
+    generate_judge_report()
+    print("  judge readiness report: training/judge_readiness_report.md")
     print("  python shadowops_cli.py --episodes 10 --speed 0.08")
 
 

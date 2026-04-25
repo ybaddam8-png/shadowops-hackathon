@@ -1,0 +1,218 @@
+{
+  "status": "judge_ready_laptop_safe",
+  "model_claim": "No model improvement is claimed unless model_eval_report proves it.",
+  "q_aware_guardrail": "q_aware_demo_policy remains the production guardrail.",
+  "baseline_benchmark": {
+    "dataset": {
+      "train_sample_count": 500,
+      "val_sample_count": 100,
+      "validation_source": "training\\qwen3_val_dataset.json"
+    },
+    "metrics": [
+      {
+        "policy": "Random",
+        "exact_match": 0.36,
+        "safety_accuracy": 0.8,
+        "unsafe_decision_rate": 0.2,
+        "false_positive_rate": 0.16279069767441862,
+        "reward_mean": 0.08253612000000003
+      },
+      {
+        "policy": "Heuristic",
+        "exact_match": 0.52,
+        "safety_accuracy": 0.92,
+        "unsafe_decision_rate": 0.08,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.1457713
+      },
+      {
+        "policy": "Q-aware",
+        "exact_match": 0.85,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.80156036
+      },
+      {
+        "policy": "Oracle",
+        "exact_match": 1.0,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.92046906
+      }
+    ],
+    "oracle_check": {
+      "passed": true,
+      "oracle_reward_mean": 1.92046906,
+      "inconsistency_count": 0,
+      "output_path": "training\\oracle_inconsistency_examples.json"
+    }
+  },
+  "reward_diagnostics": {
+    "sample_count": 100,
+    "reward_mean": -0.4007447433333333,
+    "reward_std": 1.9578529835534717,
+    "percent_zero_std_groups": 0.0,
+    "invalid_output_rate": 0.16666666666666666,
+    "action_distribution": {
+      "ALLOW": 0.2,
+      "BLOCK": 0.4,
+      "FORK": 0.2,
+      "QUARANTINE": 0.2
+    }
+  },
+  "dataset_audit": {
+    "train_sample_count": 500,
+    "val_sample_count": 100,
+    "hard_negative_count": 40,
+    "duplicate_prompt_count": 0,
+    "train_val_overlap_count": 0,
+    "action_distribution": {
+      "train": {
+        "ALLOW": 189,
+        "FORK": 156,
+        "QUARANTINE": 67,
+        "BLOCK": 88
+      },
+      "val": {
+        "BLOCK": 15,
+        "ALLOW": 35,
+        "FORK": 28,
+        "QUARANTINE": 22
+      },
+      "hard_negative": {
+        "ALLOW": 14,
+        "QUARANTINE": 10,
+        "BLOCK": 13,
+        "FORK": 3
+      },
+      "train_pct": {
+        "ALLOW": 0.378,
+        "BLOCK": 0.176,
+        "FORK": 0.312,
+        "QUARANTINE": 0.134
+      },
+      "val_pct": {
+        "ALLOW": 0.35,
+        "BLOCK": 0.15,
+        "FORK": 0.28,
+        "QUARANTINE": 0.22
+      },
+      "combined_pct": {
+        "ALLOW": 0.37333333333333335,
+        "BLOCK": 0.17166666666666666,
+        "FORK": 0.30666666666666664,
+        "QUARANTINE": 0.14833333333333334
+      }
+    },
+    "domain_distribution": {
+      "AWS": 203,
+      "GITHUB": 208,
+      "SOC": 189,
+      "github_ci": 14,
+      "pentest": 4,
+      "iam": 8,
+      "aws_s3": 9,
+      "network_firewall": 5
+    },
+    "risk_type_distribution": {
+      "LOW": 224,
+      "CRITICAL": 129,
+      "MEDIUM": 144,
+      "HIGH": 103,
+      "medium": 13,
+      "critical": 12,
+      "high": 10,
+      "low": 5
+    },
+    "false_positive_challenge_count": 192,
+    "missing_label_count": 0,
+    "invalid_action_label_count": 0,
+    "passed_preflight": true,
+    "failures": []
+  },
+  "model_vs_policy_gate": {
+    "training_gate_status": "FAIL",
+    "training_gate_passed": false,
+    "reason": "No model metrics are available; checkpoint was not loaded or evaluation failed.",
+    "recommended_next_action": "Run --evaluate-model with a valid --model-path after SFT/GRPO smoke training."
+  },
+  "evidence_planner_example": [
+    {
+      "step": 1,
+      "ask": "Verify requester identity before reviewing approval evidence.",
+      "priority": "critical",
+      "reason": "Identity verification must happen before trusting the request.",
+      "blocks_decision": true,
+      "expected_source": "identity provider / repository owner / security lead",
+      "timeout_hint": "15 minutes"
+    },
+    {
+      "step": 2,
+      "ask": "Provide approval chain for iam production action.",
+      "priority": "high",
+      "reason": "Approval evidence determines whether this is legitimate work or policy bypass.",
+      "blocks_decision": true,
+      "expected_source": "ticketing system / incident commander",
+      "timeout_hint": "30 minutes"
+    },
+    {
+      "step": 3,
+      "ask": "Provide privilege diff for iam production action.",
+      "priority": "high",
+      "reason": "Privilege, secret, public exposure, and data impact evidence blocks unsafe execution.",
+      "blocks_decision": true,
+      "expected_source": "cloud audit logs / CI settings / data owner",
+      "timeout_hint": "30 minutes"
+    },
+    {
+      "step": 4,
+      "ask": "Provide rollback plan and monitoring owner before exposure is allowed.",
+      "priority": "low",
+      "reason": "Rollback and monitoring evidence controls blast radius after approval.",
+      "blocks_decision": true,
+      "expected_source": "runbook / monitoring owner",
+      "timeout_hint": "before execution"
+    }
+  ],
+  "safe_outcome_example": {
+    "outcome": "Fork to human reviewer with IAM approval chain.",
+    "remediation_steps": [
+      "Require two-person approval before privilege escalation.",
+      "Collect missing evidence in plan order before allowing production impact."
+    ],
+    "rollback_required": false,
+    "human_review_required": true,
+    "monitoring_required": true,
+    "explanation": "Outcome is based on decision, risk indicators, trusted evidence, environment, and ordered evidence gaps.",
+    "evidence_needed": [
+      "Verify requester identity before reviewing approval evidence.",
+      "Provide approval chain for iam production action.",
+      "Provide privilege diff for iam production action.",
+      "Provide rollback plan and monitoring owner before exposure is allowed."
+    ],
+    "allowed_next_actions": [
+      "route to human reviewer",
+      "run in shadow workflow only"
+    ]
+  },
+  "memory_risk_chain_example": {
+    "session_id": "judge-chain-example",
+    "recent_action_count": 3,
+    "actor": "unknown",
+    "actor_risk": 1.0,
+    "session_risk": 1.0,
+    "service": "aws",
+    "service_risk": 1.0,
+    "risky_chains": [
+      "firewall open -> IAM admin creation -> data export"
+    ],
+    "recent_decisions": [
+      "QUARANTINE",
+      "QUARANTINE",
+      "QUARANTINE"
+    ],
+    "recent_indicators": []
+  }
+}

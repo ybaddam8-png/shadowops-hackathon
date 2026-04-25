@@ -2,6 +2,19 @@
 
 This document prepares the manual Hugging Face Jobs setup for ShadowOps validation. Do not paste tokens into repository files, scripts, logs, or pull requests.
 
+## Local Laptop Dependencies
+
+Use the lightweight dependency file on a laptop:
+
+```bash
+cd backend-ml
+pip install -r requirements-lite.txt
+```
+
+`requirements-lite.txt` is only for local validation, policy evaluation, reports, and tests. It intentionally excludes `torch`, `transformers`, `trl`, `unsloth`, `vllm`, and `xformers`.
+
+Use the full `requirements.txt` only inside the Linux GPU training environment. Do not run `pip install -r requirements.txt` on the Windows laptop unless you are intentionally setting up a full training machine.
+
 ## Login
 
 ```bash

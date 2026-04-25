@@ -2,6 +2,17 @@
 
 This playbook keeps training claims judge-proof. A falling loss is not enough: every checkpoint must be compared against the validation split, hard negatives, and the Q-aware policy baseline.
 
+## Laptop Setup
+
+Use only the lightweight dependency file for laptop validation:
+
+```powershell
+cd backend-ml
+pip install -r requirements-lite.txt
+```
+
+Use `requirements.txt` only inside the Linux GPU training environment.
+
 ## Safe Order
 
 1. Run baseline-only validation:
