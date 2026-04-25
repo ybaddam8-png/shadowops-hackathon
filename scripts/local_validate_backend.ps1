@@ -11,8 +11,12 @@ try {
     python -m py_compile backend-ml/risk_accumulator.py
     python -m py_compile backend-ml/safe_outcome.py
     python -m py_compile backend-ml/openenv_shadowops.py
+    python -m py_compile backend-ml/openenv_shadowops_env.py
     python -m py_compile backend-ml/main.py
     python -m py_compile backend-ml/training/reward_rubric.py
+    python -m py_compile backend-ml/training/generate_reward_breakdown_report.py
+    python -m py_compile backend-ml/training/generate_submission_plots.py
+    python -m py_compile backend-ml/training/merge_real_training_results.py
     python -m py_compile backend-ml/training/openenv_eval.py
     python -m py_compile backend-ml/training/generate_report_artifacts.py
     python -m py_compile backend-ml/training/train_qwen3_grpo.py
@@ -32,6 +36,9 @@ try {
         }
         if (Test-Path training/generate_report_artifacts.py) {
             python training/generate_report_artifacts.py
+        }
+        if (Test-Path training/generate_submission_plots.py) {
+            python training/generate_submission_plots.py
         }
         python demo_judge.py
         python -m pytest tests -q

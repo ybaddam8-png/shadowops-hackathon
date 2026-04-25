@@ -1,0 +1,61 @@
+{
+  "name": "shadowops_openenv_contract",
+  "version": "1.0.0",
+  "environment": "ShadowOpsOpenEnvV1",
+  "entrypoint": "backend-ml/openenv_shadowops_env.py:ShadowOpsOpenEnvV1",
+  "deterministic_seed_support": true,
+  "action_space": {
+    "type": "discrete",
+    "mapping": {
+      "0": "ALLOW",
+      "1": "BLOCK",
+      "2": "FORK",
+      "3": "QUARANTINE"
+    },
+    "labels": ["ALLOW", "BLOCK", "FORK", "QUARANTINE"]
+  },
+  "observation": {
+    "type": "object",
+    "required": ["prompt", "risk_vector", "quarantine", "available_actions", "incident_state"],
+    "properties": {
+      "prompt": {"type": "string"},
+      "risk_vector": {"type": "array", "items": {"type": "number"}, "minItems": 16, "maxItems": 16},
+      "quarantine": {
+        "type": "object",
+        "required": ["active", "steps_remaining_normalized"]
+      },
+      "available_actions": {"type": "array", "items": {"type": "string"}},
+      "incident_state": {
+        "type": "object",
+        "required": ["domain", "intent", "payload", "tier", "ambiguity_score", "step_count", "health", "memory_context"]
+      }
+    }
+  },
+  "step_info": {
+    "required": [
+      "action",
+      "domain",
+      "intent",
+      "outcome",
+      "reward_rubric",
+      "memory_context",
+      "missing_evidence",
+      "evidence_plan",
+      "safe_outcome"
+    ]
+  },
+  "reward_breakdown": [
+    "action_correctness_reward",
+    "safety_penalty",
+    "false_positive_penalty",
+    "evidence_completeness_reward",
+    "risk_chain_handling_reward",
+    "uncertainty_handling_reward"
+  ],
+  "done_condition": "done is true when the configured episode_max_length is reached.",
+  "safe_defaults": {
+    "model_loading_required": false,
+    "hf_jobs_required": false,
+    "gpu_required": false
+  }
+}

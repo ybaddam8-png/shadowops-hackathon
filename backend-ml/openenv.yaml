@@ -1,0 +1,35 @@
+name: shadowops
+version: 1.0.0
+entrypoint: openenv_shadowops_env.py:ShadowOpsOpenEnvV1
+schema_contract: schema_contract.json
+description: >
+  OpenEnv-compatible autonomous cyber incident response environment with
+  deterministic seed support, multi-step incident trajectories, memory-aware
+  risk accumulation, evidence planning, and safe outcomes.
+interface:
+  reset: reset() -> observation
+  step: step(action) -> observation, reward, done, info
+  state: state() -> environment_state
+  close: close() -> None
+action_space:
+  type: discrete
+  labels:
+    - ALLOW
+    - BLOCK
+    - FORK
+    - QUARANTINE
+observation:
+  type: object
+  fields:
+    prompt: string
+    risk_vector: float[16]
+    quarantine: object
+    available_actions: string[]
+    incident_state: object
+reward:
+  type: composable
+  report: training/reward_breakdown_report.json
+episode:
+  deterministic_seed: true
+  default_max_steps: 8
+  metadata_in_state: true

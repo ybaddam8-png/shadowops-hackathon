@@ -4,7 +4,8 @@ description: >
   ShadowOps is a cybersecurity incident-response RL environment where agents
   decide whether cloud, CI, IAM, network, and pentest actions should be allowed,
   blocked, forked to human review, or quarantined.
-entrypoint: backend-ml/openenv_shadowops.py:ShadowOpsOpenEnv
+entrypoint: backend-ml/openenv_shadowops_env.py:ShadowOpsOpenEnvV1
+schema_contract: backend-ml/schema_contract.json
 interface:
   reset: reset()
   step: step(action)
@@ -13,8 +14,8 @@ interface:
 actions:
   - ALLOW
   - BLOCK
-  - FORK
   - QUARANTINE
+  - FORK
 observation:
   type: object
   fields:

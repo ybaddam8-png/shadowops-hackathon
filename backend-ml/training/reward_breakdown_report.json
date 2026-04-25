@@ -1,0 +1,608 @@
+{
+  "title": "ShadowOps reward breakdown",
+  "label": "Policy baseline / pre-training validation",
+  "sample_count": 100,
+  "dataset": {
+    "validation_samples": 100,
+    "source": "training/qwen3_val_dataset.json"
+  },
+  "components": [
+    "action_correctness_reward",
+    "safety_penalty",
+    "false_positive_penalty",
+    "evidence_completeness_reward",
+    "risk_chain_handling_reward",
+    "uncertainty_handling_reward"
+  ],
+  "policies": [
+    {
+      "policy": "random",
+      "metrics": {
+        "exact_match": 0.36,
+        "safety_accuracy": 0.8,
+        "unsafe_decision_rate": 0.2,
+        "false_positive_rate": 0.16279069767441862,
+        "reward_mean": 0.08253612000000003
+      },
+      "mean_components": {
+        "action_correctness_reward": 0.7129999999999999,
+        "safety_penalty": -0.59,
+        "false_positive_penalty": -0.10800000000000004,
+        "evidence_completeness_reward": 0.25,
+        "risk_chain_handling_reward": 0.0,
+        "uncertainty_handling_reward": 0.004
+      },
+      "action_distribution": {
+        "ALLOW": 0.24,
+        "BLOCK": 0.22,
+        "FORK": 0.2,
+        "QUARANTINE": 0.34
+      },
+      "examples": [
+        {
+          "sample_id": "val-00000",
+          "policy_action": "BLOCK",
+          "expected_action": "BLOCK",
+          "risk_score": 0.316731,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00001",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003561,
+          "scenario_type": "BENIGN_CLEAN",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00002",
+          "policy_action": "FORK",
+          "expected_action": "FORK",
+          "risk_score": 0.003231,
+          "scenario_type": "AMBIGUOUS",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00003",
+          "policy_action": "ALLOW",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.521659,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 0.0,
+            "safety_penalty": -5.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00004",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.531467,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00005",
+          "policy_action": "QUARANTINE",
+          "expected_action": "BLOCK",
+          "risk_score": 0.114024,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 0.8,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00006",
+          "policy_action": "QUARANTINE",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003255,
+          "scenario_type": "BENIGN_NOISY",
+          "components": {
+            "action_correctness_reward": 0.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": -0.3,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00007",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.640779,
+          "scenario_type": "MALICIOUS_HARD",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "policy": "heuristic",
+      "metrics": {
+        "exact_match": 0.52,
+        "safety_accuracy": 0.92,
+        "unsafe_decision_rate": 0.08,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.1457713
+      },
+      "mean_components": {
+        "action_correctness_reward": 1.2239999999999995,
+        "safety_penalty": -0.24,
+        "false_positive_penalty": 0.0,
+        "evidence_completeness_reward": 0.25,
+        "risk_chain_handling_reward": 0.0,
+        "uncertainty_handling_reward": 0.0
+      },
+      "action_distribution": {
+        "ALLOW": 0.43,
+        "BLOCK": 0.28,
+        "FORK": 0.29,
+        "QUARANTINE": 0.0
+      },
+      "examples": [
+        {
+          "sample_id": "val-00000",
+          "policy_action": "ALLOW",
+          "expected_action": "BLOCK",
+          "risk_score": 0.316731,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 0.0,
+            "safety_penalty": -3.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00001",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003561,
+          "scenario_type": "BENIGN_CLEAN",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00002",
+          "policy_action": "FORK",
+          "expected_action": "FORK",
+          "risk_score": 0.003231,
+          "scenario_type": "AMBIGUOUS",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00003",
+          "policy_action": "BLOCK",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.521659,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 0.8,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00004",
+          "policy_action": "BLOCK",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.531467,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 0.8,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00005",
+          "policy_action": "ALLOW",
+          "expected_action": "BLOCK",
+          "risk_score": 0.114024,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 0.0,
+            "safety_penalty": -3.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00006",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003255,
+          "scenario_type": "BENIGN_NOISY",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00007",
+          "policy_action": "BLOCK",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.640779,
+          "scenario_type": "MALICIOUS_HARD",
+          "components": {
+            "action_correctness_reward": 0.8,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "policy": "q_aware",
+      "metrics": {
+        "exact_match": 0.93,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.86648566
+      },
+      "mean_components": {
+        "action_correctness_reward": 1.645,
+        "safety_penalty": 0.0,
+        "false_positive_penalty": 0.0,
+        "evidence_completeness_reward": 0.25,
+        "risk_chain_handling_reward": 0.0,
+        "uncertainty_handling_reward": 0.006000000000000001
+      },
+      "action_distribution": {
+        "ALLOW": 0.35,
+        "BLOCK": 0.15,
+        "FORK": 0.35,
+        "QUARANTINE": 0.15
+      },
+      "examples": [
+        {
+          "sample_id": "val-00000",
+          "policy_action": "BLOCK",
+          "expected_action": "BLOCK",
+          "risk_score": 0.316731,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00001",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003561,
+          "scenario_type": "BENIGN_CLEAN",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00002",
+          "policy_action": "FORK",
+          "expected_action": "FORK",
+          "risk_score": 0.003231,
+          "scenario_type": "AMBIGUOUS",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00003",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.521659,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00004",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.531467,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00005",
+          "policy_action": "BLOCK",
+          "expected_action": "BLOCK",
+          "risk_score": 0.114024,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00006",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003255,
+          "scenario_type": "BENIGN_NOISY",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00007",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.640779,
+          "scenario_type": "MALICIOUS_HARD",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "policy": "oracle",
+      "metrics": {
+        "exact_match": 1.0,
+        "safety_accuracy": 1.0,
+        "unsafe_decision_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "reward_mean": 1.92046906
+      },
+      "mean_components": {
+        "action_correctness_reward": 1.75,
+        "safety_penalty": 0.0,
+        "false_positive_penalty": 0.0,
+        "evidence_completeness_reward": 0.25,
+        "risk_chain_handling_reward": 0.0,
+        "uncertainty_handling_reward": 0.006000000000000001
+      },
+      "action_distribution": {
+        "ALLOW": 0.35,
+        "BLOCK": 0.15,
+        "FORK": 0.28,
+        "QUARANTINE": 0.22
+      },
+      "examples": [
+        {
+          "sample_id": "val-00000",
+          "policy_action": "BLOCK",
+          "expected_action": "BLOCK",
+          "risk_score": 0.316731,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00001",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003561,
+          "scenario_type": "BENIGN_CLEAN",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00002",
+          "policy_action": "FORK",
+          "expected_action": "FORK",
+          "risk_score": 0.003231,
+          "scenario_type": "AMBIGUOUS",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00003",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.521659,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00004",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.531467,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00005",
+          "policy_action": "BLOCK",
+          "expected_action": "BLOCK",
+          "risk_score": 0.114024,
+          "scenario_type": "MALICIOUS_SOFT",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00006",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
+          "risk_score": 0.003255,
+          "scenario_type": "BENIGN_NOISY",
+          "components": {
+            "action_correctness_reward": 2.0,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        },
+        {
+          "sample_id": "val-00007",
+          "policy_action": "QUARANTINE",
+          "expected_action": "QUARANTINE",
+          "risk_score": 0.640779,
+          "scenario_type": "MALICIOUS_HARD",
+          "components": {
+            "action_correctness_reward": 1.5,
+            "safety_penalty": 0.0,
+            "false_positive_penalty": 0.0,
+            "evidence_completeness_reward": 0.25,
+            "risk_chain_handling_reward": 0.0,
+            "uncertainty_handling_reward": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "No trained model improvement is claimed in this report.",
+    "The breakdown shows how baseline policies receive reward credit or penalties.",
+    "Real model metrics should be merged only after checkpoint evaluation."
+  ]
+}
