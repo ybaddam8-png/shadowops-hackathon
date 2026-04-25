@@ -51,6 +51,10 @@ def _risk_type_distribution(samples: list[dict[str, Any]]) -> dict[str, int]:
     )
 
 
+def _benign_malicious_distribution(samples: list[dict[str, Any]]) -> dict[str, int]:
+    return dict(Counter("malicious" if sample.get("is_malicious", False) else "benign" for sample in samples))
+
+
 def _action_counts(samples: list[dict[str, Any]]) -> dict[str, int]:
     return dict(Counter(_label(sample) or "MISSING" for sample in samples))
 
@@ -70,6 +74,24 @@ def _false_positive_challenge(sample: dict[str, Any]) -> bool:
     if sample.get("scenario_type") == "BENIGN_NOISY":
         return True
     return str(sample.get("severity", "")).upper() in {"MEDIUM", "HIGH"}
+
+
+def _examples_per_action(samples: list[dict[str, Any]]) -> dict[str, list[dict[str, str]]]:
+    examples: dict[str, list[dict[str, str]]] = {action: [] for action in sorted(VALID_ACTION_SET)}
+    for sample in samples:
+        action = _label(sample)
+        if action not in VALID_ACTION_SET or len(examples[action]) >= 3:
+            continue
+        payload = str(sample.get("raw_payload") or sample.get("action_summary") or sample.get("prompt") or "")
+        examples[action].append(
+            {
+                "sample_id": str(sample.get("sample_id") or sample.get("id") or "unknown"),
+                "scenario_type": str(sample.get("scenario_type") or sample.get("risk_level") or "unknown"),
+                "severity": str(sample.get("severity") or sample.get("risk_level") or "unknown"),
+                "payload": payload[:160],
+            }
+        )
+    return examples
 
 
 def build_dataset_audit(
@@ -121,11 +143,17 @@ def build_dataset_audit(
         "duplicate_prompt_count": sum(count - 1 for count in prompt_counts.values() if count > 1),
         "train_val_overlap_count": train_val_overlap,
         "action_distribution": action_distribution,
+        "benign_malicious_distribution": {
+            "train": _benign_malicious_distribution(train_samples),
+            "val": _benign_malicious_distribution(val_samples),
+        },
+        "scenario_distribution": _distribution(all_train_val, "scenario_type"),
         "domain_distribution": _distribution(all_samples, "domain"),
         "risk_type_distribution": _risk_type_distribution(all_samples),
         "false_positive_challenge_count": sum(1 for sample in all_samples if _false_positive_challenge(sample)),
         "missing_label_count": missing_label_count,
         "invalid_action_label_count": invalid_action_label_count,
+        "examples_per_action": _examples_per_action(all_train_val),
         "passed_preflight": not failures,
         "failures": failures,
     }
