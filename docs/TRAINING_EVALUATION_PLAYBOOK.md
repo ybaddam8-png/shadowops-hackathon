@@ -71,3 +71,21 @@ Use `requirements.txt` only inside the Linux GPU training environment.
 - Long training only after `model_eval_report.json` works.
 - Stop if logs show no reward improvement, high `frac_reward_zero_std`, high invalid output rate, or a failed gate.
 - Keep credits safe by running eval -> SFT smoke -> GRPO smoke before any longer run.
+
+## Post-Training Artifact Refresh
+
+After real training finishes, run:
+
+```powershell
+cd backend-ml
+python training/post_training_artifacts.py
+python training/train_qwen3_grpo.py --evaluate-model --model-path <REAL_CHECKPOINT_PATH> --compare-against-policy --generate-plots
+python training/generate_reward_curves.py
+python training/check_submission_artifacts.py
+```
+
+- Reward curves are generated only from real trainer logs (`trainer_state.json`, `metrics.jsonl`, or real `reward_curve_data.json`).
+- If logs/checkpoint metrics are missing, reports stay in `PENDING_REAL_TRAINING_LOGS` instead of inventing values.
+- Q-aware policy remains the baseline safety guardrail and model gate reference.
+- A trained checkpoint must pass action-format validation, hidden eval, and model-vs-policy gating.
+- Do not claim model improvement until real checkpoint evaluation evidence exists.

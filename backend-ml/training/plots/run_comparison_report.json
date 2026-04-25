@@ -1,10 +1,33 @@
 {
-  "runs": [],
-  "generated_plot_paths": [],
-  "skipped_plots": [
-    "run_reward_comparison.png",
-    "run_loss_comparison.png",
-    "run_eval_comparison.png"
+  "status": "PENDING_REAL_TRAINING_LOGS",
+  "notes": [
+    "PENDING_REAL_TRAINING_LOGS"
   ],
-  "warnings": []
+  "available_artifacts": {
+    "reward_curve_data": "training\\reports\\reward_curve_data.json",
+    "demo_benchmark_report": "training\\demo_benchmark_report.json",
+    "hidden_eval_report": "training\\reports\\hidden_eval_report.json",
+    "model_eval_report_training": "training\\model_eval_report.json",
+    "model_policy_comparison_training": "training\\model_policy_comparison.json",
+    "model_policy_comparison_reports": "training\\reports\\model_policy_comparison.json"
+  },
+  "benchmark": {
+    "available": true,
+    "rows": 4,
+    "q_aware_reward_mean": null,
+    "q_aware_safety_accuracy": null
+  },
+  "hidden_eval": {
+    "available": true,
+    "source": "training\\reports\\hidden_eval_report.json",
+    "status": "UNKNOWN",
+    "unsafe_decision_rate": null
+  },
+  "model_policy": {
+    "available": true,
+    "source": "training\\reports\\model_policy_comparison.json",
+    "model_reward_mean": null,
+    "q_aware_reward_mean": null,
+    "delta_vs_q_aware": null
+  }
 }

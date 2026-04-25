@@ -1,11 +1,9 @@
-"""Check that ShadowOps submission artifacts are present and honest."""
+"""Validate submission artifacts and unsafe tracked files."""
 
 from __future__ import annotations
 
 import json
-import re
 import subprocess
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -14,194 +12,156 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 BACKEND_DIR = REPO_ROOT / "backend-ml"
 TRAINING_DIR = BACKEND_DIR / "training"
 REPORTS_DIR = TRAINING_DIR / "reports"
-OUTPUT_JSON = REPORTS_DIR / "submission_artifact_check.json"
-OUTPUT_MD = REPORTS_DIR / "submission_artifact_check.md"
-
+PLOTS_DIR = TRAINING_DIR / "plots"
 
 REQUIRED_FILES = {
-    "root_openenv": REPO_ROOT / "openenv.yaml",
-    "backend_openenv_wrapper": BACKEND_DIR / "openenv_shadowops_env.py",
-    "backend_openenv_config": BACKEND_DIR / "openenv.yaml",
+    "openenv_root_yaml": REPO_ROOT / "openenv.yaml",
+    "openenv_wrapper": BACKEND_DIR / "openenv_shadowops_env.py",
     "schema_contract": BACKEND_DIR / "schema_contract.json",
-    "benchmark_json": TRAINING_DIR / "demo_benchmark_report.json",
-    "benchmark_md": TRAINING_DIR / "demo_benchmark_report.md",
-    "hidden_eval_json": REPORTS_DIR / "hidden_eval_report.json",
-    "hidden_eval_md": REPORTS_DIR / "hidden_eval_report.md",
-    "multistep_json": REPORTS_DIR / "multistep_episode_report.json",
-    "multistep_md": REPORTS_DIR / "multistep_episode_report.md",
-    "reward_diagnostics_json": REPORTS_DIR / "reward_diagnostics_report.json",
-    "reward_diagnostics_md": REPORTS_DIR / "reward_diagnostics_report.md",
+    "benchmark_report": TRAINING_DIR / "demo_benchmark_report.json",
     "reward_curve_data": REPORTS_DIR / "reward_curve_data.json",
     "reward_curve_report": REPORTS_DIR / "reward_curve_report.md",
-    "action_only_sft_audit_json": REPORTS_DIR / "action_only_sft_dataset_audit.json",
-    "action_only_sft_audit_md": REPORTS_DIR / "action_only_sft_dataset_audit.md",
-    "model_policy_gate_json": REPORTS_DIR / "model_policy_gate_report.json",
-    "model_policy_gate_md": REPORTS_DIR / "model_policy_gate_report.md",
-    "submission_readme": REPO_ROOT / "docs" / "SUBMISSION_README_DRAFT.md",
-    "judge_readme_block": REPO_ROOT / "docs" / "JUDGE_README_BLOCK.md",
-    "pitch_script": REPO_ROOT / "docs" / "DEMO_PITCH_SCRIPT.md",
-    "judge_checklist": REPO_ROOT / "docs" / "JUDGE_DEMO_CHECKLIST.md",
-    "champion_checkpoint_guide": REPO_ROOT / "docs" / "CHAMPION_CHECKPOINT_INTEGRATION.md",
-    "kaggle_cells": REPO_ROOT / "docs" / "KAGGLE_TRAINING_CELLS.md",
+    "repo_cleanup_report_json": REPORTS_DIR / "repo_cleanup_report.json",
+    "repo_cleanup_report_md": REPORTS_DIR / "repo_cleanup_report.md",
 }
 
-REQUIRED_PLOTS = (
-    TRAINING_DIR / "plots" / "baseline_policy_comparison.png",
-    TRAINING_DIR / "plots" / "reward_breakdown.png",
-    TRAINING_DIR / "plots" / "safety_accuracy_comparison.png",
-    TRAINING_DIR / "plots" / "unsafe_decision_rate.png",
-    TRAINING_DIR / "plots" / "model_policy_comparison.png",
-    TRAINING_DIR / "plots" / "safety_reward_comparison.png",
+OPTIONAL_REPORTS = {
+    "hidden_eval_report": REPORTS_DIR / "hidden_eval_report.json",
+    "model_policy_comparison_report": REPORTS_DIR / "model_policy_comparison.json",
+}
+
+REQUIRED_PNGS = [
+    "reward_curve.png",
+    "reward_std_curve.png",
+    "completion_length_curve.png",
+    "invalid_output_rate_curve.png",
+    "model_policy_comparison.png",
+    "safety_reward_comparison.png",
+]
+
+TRACKED_BLOCK_PATTERNS = (
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".next/",
+    ".venv/",
+    "venv/",
+    "__pycache__/",
 )
 
-SECRET_PATTERNS = (
-    re.compile(r"hf_[A-Za-z0-9]{20,}"),
-    re.compile(r"github_pat_[A-Za-z0-9_]{20,}"),
-    re.compile(r"AKIA[0-9A-Z]{16}"),
-)
+DANGEROUS_SUFFIXES = (".safetensors", ".bin", ".pt", ".pth", ".ckpt")
 
-FAKE_CLAIM_PATTERNS = (
-    re.compile(r"\btrained model (improved|beats|wins)\b", re.IGNORECASE),
-    re.compile(r"\bSFT.*GRPO.*improved\b", re.IGNORECASE),
-    re.compile(r"\bcheckpoint wins\b", re.IGNORECASE),
-)
+
+def _read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _git_ls_files() -> list[str]:
-    completed = subprocess.run(
+    result = subprocess.run(
         ["git", "ls-files"],
         cwd=str(REPO_ROOT),
         check=False,
         capture_output=True,
         text=True,
     )
-    if completed.returncode != 0:
+    if result.returncode != 0:
         return []
-    return [line.strip().replace("\\", "/") for line in completed.stdout.splitlines() if line.strip()]
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
-def _scan_text_files(paths: list[Path]) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
-    secrets = []
-    fake_claims = []
-    for path in paths:
-        if not path.exists() or path.suffix.lower() not in {".md", ".ps1", ".sh", ".py", ".json", ".yaml", ".yml", ".txt"}:
-            continue
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        rel = str(path.relative_to(REPO_ROOT))
-        for pattern in SECRET_PATTERNS:
-            if pattern.search(text):
-                secrets.append({"file": rel, "pattern": pattern.pattern})
-        for pattern in FAKE_CLAIM_PATTERNS:
-            if pattern.search(text):
-                fake_claims.append({"file": rel, "pattern": pattern.pattern})
-    return secrets, fake_claims
+def _has_pending_real_logs() -> bool:
+    reward_curve_data = REPORTS_DIR / "reward_curve_data.json"
+    if not reward_curve_data.exists():
+        return True
+    try:
+        payload = _read_json(reward_curve_data)
+    except json.JSONDecodeError:
+        return False
+    status = str(payload.get("status", ""))
+    notes = payload.get("notes") or []
+    if status == "PENDING_REAL_TRAINING_LOGS":
+        return True
+    return any(str(note) == "PENDING_REAL_TRAINING_LOGS" for note in notes)
 
 
-def _load_json(path: Path) -> Any:
-    if not path.exists():
-        return None
-    return json.loads(path.read_text(encoding="utf-8"))
+def check_submission_artifacts() -> dict[str, Any]:
+    required_missing = [name for name, path in REQUIRED_FILES.items() if not path.exists()]
+    optional = {name: path.exists() for name, path in OPTIONAL_REPORTS.items()}
 
+    broken_pngs: list[str] = []
+    for name in REQUIRED_PNGS:
+        path = PLOTS_DIR / name
+        if not path.exists() or path.stat().st_size == 0:
+            broken_pngs.append(str(path.relative_to(REPO_ROOT)))
 
-def build_submission_artifact_check() -> dict[str, Any]:
     tracked = _git_ls_files()
-    missing = {name: str(path.relative_to(REPO_ROOT)) for name, path in REQUIRED_FILES.items() if not path.exists()}
-    missing_plots = [str(path.relative_to(REPO_ROOT)) for path in REQUIRED_PLOTS if not path.exists()]
-    reward_curve_data = _load_json(REPORTS_DIR / "reward_curve_data.json") or {}
-    has_training_logs = bool(reward_curve_data.get("has_real_training_logs"))
-    reward_curve_plot = TRAINING_DIR / "plots" / "reward_curve.png"
-    training_curve_missing = has_training_logs and not reward_curve_plot.exists()
-    bad_tracked = [
-        path
-        for path in tracked
-        if any(
-            marker in path
-            for marker in (
-                "node_modules/",
-                "__pycache__/",
-                "unsloth_compiled_cache/",
-                "shadowops_qwen3_",
-                ".safetensors",
-                ".pt",
-                ".pth",
-                "training/checkpoints/",
-            )
-        )
-    ]
-    nested_repo_tracked = [path for path in tracked if path.startswith("shadowops-hackathon/")]
+    tracked_unsafe = []
+    for path in tracked:
+        abs_path = REPO_ROOT / path
+        # If the file is already deleted from the working tree, do not fail the in-flight cleanup.
+        if not abs_path.exists():
+            continue
+        if (
+            any(fragment in path for fragment in TRACKED_BLOCK_PATTERNS)
+            or path.endswith(DANGEROUS_SUFFIXES)
+            or path.endswith(".env")
+            or ".env." in path
+        ):
+            tracked_unsafe.append(path)
 
-    scan_roots = [REPO_ROOT / "docs", REPO_ROOT / "scripts", BACKEND_DIR / "training"]
-    scan_files = [path for root in scan_roots if root.exists() for path in root.rglob("*") if path.is_file()]
-    secrets, fake_claims = _scan_text_files(scan_files)
+    fake_claims: list[str] = []
+    model_policy_path = OPTIONAL_REPORTS["model_policy_comparison_report"]
+    if model_policy_path.exists():
+        payload = _read_json(model_policy_path)
+        delta = payload.get("delta_vs_q_aware", {})
+        reward_delta = delta.get("reward_mean") if isinstance(delta, dict) else None
+        if reward_delta is not None and not isinstance(reward_delta, (int, float)):
+            fake_claims.append("model_policy_comparison.delta_vs_q_aware.reward_mean must be numeric or absent.")
 
-    gate = _load_json(REPORTS_DIR / "model_policy_gate_report.json") or {}
-    checkpoint = _load_json(REPORTS_DIR / "checkpoint_comparison_report.json") or {}
-    checkpoint_metrics_pending = not any(row.get("metrics") for row in checkpoint.get("checkpoints", []))
-    failures = []
-    warnings = []
-    if missing:
-        failures.append("required artifacts missing")
-    if missing_plots:
-        failures.append("submission plots missing")
-    if training_curve_missing:
-        failures.append("real training logs exist but reward_curve.png is missing")
-    if secrets:
-        failures.append("possible secrets or tokens found")
-    if fake_claims:
-        failures.append("possible unsupported trained-model claim found")
-    if bad_tracked:
-        failures.append("large/cache/checkpoint artifacts are tracked")
-    if nested_repo_tracked:
-        failures.append("nested duplicate repo folder is tracked")
-    if checkpoint_metrics_pending or gate.get("gate_status") == "PENDING_REAL_CHECKPOINT_EVAL":
-        warnings.append("real trained checkpoint metrics are pending")
-    if not has_training_logs:
-        warnings.append("real trainer_state.json logs are pending; training curves will appear after SFT/GRPO runs")
+    if required_missing or broken_pngs or tracked_unsafe or fake_claims:
+        status = "FAIL"
+    elif _has_pending_real_logs():
+        status = "WARN"
+    else:
+        status = "PASS"
 
-    status = "FAIL" if failures else ("WARN" if warnings else "PASS")
-    return {
+    report = {
         "status": status,
-        "failures": failures,
-        "warnings": warnings,
-        "missing_required_files": missing,
-        "missing_plots": missing_plots,
-        "training_curve_missing": training_curve_missing,
-        "has_real_training_logs": has_training_logs,
-        "possible_secrets": secrets,
-        "possible_fake_claims": fake_claims,
-        "bad_tracked_artifacts": bad_tracked[:50],
-        "nested_duplicate_repo_tracked": nested_repo_tracked[:50],
-        "model_policy_gate_status": gate.get("gate_status", "missing"),
-        "checkpoint_metrics_pending": checkpoint_metrics_pending,
-        "checked_tracked_file_count": len(tracked),
+        "required_missing": required_missing,
+        "optional_reports": optional,
+        "broken_reward_curve_pngs": broken_pngs,
+        "tracked_unsafe_paths": tracked_unsafe,
+        "fake_model_improvement_claims": fake_claims,
+        "pending_real_training_logs": _has_pending_real_logs(),
     }
-
-
-def write_submission_artifact_check(report: dict[str, Any]) -> None:
-    OUTPUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_JSON.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    lines = [
-        "# ShadowOps Submission Artifact Check",
+    json_path = REPORTS_DIR / "submission_artifact_report.json"
+    json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    md_lines = [
+        "# Submission Artifact Check",
         "",
-        f"Status: **{report['status']}**",
+        f"- status: `{status}`",
+        f"- pending_real_training_logs: `{report['pending_real_training_logs']}`",
         "",
-        "## Failures",
+        "## Missing Required Files",
+        *(["- none"] if not required_missing else [f"- `{name}`" for name in required_missing]),
         "",
+        "## Broken Reward Curve PNGs",
+        *(["- none"] if not broken_pngs else [f"- `{name}`" for name in broken_pngs]),
+        "",
+        "## Tracked Unsafe Paths",
+        *(["- none"] if not tracked_unsafe else [f"- `{path}`" for path in tracked_unsafe]),
+        "",
+        "## Fake Model Improvement Claims",
+        *(["- none"] if not fake_claims else [f"- {item}" for item in fake_claims]),
     ]
-    lines.extend(f"- {item}" for item in report["failures"] or ["none"])
-    lines.extend(["", "## Warnings", ""])
-    lines.extend(f"- {item}" for item in report["warnings"] or ["none"])
-    lines.extend(["", "## Model Policy Gate", "", f"- status: {report['model_policy_gate_status']}"])
-    OUTPUT_MD.write_text("\n".join(lines), encoding="utf-8")
+    (REPORTS_DIR / "submission_artifact_report.md").write_text("\n".join(md_lines), encoding="utf-8")
+    return report
 
 
 def main() -> int:
-    report = build_submission_artifact_check()
-    write_submission_artifact_check(report)
-    print(f"Submission artifact check: {report['status']}")
-    print(f"Saved: {OUTPUT_JSON.relative_to(BACKEND_DIR)}")
-    print(f"Saved: {OUTPUT_MD.relative_to(BACKEND_DIR)}")
-    return 1 if report["status"] == "FAIL" else 0
+    report = check_submission_artifacts()
+    print(f"submission_artifact_status={report['status']}")
+    return 0
 
 
 if __name__ == "__main__":

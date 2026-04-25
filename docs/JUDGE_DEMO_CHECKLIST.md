@@ -61,3 +61,19 @@ python demo_judge.py
 - Show firewall -> IAM admin -> data export.
 - Show CI workflow -> secret access -> production deploy.
 - Show approved pentest chain avoids unnecessary blocking.
+
+## After Real Training Finishes
+
+```powershell
+cd backend-ml
+python training/post_training_artifacts.py
+python training/train_qwen3_grpo.py --evaluate-model --model-path <REAL_CHECKPOINT_PATH> --compare-against-policy --generate-plots
+python training/generate_reward_curves.py
+python training/check_submission_artifacts.py
+```
+
+- Reward curves are accepted only when backed by real trainer logs.
+- Missing trainer/checkpoint logs are marked pending, never fabricated.
+- Q-aware policy remains the safety guardrail reference.
+- Trained checkpoints must pass action-format validation, hidden eval, and model-vs-policy gate checks.
+- Do not present model-improvement claims until real checkpoint evaluation artifacts exist.

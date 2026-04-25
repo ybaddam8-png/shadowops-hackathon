@@ -1,0 +1,32 @@
+{
+  "status": "PENDING_REAL_TRAINING_LOGS",
+  "curve_notes": [
+    "reward_curve_data.json present but was not usable for plotting.",
+    "PENDING_REAL_TRAINING_LOGS"
+  ],
+  "reward_curve_status": "PENDING_REAL_TRAINING_LOGS",
+  "run_comparison_status": "PENDING_REAL_TRAINING_LOGS",
+  "model_eval_status": "FOUND",
+  "model_eval": {
+    "status": "FOUND",
+    "source": "training\\model_eval_report.json",
+    "training_gate_status": "FAIL",
+    "delta_vs_q_aware": null
+  },
+  "submission_checker_status": "WARN",
+  "artifacts": {
+    "reward_curve_data": "training/reports/reward_curve_data.json",
+    "reward_curve_report": "training/reports/reward_curve_report.md",
+    "run_comparison_report": "training/plots/run_comparison_report.json",
+    "submission_checker_report": "training/reports/submission_artifact_report.json",
+    "plots_non_empty": {
+      "reward_curve.png": true,
+      "reward_std_curve.png": true,
+      "completion_length_curve.png": true,
+      "invalid_output_rate_curve.png": true,
+      "model_policy_comparison.png": true,
+      "safety_reward_comparison.png": true
+    }
+  },
+  "never_faked_metrics": true
+}

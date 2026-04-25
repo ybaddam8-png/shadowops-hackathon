@@ -120,6 +120,22 @@ python demo_judge.py
 
 GPU training should be launched only from the documented Hugging Face scripts after eval-only validation passes. Do not claim improvement until `model_eval_report.json` proves it and the model-vs-policy gate passes.
 
+After real training finishes, run:
+
+```powershell
+cd backend-ml
+python training/post_training_artifacts.py
+python training/train_qwen3_grpo.py --evaluate-model --model-path <REAL_CHECKPOINT_PATH> --compare-against-policy --generate-plots
+python training/generate_reward_curves.py
+python training/check_submission_artifacts.py
+```
+
+- Reward curves are generated only from real trainer logs.
+- Missing logs/checkpoint metrics are marked pending (`PENDING_REAL_TRAINING_LOGS`).
+- Q-aware policy remains the safety guardrail baseline.
+- Trained checkpoints must pass action-format validation, hidden eval, and model-vs-policy gate.
+- Do not claim model improvement until real checkpoint evaluation artifacts exist.
+
 ## Real Training Evidence
 Real training evidence will be added here after GPU run.
 

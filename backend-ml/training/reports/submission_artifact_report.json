@@ -1,0 +1,12 @@
+{
+  "status": "WARN",
+  "required_missing": [],
+  "optional_reports": {
+    "hidden_eval_report": true,
+    "model_policy_comparison_report": true
+  },
+  "broken_reward_curve_pngs": [],
+  "tracked_unsafe_paths": [],
+  "fake_model_improvement_claims": [],
+  "pending_real_training_logs": true
+}

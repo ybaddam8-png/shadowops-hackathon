@@ -1,0 +1,24 @@
+# Repo Cleanup Report
+
+- Deleted folders:
+  - `shadowops-hackathon/` (untracked duplicate nested frontend tree)
+  - `frontend/node_modules/`
+  - `frontend/dist/`
+- Kept uncertain folders:
+  - `backend-ml/.pytest_cache/` (ignored local test cache)
+  - `backend-ml/training/checkpoints/` (protected training path, not committed)
+  - `backend-ml/shadowops_qwen3_*/` (ignored model directories, not committed)
+- Protected paths:
+  - `backend-ml` source and tests
+  - `docs/`
+  - `backend-ml/training/reports/`
+  - `backend-ml/training/plots/`
+  - `openenv.yaml`
+  - `backend-ml/schema_contract.json`
+  - tracked frontend source
+- `.gitignore` updated with cache/build/checkpoint/secret protections.
+- Total cleanup count: `3`
+- Confirmation: no source code deleted.
+- Confirmation: no judge reports deleted.
+- Confirmation: no secrets committed.
+- Confirmation: no checkpoints/model weights committed.
