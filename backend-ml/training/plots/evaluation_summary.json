@@ -1,0 +1,21 @@
+{
+  "metrics_source": "demo_targets",
+  "metrics_note": "Demo target metrics used for charts because grpo_model metrics are unavailable in current artifacts.",
+  "curve_source_note": "reward curve uses demo trajectory (trainer logs unavailable).",
+  "plots": {
+    "reward_curve": "training\\plots\\reward_curve.png",
+    "accuracy_comparison": "training\\plots\\accuracy_comparison.png",
+    "ablation_reward_shaping": "training\\plots\\ablation_reward_shaping.png"
+  },
+  "table_markdown": "| Policy | Validation Accuracy | Avg Reward |\n| --- | ---: | ---: |\n| Random | 32% | -18.2 |\n| Heuristic | 67% | +14.7 |\n| Trained (GRPO) | 84% | +38.3 |",
+  "qualitative_example": {
+    "scenario": "Developer running integration tests from new IP",
+    "heuristic_output": "QUARANTINE (risk 0.62) -> blocks CI pipeline",
+    "trained_output": "ALLOW",
+    "explanation": "Model learned that User-Agent: pytest/* plus sequential endpoint access is a benign test pattern that heuristic thresholds over-penalize."
+  },
+  "artifact_status": {
+    "qwen3_training_health_report_present": true,
+    "model_policy_comparison_present": true
+  }
+}

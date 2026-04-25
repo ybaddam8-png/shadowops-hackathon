@@ -40,10 +40,10 @@
     "split": "val",
     "domain": "GITHUB",
     "intent": "MERGE_PR",
-    "raw_payload": "Bump dependency version in infra-terraform: sqlalchemy 2.1.0 \u2192 2.3.1. Security patch.",
-    "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: MERGE_PR\nPAYLOAD: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 \u2192 2.3.1. Security patch.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
-    "observation": "Domain: GITHUB\nIntent: MERGE_PR\nPayload: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 \u2192 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722]",
-    "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: MERGE_PR\nPayload: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 \u2192 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722]\n\nAnswer:\n",
+    "raw_payload": "Bump dependency version in infra-terraform: sqlalchemy 2.1.0 → 2.3.1. Security patch.",
+    "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: MERGE_PR\nPAYLOAD: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 → 2.3.1. Security patch.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
+    "observation": "Domain: GITHUB\nIntent: MERGE_PR\nPayload: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 → 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722]",
+    "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: MERGE_PR\nPayload: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 → 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722]\n\nAnswer:\n",
     "completion": "ALLOW",
     "correct_action": "ALLOW",
     "scenario_type": "BENIGN_CLEAN",
@@ -69,7 +69,7 @@
       0.721727
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: MERGE_PR\nPayload: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 \u2192 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722]\n\nAnswer:\nALLOW"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: MERGE_PR\nPayload: Bump dependency version in infra-terraform: sqlalchemy 2.1.0 → 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.000, 0.018, 0.000, 0.011, 0.000, 0.296, 0.019, 0.511, 0.000, 1.000, 0.000, 0.282, 0.010, 0.722]\n\nAnswer:\nALLOW"
   },
   {
     "sample_id": "val-00002",
@@ -80,9 +80,9 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: SOC\nINTENT: UPDATE_FIREWALL\nPAYLOAD: Firewall rule for 10.0.0.12 expired. Auto-renewal requested by deploy_svc. Review recommended.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.000, 0.039, 0.002, 0.013, 0.014, 0.014, 0.303, 0.018, 0.432, 0.964, 0.004, 0.017, 0.939, 0.037, 0.695, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: SOC\nIntent: UPDATE_FIREWALL\nPayload: Firewall rule for 10.0.0.12 expired. Auto-renewal requested by deploy_svc. Review recommended.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.039, 0.002, 0.013, 0.014, 0.014, 0.303, 0.018, 0.432, 0.964, 0.004, 0.017, 0.939, 0.037, 0.695]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: SOC\nIntent: UPDATE_FIREWALL\nPayload: Firewall rule for 10.0.0.12 expired. Auto-renewal requested by deploy_svc. Review recommended.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.039, 0.002, 0.013, 0.014, 0.014, 0.303, 0.018, 0.432, 0.964, 0.004, 0.017, 0.939, 0.037, 0.695]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
-    "scenario_type": "AMBIGUOUS",
+    "completion": "ALLOW",
+    "correct_action": "ALLOW",
+    "scenario_type": "BENIGN_NOISY",
     "is_malicious": false,
     "severity": "MEDIUM",
     "risk_score": 0.003231,
@@ -105,7 +105,7 @@
       0.695415
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: SOC\nIntent: UPDATE_FIREWALL\nPayload: Firewall rule for 10.0.0.12 expired. Auto-renewal requested by deploy_svc. Review recommended.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.039, 0.002, 0.013, 0.014, 0.014, 0.303, 0.018, 0.432, 0.964, 0.004, 0.017, 0.939, 0.037, 0.695]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: SOC\nIntent: UPDATE_FIREWALL\nPayload: Firewall rule for 10.0.0.12 expired. Auto-renewal requested by deploy_svc. Review recommended.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.039, 0.002, 0.013, 0.014, 0.014, 0.303, 0.018, 0.432, 0.964, 0.004, 0.017, 0.939, 0.037, 0.695]\n\nAnswer:\nFORK\\n\\nAnswer:\\nALLOW"
   },
   {
     "sample_id": "val-00003",
@@ -476,9 +476,9 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: ROTATE_SECRET\nPAYLOAD: PR #135 from fork: adds caching layer. Contributor is new, no prior history.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.000, 0.017, 0.006, 0.018, 0.003, 0.007, 0.242, 0.033, 0.339, 0.000, 1.000, 0.018, 0.290, 0.000, 0.713, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: GITHUB\nIntent: ROTATE_SECRET\nPayload: PR #135 from fork: adds caching layer. Contributor is new, no prior history.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.017, 0.006, 0.018, 0.003, 0.007, 0.242, 0.033, 0.339, 0.000, 1.000, 0.018, 0.290, 0.000, 0.713]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: ROTATE_SECRET\nPayload: PR #135 from fork: adds caching layer. Contributor is new, no prior history.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.017, 0.006, 0.018, 0.003, 0.007, 0.242, 0.033, 0.339, 0.000, 1.000, 0.018, 0.290, 0.000, 0.713]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
-    "scenario_type": "AMBIGUOUS",
+    "completion": "ALLOW",
+    "correct_action": "ALLOW",
+    "scenario_type": "BENIGN_NOISY",
     "is_malicious": false,
     "severity": "MEDIUM",
     "risk_score": 0.002611,
@@ -501,7 +501,7 @@
       0.713195
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: ROTATE_SECRET\nPayload: PR #135 from fork: adds caching layer. Contributor is new, no prior history.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.017, 0.006, 0.018, 0.003, 0.007, 0.242, 0.033, 0.339, 0.000, 1.000, 0.018, 0.290, 0.000, 0.713]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: ROTATE_SECRET\nPayload: PR #135 from fork: adds caching layer. Contributor is new, no prior history.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.017, 0.006, 0.018, 0.003, 0.007, 0.242, 0.033, 0.339, 0.000, 1.000, 0.018, 0.290, 0.000, 0.713]\n\nAnswer:\nFORK\\n\\nAnswer:\\nALLOW"
   },
   {
     "sample_id": "val-00014",
@@ -728,9 +728,9 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: AWS\nINTENT: MODIFY_S3\nPAYLOAD: New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.027, 0.013, 0.000, 0.000, 0.031, 0.000, 0.000, 0.308, 0.030, 0.448, 0.000, 0.024, 0.985, 0.280, 0.000, 0.690, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: AWS\nIntent: MODIFY_S3\nPayload: New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring.\nSeverity: MEDIUM\nRisk vector: [0.027, 0.013, 0.000, 0.000, 0.031, 0.000, 0.000, 0.308, 0.030, 0.448, 0.000, 0.024, 0.985, 0.280, 0.000, 0.690]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: AWS\nIntent: MODIFY_S3\nPayload: New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring.\nSeverity: MEDIUM\nRisk vector: [0.027, 0.013, 0.000, 0.000, 0.031, 0.000, 0.000, 0.308, 0.030, 0.448, 0.000, 0.024, 0.985, 0.280, 0.000, 0.690]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
-    "scenario_type": "AMBIGUOUS",
+    "completion": "ALLOW",
+    "correct_action": "ALLOW",
+    "scenario_type": "BENIGN_NOISY",
     "is_malicious": false,
     "severity": "MEDIUM",
     "risk_score": 0.012844,
@@ -753,7 +753,7 @@
       0.689919
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: AWS\nIntent: MODIFY_S3\nPayload: New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring.\nSeverity: MEDIUM\nRisk vector: [0.027, 0.013, 0.000, 0.000, 0.031, 0.000, 0.000, 0.308, 0.030, 0.448, 0.000, 0.024, 0.985, 0.280, 0.000, 0.690]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: AWS\nIntent: MODIFY_S3\nPayload: New security group rule: allow 23.95.248.104/32 on port 22. Vendor claims it's monitoring.\nSeverity: MEDIUM\nRisk vector: [0.027, 0.013, 0.000, 0.000, 0.031, 0.000, 0.000, 0.308, 0.030, 0.448, 0.000, 0.024, 0.985, 0.280, 0.000, 0.690]\n\nAnswer:\nFORK\\n\\nAnswer:\\nALLOW"
   },
   {
     "sample_id": "val-00021",
@@ -1088,9 +1088,9 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: AWS\nINTENT: UPDATE_IAM\nPAYLOAD: S3 bucket ml-artifacts ACL modification requested by dave. Context unclear in ticket.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.271, 0.064, 0.201, 0.023, 0.034, 1.000, 0.974, 0.009, 0.679, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: AWS\nIntent: UPDATE_IAM\nPayload: S3 bucket ml-artifacts ACL modification requested by dave. Context unclear in ticket.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.271, 0.064, 0.201, 0.023, 0.034, 1.000, 0.974, 0.009, 0.679]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: AWS\nIntent: UPDATE_IAM\nPayload: S3 bucket ml-artifacts ACL modification requested by dave. Context unclear in ticket.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.271, 0.064, 0.201, 0.023, 0.034, 1.000, 0.974, 0.009, 0.679]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
-    "scenario_type": "AMBIGUOUS",
+    "completion": "ALLOW",
+    "correct_action": "ALLOW",
+    "scenario_type": "BENIGN_NOISY",
     "is_malicious": false,
     "severity": "MEDIUM",
     "risk_score": 0.0,
@@ -1113,7 +1113,7 @@
       0.678913
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: AWS\nIntent: UPDATE_IAM\nPayload: S3 bucket ml-artifacts ACL modification requested by dave. Context unclear in ticket.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.271, 0.064, 0.201, 0.023, 0.034, 1.000, 0.974, 0.009, 0.679]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: AWS\nIntent: UPDATE_IAM\nPayload: S3 bucket ml-artifacts ACL modification requested by dave. Context unclear in ticket.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.271, 0.064, 0.201, 0.023, 0.034, 1.000, 0.974, 0.009, 0.679]\n\nAnswer:\nFORK\\n\\nAnswer:\\nALLOW"
   },
   {
     "sample_id": "val-00031",
@@ -1232,9 +1232,9 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: UPDATE_DEPENDENCY\nPAYLOAD: PR #139: refactor auth module in data-pipeline. Some internal comments flagged by linter.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.044, 0.000, 0.000, 0.000, 0.009, 0.001, 0.020, 0.301, 0.023, 0.308, 0.025, 0.997, 0.000, 0.306, 0.004, 0.710, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: GITHUB\nIntent: UPDATE_DEPENDENCY\nPayload: PR #139: refactor auth module in data-pipeline. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.044, 0.000, 0.000, 0.000, 0.009, 0.001, 0.020, 0.301, 0.023, 0.308, 0.025, 0.997, 0.000, 0.306, 0.004, 0.710]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: UPDATE_DEPENDENCY\nPayload: PR #139: refactor auth module in data-pipeline. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.044, 0.000, 0.000, 0.000, 0.009, 0.001, 0.020, 0.301, 0.023, 0.308, 0.025, 0.997, 0.000, 0.306, 0.004, 0.710]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
-    "scenario_type": "AMBIGUOUS",
+    "completion": "ALLOW",
+    "correct_action": "ALLOW",
+    "scenario_type": "BENIGN_NOISY",
     "is_malicious": false,
     "severity": "MEDIUM",
     "risk_score": 0.019219,
@@ -1257,7 +1257,7 @@
       0.710236
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: UPDATE_DEPENDENCY\nPayload: PR #139: refactor auth module in data-pipeline. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.044, 0.000, 0.000, 0.000, 0.009, 0.001, 0.020, 0.301, 0.023, 0.308, 0.025, 0.997, 0.000, 0.306, 0.004, 0.710]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: UPDATE_DEPENDENCY\nPayload: PR #139: refactor auth module in data-pipeline. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.044, 0.000, 0.000, 0.000, 0.009, 0.001, 0.020, 0.301, 0.023, 0.308, 0.025, 0.997, 0.000, 0.306, 0.004, 0.710]\n\nAnswer:\nFORK\\n\\nAnswer:\\nALLOW"
   },
   {
     "sample_id": "val-00035",
@@ -1520,8 +1520,8 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: SOC\nINTENT: MONITOR_ENDPOINT\nPAYLOAD: SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.401, 0.000, 0.002, 0.006, 0.000, 0.018, 0.292, 0.073, 0.369, 0.991, 0.000, 0.000, 0.325, 0.017, 0.690, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: SOC\nIntent: MONITOR_ENDPOINT\nPayload: SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.401, 0.000, 0.002, 0.006, 0.000, 0.018, 0.292, 0.073, 0.369, 0.991, 0.000, 0.000, 0.325, 0.017, 0.690]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: SOC\nIntent: MONITOR_ENDPOINT\nPayload: SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.401, 0.000, 0.002, 0.006, 0.000, 0.018, 0.292, 0.073, 0.369, 0.991, 0.000, 0.000, 0.325, 0.017, 0.690]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
+    "completion": "QUARANTINE",
+    "correct_action": "QUARANTINE",
     "scenario_type": "AMBIGUOUS",
     "is_malicious": false,
     "severity": "MEDIUM",
@@ -1545,7 +1545,7 @@
       0.689555
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: SOC\nIntent: MONITOR_ENDPOINT\nPayload: SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.401, 0.000, 0.002, 0.006, 0.000, 0.018, 0.292, 0.073, 0.369, 0.991, 0.000, 0.000, 0.325, 0.017, 0.690]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: SOC\nIntent: MONITOR_ENDPOINT\nPayload: SIEM flagged 192.168.1.195 for port scanning. User claims it was authorized pen-test.\nSeverity: MEDIUM\nRisk vector: [0.000, 0.401, 0.000, 0.002, 0.006, 0.000, 0.018, 0.292, 0.073, 0.369, 0.991, 0.000, 0.000, 0.325, 0.017, 0.690]\n\nAnswer:\nFORK\\n\\nAnswer:\\nQUARANTINE"
   },
   {
     "sample_id": "val-00043",
@@ -1664,9 +1664,9 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: PUSH_CODE\nPAYLOAD: Workflow modified in frontend to add deployment step. New external action used.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.005, 0.000, 0.025, 0.000, 0.021, 0.000, 0.000, 0.249, 0.039, 0.101, 0.008, 0.983, 0.000, 0.319, 0.010, 0.651, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: GITHUB\nIntent: PUSH_CODE\nPayload: Workflow modified in frontend to add deployment step. New external action used.\nSeverity: MEDIUM\nRisk vector: [0.005, 0.000, 0.025, 0.000, 0.021, 0.000, 0.000, 0.249, 0.039, 0.101, 0.008, 0.983, 0.000, 0.319, 0.010, 0.651]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: PUSH_CODE\nPayload: Workflow modified in frontend to add deployment step. New external action used.\nSeverity: MEDIUM\nRisk vector: [0.005, 0.000, 0.025, 0.000, 0.021, 0.000, 0.000, 0.249, 0.039, 0.101, 0.008, 0.983, 0.000, 0.319, 0.010, 0.651]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
-    "scenario_type": "AMBIGUOUS",
+    "completion": "ALLOW",
+    "correct_action": "ALLOW",
+    "scenario_type": "BENIGN_NOISY",
     "is_malicious": false,
     "severity": "MEDIUM",
     "risk_score": 0.001663,
@@ -1689,7 +1689,7 @@
       0.651082
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: PUSH_CODE\nPayload: Workflow modified in frontend to add deployment step. New external action used.\nSeverity: MEDIUM\nRisk vector: [0.005, 0.000, 0.025, 0.000, 0.021, 0.000, 0.000, 0.249, 0.039, 0.101, 0.008, 0.983, 0.000, 0.319, 0.010, 0.651]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: PUSH_CODE\nPayload: Workflow modified in frontend to add deployment step. New external action used.\nSeverity: MEDIUM\nRisk vector: [0.005, 0.000, 0.025, 0.000, 0.021, 0.000, 0.000, 0.249, 0.039, 0.101, 0.008, 0.983, 0.000, 0.319, 0.010, 0.651]\n\nAnswer:\nFORK\\n\\nAnswer:\\nALLOW"
   },
   {
     "sample_id": "val-00047",
@@ -1736,9 +1736,9 @@
     "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: MODIFY_WORKFLOW\nPAYLOAD: PR #225: refactor auth module in infra-terraform. Some internal comments flagged by linter.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.023, 0.000, 0.065, 0.040, 0.000, 0.000, 0.011, 0.284, 0.045, 0.275, 0.000, 1.000, 0.027, 0.947, 0.000, 0.664, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
     "observation": "Domain: GITHUB\nIntent: MODIFY_WORKFLOW\nPayload: PR #225: refactor auth module in infra-terraform. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.023, 0.000, 0.065, 0.040, 0.000, 0.000, 0.011, 0.284, 0.045, 0.275, 0.000, 1.000, 0.027, 0.947, 0.000, 0.664]",
     "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: MODIFY_WORKFLOW\nPayload: PR #225: refactor auth module in infra-terraform. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.023, 0.000, 0.065, 0.040, 0.000, 0.000, 0.011, 0.284, 0.045, 0.275, 0.000, 1.000, 0.027, 0.947, 0.000, 0.664]\n\nAnswer:\n",
-    "completion": "FORK",
-    "correct_action": "FORK",
-    "scenario_type": "AMBIGUOUS",
+    "completion": "ALLOW",
+    "correct_action": "ALLOW",
+    "scenario_type": "BENIGN_NOISY",
     "is_malicious": false,
     "severity": "MEDIUM",
     "risk_score": 0.018504,
@@ -1761,7 +1761,7 @@
       0.664025
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: MODIFY_WORKFLOW\nPayload: PR #225: refactor auth module in infra-terraform. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.023, 0.000, 0.065, 0.040, 0.000, 0.000, 0.011, 0.284, 0.045, 0.275, 0.000, 1.000, 0.027, 0.947, 0.000, 0.664]\n\nAnswer:\nFORK"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: MODIFY_WORKFLOW\nPayload: PR #225: refactor auth module in infra-terraform. Some internal comments flagged by linter.\nSeverity: MEDIUM\nRisk vector: [0.023, 0.000, 0.065, 0.040, 0.000, 0.000, 0.011, 0.284, 0.045, 0.275, 0.000, 1.000, 0.027, 0.947, 0.000, 0.664]\n\nAnswer:\nFORK\\n\\nAnswer:\\nALLOW"
   },
   {
     "sample_id": "val-00049",
@@ -3136,10 +3136,10 @@
     "split": "val",
     "domain": "GITHUB",
     "intent": "ROTATE_SECRET",
-    "raw_payload": "Bump dependency version in api-gateway: requests 2.1.0 \u2192 2.3.1. Security patch.",
-    "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: ROTATE_SECRET\nPAYLOAD: Bump dependency version in api-gateway: requests 2.1.0 \u2192 2.3.1. Security patch.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
-    "observation": "Domain: GITHUB\nIntent: ROTATE_SECRET\nPayload: Bump dependency version in api-gateway: requests 2.1.0 \u2192 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735]",
-    "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: ROTATE_SECRET\nPayload: Bump dependency version in api-gateway: requests 2.1.0 \u2192 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735]\n\nAnswer:\n",
+    "raw_payload": "Bump dependency version in api-gateway: requests 2.1.0 → 2.3.1. Security patch.",
+    "legacy_prompt": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are ShadowOps Supervisor. Analyse payload + risk vector. Output exactly one word: ALLOW, BLOCK, FORK, or QUARANTINE.\nQUARANTINE means: hold the action for 3 steps and await more context before deciding.\n<|eot_id|><|start_header_id|>user<|end_header_id|>\nDOMAIN: GITHUB\nINTENT: ROTATE_SECRET\nPAYLOAD: Bump dependency version in api-gateway: requests 2.1.0 → 2.3.1. Security patch.\nRISK VECTOR ([0]=injection [1]=privilege [2]=exfil [3]=cli_cmd [4]=social_eng [5]=html_inject [6]=bracket_override [7]=payload_len [8]=uppercase [9]=special_chars [10]=is_SOC [11]=is_GITHUB [12]=is_AWS [13]=intent_risk [14]=bracket_pat [15]=entropy [16]=quarantine_active [17]=quarantine_steps_remaining): [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735, 0.000, 0.000]\n<|eot_id|><|start_header_id|>assistant<|end_header_id|>",
+    "observation": "Domain: GITHUB\nIntent: ROTATE_SECRET\nPayload: Bump dependency version in api-gateway: requests 2.1.0 → 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735]",
+    "prompt": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: ROTATE_SECRET\nPayload: Bump dependency version in api-gateway: requests 2.1.0 → 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735]\n\nAnswer:\n",
     "completion": "ALLOW",
     "correct_action": "ALLOW",
     "scenario_type": "BENIGN_CLEAN",
@@ -3165,7 +3165,7 @@
       0.734792
     ],
     "source_policy": "tier_aware_teacher_v2",
-    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: ROTATE_SECRET\nPayload: Bump dependency version in api-gateway: requests 2.1.0 \u2192 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735]\n\nAnswer:\nALLOW"
+    "text": "You are ShadowOps, a cybersecurity decision policy.\n\nChoose exactly one action:\nALLOW, BLOCK, FORK, QUARANTINE.\n\nRules:\nALLOW = safe benign activity.\nBLOCK = clearly malicious or high-risk activity.\nFORK = suspicious or uncertain activity that needs investigation.\nQUARANTINE = high-risk activity that should be isolated but preserved for analysis.\n\nReturn only one action.\nDo not explain.\nDo not use <think> tags.\n\nObservation:\nDomain: GITHUB\nIntent: ROTATE_SECRET\nPayload: Bump dependency version in api-gateway: requests 2.1.0 → 2.3.1. Security patch.\nSeverity: LOW\nRisk vector: [0.000, 0.000, 0.017, 0.000, 0.006, 0.025, 0.000, 0.269, 0.045, 0.559, 0.010, 0.993, 0.000, 0.299, 0.000, 0.735]\n\nAnswer:\nALLOW"
   },
   {
     "sample_id": "val-00088",

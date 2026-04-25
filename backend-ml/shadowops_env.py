@@ -22,6 +22,11 @@ import re
 import datetime
 from typing import Optional
 
+try:
+    from openenv import Environment as _BaseEnvironment
+except ImportError:
+    _BaseEnvironment = object
+
 # ─────────────────────────────────────────────────────────────
 # 0. Constants
 # ─────────────────────────────────────────────────────────────
@@ -46,11 +51,11 @@ R = {
     "ALLOW_MALICIOUS":         -20,
 
     # QUARANTINE rebalanced — hold cost cut to -2 so net is recoverable
-    "QUARANTINE_STEP_COST":    - 2,   # was -5; 3 steps = -6 total
-    "QUARANTINE_CORRECT_WIPE": +20,   # was +15
+    "QUARANTINE_STEP_COST":    -8,    # was -2
+    "QUARANTINE_CORRECT_WIPE": +5,    # was +20
     "QUARANTINE_MALICIOUS":    +80,   # was +70
-    "QUARANTINE_BENIGN":       +60,   # was +50
-    "QUARANTINE_WRONG":        -30,   # was -25
+    "QUARANTINE_BENIGN":       +15,   # was +60
+    "QUARANTINE_WRONG":        -40,   # was -30
 }
 
 QUARANTINE_HOLD_STEPS    = 3
@@ -634,7 +639,7 @@ class QuarantineHold:
 # 9. Environment
 # ─────────────────────────────────────────────────────────────
 
-class UniversalShadowEnv:
+class UniversalShadowEnv(_BaseEnvironment):
     """
     4-action RL environment with dynamic scenario generation.
 
@@ -671,6 +676,7 @@ class UniversalShadowEnv:
         self.step_count         = 0
         self.episode_reward     = 0.0
         self._current_scenario  = None
+        self.session_memory     = []
 
     def reset(self):
         self.production         = _fresh_production()
@@ -903,7 +909,7 @@ class UniversalShadowEnv:
             self._suspicious_streak[domain]  = 0
 
     def _is_domain_quarantined(self, domain):
-        qt = self._domain_quarantine[domain]
+        qt = self._domain_quarantine.get(domain, None)
         if qt is None:
             return False
         if (datetime.datetime.utcnow() - qt).total_seconds() > QUARANTINE_DURATION:
@@ -954,6 +960,13 @@ class UniversalShadowEnv:
         return (vec[0]*0.35 + vec[1]*0.25 + vec[3]*0.20 + vec[6]*0.20) > 0.45
 
     def get_production_snapshot(self): return copy.deepcopy(self.production)
+    def state(self):
+        """Gym-compatible state getter"""
+        return self.get_production_snapshot()
+    def close(self):
+        """Cleanup"""
+        self._domain_quarantine.clear()
+        self.session_memory.clear()
     def get_forensic_log(self):        return list(self.forensic_log)
     def get_health_scores(self):       return dict(self.health)
     def get_incident_reports(self):    return list(self.incident_reports)
