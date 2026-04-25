@@ -17,6 +17,15 @@ try {
     try {
         python training/train_qwen3_grpo.py --evaluate-baselines-only --skip-model-load
         python training/train_qwen3_grpo.py --reward-diagnostics --skip-model-load
+        if (Test-Path training/generate_replay_report.py) {
+            python training/generate_replay_report.py
+        }
+        if (Test-Path training/generate_judge_report.py) {
+            python training/generate_judge_report.py
+        }
+        if (Test-Path training/latency_determinism_check.py) {
+            python training/latency_determinism_check.py
+        }
         python demo_judge.py
         python -m pytest tests -q
     }

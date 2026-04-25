@@ -663,6 +663,55 @@ def q_aware_demo_policy_action(
     return q_aware_policy_action(sample)
 
 
+def build_decision_trace(
+    *,
+    domain: str,
+    risk_signals: Iterable[str],
+    safe_signals: Iterable[str],
+    cumulative_risk_score: float,
+    memory_context: Optional[dict[str, Any]],
+    missing_evidence: Iterable[str],
+    evidence_plan: Iterable[dict[str, Any]],
+    final_decision: str,
+    safe_outcome: str,
+) -> dict[str, Any]:
+    memory_context = memory_context or {}
+    memory_signals = list(memory_context.get("risky_chains", []))
+    if memory_context.get("recent_indicators"):
+        memory_signals.extend(f"recent:{item}" for item in memory_context.get("recent_indicators", [])[:5])
+    if memory_context.get("session_risk", 0.0):
+        memory_signals.append(f"session_risk={float(memory_context.get('session_risk', 0.0)):.3f}")
+    evidence_steps = [
+        {
+            "step": item.get("step"),
+            "priority": item.get("priority"),
+            "ask": item.get("ask"),
+            "blocks_decision": item.get("blocks_decision", False),
+        }
+        for item in evidence_plan or []
+        if isinstance(item, dict)
+    ]
+    if final_decision == "ALLOW":
+        rationale = "Allowed only because trusted evidence and risk stayed within policy limits."
+    elif final_decision == "BLOCK":
+        rationale = "Blocked because risk indicators show clear malicious or high-danger behavior."
+    elif final_decision == "FORK":
+        rationale = "Forked to human review because risk is high or approval is required before execution."
+    else:
+        rationale = "Quarantined until missing evidence is provided and risk can be reduced."
+    return {
+        "domain": domain or "unknown",
+        "risk_signals": list(risk_signals or []),
+        "safe_signals": list(safe_signals or []),
+        "cumulative_risk_score": round(float(cumulative_risk_score or 0.0), 3),
+        "memory_signals": list(dict.fromkeys(str(item) for item in memory_signals)),
+        "missing_evidence": list(missing_evidence or []),
+        "evidence_steps": evidence_steps,
+        "final_decision": final_decision,
+        "safety_rationale": f"{rationale} Safe outcome: {safe_outcome}",
+    }
+
+
 def build_q_aware_decision(
     domain: str,
     intent: str,
@@ -791,6 +840,17 @@ def build_q_aware_decision(
         f"cumulative_risk={cumulative_risk:.2f}; uncertainty={uncertainty:.2f}. "
         f"{evidence_gap}"
     )
+    decision_trace = build_decision_trace(
+        domain=policy_features["domain"],
+        risk_signals=policy_features["risk_indicators"],
+        safe_signals=policy_features["safe_indicators"],
+        cumulative_risk_score=cumulative_risk,
+        memory_context=memory_context,
+        missing_evidence=missing_evidence,
+        evidence_plan=evidence_plan,
+        final_decision=decision,
+        safe_outcome=safe_outcome,
+    )
 
     return {
         "decision": decision,
@@ -805,6 +865,7 @@ def build_q_aware_decision(
         "safe_outcome": safe_outcome,
         "evidence_plan": evidence_plan,
         "structured_safe_outcome": structured_safe_outcome,
+        "decision_trace": decision_trace,
         "memory_context": memory_context or {},
         "policy_name": "q_aware_demo_policy",
         "domain": policy_features["domain"],

@@ -1,7 +1,18 @@
 {
   "status": "judge_ready_laptop_safe",
-  "model_claim": "No model improvement is claimed unless model_eval_report proves it.",
-  "q_aware_guardrail": "q_aware_demo_policy remains the production guardrail.",
+  "executive_summary": "ShadowOps is a laptop-safe autonomous incident response supervisor that evaluates high-risk cloud, CI, IAM, network, and pentest actions before they reach production.",
+  "what_shadowops_does": [
+    "Scores action risk from payload signals and domain policy.",
+    "Accumulates session memory to catch multi-step attack chains.",
+    "Requests missing operational evidence before allowing risky actions.",
+    "Returns safe outcomes such as quarantine, fork-to-human, rollback, or restricted allow."
+  ],
+  "why_it_is_different": [
+    "Uses a deterministic Q-aware guardrail by default, so the demo is safe without a GPU.",
+    "Compares future model checkpoints against policy baselines before trusting them.",
+    "Explains decisions through audit traces, evidence plans, and safe outcomes.",
+    "Optimizes for false-positive reduction when trusted evidence is present."
+  ],
   "baseline_benchmark": {
     "dataset": {
       "train_sample_count": 500,
@@ -231,11 +242,9 @@
     "passed_preflight": true,
     "failures": []
   },
-  "model_vs_policy_gate": {
-    "training_gate_status": "FAIL",
-    "training_gate_passed": false,
-    "reason": "No model metrics are available; checkpoint was not loaded or evaluation failed.",
-    "recommended_next_action": "Run --evaluate-model with a valid --model-path after SFT/GRPO smoke training."
+  "safety_guardrail": {
+    "policy": "q_aware_demo_policy",
+    "explanation": "The Q-aware policy is the production guardrail until a trained checkpoint beats reference metrics and passes the safety gate."
   },
   "evidence_planner_example": [
     {
@@ -312,6 +321,34 @@
       "QUARANTINE",
       "QUARANTINE"
     ],
-    "recent_indicators": []
-  }
+    "recent_indicators": [],
+    "action_chain": [
+      "open firewall port 22 to 0.0.0.0/0",
+      "create IAM admin user with AdministratorAccess",
+      "export customer data to external transfer destination"
+    ]
+  },
+  "model_vs_policy_gate": {
+    "training_gate_status": "FAIL",
+    "training_gate_passed": false,
+    "reason": "No model metrics are available; checkpoint was not loaded or evaluation failed.",
+    "recommended_next_action": "Run --evaluate-model with a valid --model-path after SFT/GRPO smoke training."
+  },
+  "replay_summary": {
+    "scenario_count": 5,
+    "pass_count": 5
+  },
+  "gpu_training_handoff": [
+    "Pull shadowops-backend-agent-upgrade.",
+    "Run laptop-safe baseline/eval first.",
+    "Run SFT smoke, then evaluate SFT checkpoint.",
+    "Run GRPO smoke, then evaluate GRPO checkpoint.",
+    "Only run longer GRPO after model_eval_report proves safety and reward progress."
+  ],
+  "honest_limitations": [
+    "No model improvement is claimed without a real checkpoint evaluation report.",
+    "Laptop validation verifies policy, parser, evidence planning, memory, reports, and tests only.",
+    "HF GPU training must be launched manually and monitored for credit safety."
+  ],
+  "final_judge_claim": "ShadowOps currently proves production-safe behavior through the Q-aware policy guardrail. Trained model improvement is only claimed after checkpoint evaluation passes the model-vs-policy safety gate."
 }

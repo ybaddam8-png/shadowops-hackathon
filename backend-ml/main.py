@@ -141,6 +141,17 @@ def _fallback_decision_details(domain: str, risk_vector: list, ambiguity: float,
             "evidence_needed": [],
             "allowed_next_actions": ["request valid supervisor decision"],
         },
+        "decision_trace": {
+            "domain": domain or "unknown",
+            "risk_signals": [],
+            "safe_signals": [],
+            "cumulative_risk_score": round(float(risk_score), 3),
+            "memory_signals": [],
+            "missing_evidence": [],
+            "evidence_steps": [],
+            "final_decision": decision,
+            "safety_rationale": "Fallback policy returned a conservative supervisor decision.",
+        },
         "memory_context": {},
         "policy_name": "threshold_fallback_policy",
         "domain": domain,
@@ -212,6 +223,39 @@ def _safe_decision_details(
         structured_safe_outcome["evidence_needed"] = missing_evidence
     if not isinstance(structured_safe_outcome.get("allowed_next_actions"), list):
         structured_safe_outcome["allowed_next_actions"] = ["hold action", "collect missing evidence"]
+    decision_trace = _as_dict(details.get("decision_trace"))
+    decision_trace.setdefault("domain", str(details.get("domain") or domain or "unknown"))
+    decision_trace.setdefault("risk_signals", risk_indicators)
+    decision_trace.setdefault("safe_signals", safe_indicators)
+    decision_trace.setdefault("cumulative_risk_score", round(max(0.0, min(1.0, cumulative_risk)), 3))
+    memory_context = _as_dict(details.get("memory_context"))
+    memory_signals = list(memory_context.get("risky_chains", []))
+    decision_trace.setdefault("memory_signals", memory_signals)
+    decision_trace.setdefault("missing_evidence", missing_evidence)
+    decision_trace.setdefault(
+        "evidence_steps",
+        [
+            {
+                "step": item.get("step"),
+                "priority": item.get("priority"),
+                "ask": item.get("ask"),
+                "blocks_decision": item.get("blocks_decision", False),
+            }
+            for item in evidence_plan
+        ],
+    )
+    decision_trace.setdefault("final_decision", decision)
+    decision_trace.setdefault("safety_rationale", f"Safe outcome: {safe_outcome}")
+    if not isinstance(decision_trace.get("risk_signals"), list):
+        decision_trace["risk_signals"] = risk_indicators
+    if not isinstance(decision_trace.get("safe_signals"), list):
+        decision_trace["safe_signals"] = safe_indicators
+    if not isinstance(decision_trace.get("memory_signals"), list):
+        decision_trace["memory_signals"] = memory_signals
+    if not isinstance(decision_trace.get("missing_evidence"), list):
+        decision_trace["missing_evidence"] = missing_evidence
+    if not isinstance(decision_trace.get("evidence_steps"), list):
+        decision_trace["evidence_steps"] = []
 
     return {
         **details,
@@ -227,7 +271,8 @@ def _safe_decision_details(
         "safe_outcome": safe_outcome,
         "evidence_plan": evidence_plan,
         "structured_safe_outcome": structured_safe_outcome,
-        "memory_context": _as_dict(details.get("memory_context")),
+        "decision_trace": decision_trace,
+        "memory_context": memory_context,
         "policy_name": str(details.get("policy_name") or DEMO_POLICY_NAME),
         "domain": str(details.get("domain") or domain or "unknown"),
         "mitre_tactic": str(details.get("mitre_tactic") or "Unknown"),

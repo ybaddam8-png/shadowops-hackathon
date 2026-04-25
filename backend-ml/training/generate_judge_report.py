@@ -17,6 +17,7 @@ from agent_memory import ActionMemoryRecord, SessionMemory  # noqa: E402
 from evidence_planner import build_evidence_plan  # noqa: E402
 from safe_outcome import generate_structured_safe_outcome  # noqa: E402
 from training.dataset_audit import run_dataset_audit  # noqa: E402
+from training.generate_replay_report import build_replay_report  # noqa: E402
 from training.shadowops_training_common import (  # noqa: E402
     DEFAULT_DEMO_BENCHMARK_JSON,
     DEFAULT_MODEL_EVAL_JSON,
@@ -30,6 +31,11 @@ from training.shadowops_training_common import (  # noqa: E402
 
 DEFAULT_JUDGE_REPORT_JSON = TRAINING_DIR / "judge_readiness_report.json"
 DEFAULT_JUDGE_REPORT_MD = TRAINING_DIR / "judge_readiness_report.md"
+FINAL_JUDGE_CLAIM = (
+    "ShadowOps currently proves production-safe behavior through the Q-aware policy guardrail. "
+    "Trained model improvement is only claimed after checkpoint evaluation passes the "
+    "model-vs-policy safety gate."
+)
 
 
 def _read_json(path: Path, default: Any) -> Any:
@@ -44,23 +50,27 @@ def _benchmark_summary() -> dict[str, Any]:
     return _read_json(DEFAULT_DEMO_BENCHMARK_JSON, {})
 
 
+def _benchmark_rows(benchmark: dict[str, Any]) -> list[dict[str, Any]]:
+    return list(benchmark.get("metrics") or benchmark.get("rows") or [])
+
+
 def _gate_summary(benchmark: dict[str, Any]) -> dict[str, Any]:
     model_eval = _read_json(DEFAULT_MODEL_EVAL_JSON, {})
     if model_eval.get("training_gate"):
         return model_eval["training_gate"]
-    rows = benchmark.get("metrics") or benchmark.get("rows") or []
-    q_aware = next((row for row in rows if row.get("policy") == "Q-aware"), {})
+    q_aware = next((row for row in _benchmark_rows(benchmark) if row.get("policy") == "Q-aware"), {})
     return evaluate_training_gate(None, q_aware)
 
 
 def _memory_chain_example() -> dict[str, Any]:
     memory = SessionMemory(persistence_enabled=False)
     session_id = "judge-chain-example"
-    for timestamp, summary, risk in (
+    actions = (
         (1, "open firewall port 22 to 0.0.0.0/0", 0.68),
         (2, "create IAM admin user with AdministratorAccess", 0.74),
         (3, "export customer data to external transfer destination", 0.81),
-    ):
+    )
+    for timestamp, summary, risk in actions:
         memory.add_record(
             ActionMemoryRecord(
                 actor="unknown",
@@ -75,7 +85,9 @@ def _memory_chain_example() -> dict[str, Any]:
                 indicators=[],
             )
         )
-    return memory.summarize_memory_context(session_id)
+    context = memory.summarize_memory_context(session_id)
+    context["action_chain"] = [summary for _, summary, _ in actions]
+    return context
 
 
 def _evidence_examples() -> dict[str, Any]:
@@ -105,11 +117,26 @@ def build_judge_report() -> dict[str, Any]:
     reward_diagnostics = run_reward_diagnostics(val_samples)
     dataset_audit = run_dataset_audit()
     evidence_examples = _evidence_examples()
+    replay_report = build_replay_report()
     gate = _gate_summary(benchmark)
     return {
         "status": "judge_ready_laptop_safe",
-        "model_claim": "No model improvement is claimed unless model_eval_report proves it.",
-        "q_aware_guardrail": "q_aware_demo_policy remains the production guardrail.",
+        "executive_summary": (
+            "ShadowOps is a laptop-safe autonomous incident response supervisor that evaluates "
+            "high-risk cloud, CI, IAM, network, and pentest actions before they reach production."
+        ),
+        "what_shadowops_does": [
+            "Scores action risk from payload signals and domain policy.",
+            "Accumulates session memory to catch multi-step attack chains.",
+            "Requests missing operational evidence before allowing risky actions.",
+            "Returns safe outcomes such as quarantine, fork-to-human, rollback, or restricted allow.",
+        ],
+        "why_it_is_different": [
+            "Uses a deterministic Q-aware guardrail by default, so the demo is safe without a GPU.",
+            "Compares future model checkpoints against policy baselines before trusting them.",
+            "Explains decisions through audit traces, evidence plans, and safe outcomes.",
+            "Optimizes for false-positive reduction when trusted evidence is present.",
+        ],
         "baseline_benchmark": benchmark,
         "reward_diagnostics": {
             "sample_count": reward_diagnostics["sample_count"],
@@ -120,11 +147,49 @@ def build_judge_report() -> dict[str, Any]:
             "action_distribution": reward_diagnostics["action_distribution"],
         },
         "dataset_audit": dataset_audit,
-        "model_vs_policy_gate": gate,
+        "safety_guardrail": {
+            "policy": "q_aware_demo_policy",
+            "explanation": (
+                "The Q-aware policy is the production guardrail until a trained checkpoint "
+                "beats reference metrics and passes the safety gate."
+            ),
+        },
         "evidence_planner_example": evidence_examples["evidence_plan"],
         "safe_outcome_example": evidence_examples["structured_safe_outcome"],
         "memory_risk_chain_example": _memory_chain_example(),
+        "model_vs_policy_gate": gate,
+        "replay_summary": {
+            "scenario_count": replay_report["scenario_count"],
+            "pass_count": replay_report["pass_count"],
+        },
+        "gpu_training_handoff": [
+            "Pull shadowops-backend-agent-upgrade.",
+            "Run laptop-safe baseline/eval first.",
+            "Run SFT smoke, then evaluate SFT checkpoint.",
+            "Run GRPO smoke, then evaluate GRPO checkpoint.",
+            "Only run longer GRPO after model_eval_report proves safety and reward progress.",
+        ],
+        "honest_limitations": [
+            "No model improvement is claimed without a real checkpoint evaluation report.",
+            "Laptop validation verifies policy, parser, evidence planning, memory, reports, and tests only.",
+            "HF GPU training must be launched manually and monitored for credit safety.",
+        ],
+        "final_judge_claim": FINAL_JUDGE_CLAIM,
     }
+
+
+def _write_benchmark_table(lines: list[str], rows: list[dict[str, Any]]) -> None:
+    lines.extend(
+        [
+            "| Policy | exact_match | safety_accuracy | unsafe_decision_rate | false_positive_rate | reward_mean |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for row in rows:
+        lines.append(
+            f"| {row['policy']} | {row['exact_match']:.3f} | {row['safety_accuracy']:.3f} | "
+            f"{row['unsafe_decision_rate']:.3f} | {row['false_positive_rate']:.3f} | {row['reward_mean']:.3f} |"
+        )
 
 
 def write_judge_report(
@@ -134,41 +199,31 @@ def write_judge_report(
     output_md: Path = DEFAULT_JUDGE_REPORT_MD,
 ) -> None:
     write_json(output_json, report)
-    rows = report.get("baseline_benchmark", {}).get("metrics") or report.get("baseline_benchmark", {}).get("rows", [])
-    lines = [
-        "# ShadowOps Judge Readiness Report",
-        "",
-        f"Status: `{report['status']}`",
-        "",
-        report["model_claim"],
-        "",
-        f"Guardrail: {report['q_aware_guardrail']}",
-        "",
-        "## Baseline Benchmark",
-        "",
-        "| Policy | exact_match | safety_accuracy | unsafe_decision_rate | false_positive_rate | reward_mean |",
-        "| --- | ---: | ---: | ---: | ---: | ---: |",
-    ]
-    for row in rows:
-        lines.append(
-            f"| {row['policy']} | {row['exact_match']:.3f} | {row['safety_accuracy']:.3f} | "
-            f"{row['unsafe_decision_rate']:.3f} | {row['false_positive_rate']:.3f} | {row['reward_mean']:.3f} |"
-        )
-
+    rows = _benchmark_rows(report.get("baseline_benchmark", {}))
     reward = report["reward_diagnostics"]
     audit = report["dataset_audit"]
     gate = report["model_vs_policy_gate"]
+    memory = report["memory_risk_chain_example"]
+
+    lines = [
+        "# ShadowOps Judge Readiness Report",
+        "",
+        "## 1. Executive Summary",
+        "",
+        report["executive_summary"],
+        "",
+        "## 2. What ShadowOps Does",
+        "",
+    ]
+    lines.extend(f"- {item}" for item in report["what_shadowops_does"])
+    lines.extend(["", "## 3. Why It Is Different", ""])
+    lines.extend(f"- {item}" for item in report["why_it_is_different"])
+    lines.extend(["", "## 4. Benchmark Results", ""])
+    _write_benchmark_table(lines, rows)
     lines.extend(
         [
             "",
-            "## Reward Diagnostics",
-            "",
-            f"- Samples: {reward['sample_count']}",
-            f"- Reward mean/std: {reward['reward_mean']:.3f} / {reward['reward_std']:.3f}",
-            f"- Zero-std groups: {reward['percent_zero_std_groups']:.1f}%",
-            f"- Invalid output rate: {reward['invalid_output_rate']:.3f}",
-            "",
-            "## Dataset Audit",
+            "## 5. Dataset Audit",
             "",
             f"- Train samples: {audit['train_sample_count']}",
             f"- Validation samples: {audit['val_sample_count']}",
@@ -177,14 +232,21 @@ def write_judge_report(
             f"- Train/validation overlap: {audit['train_val_overlap_count']}",
             f"- Missing labels: {audit['missing_label_count']}",
             f"- Invalid action labels: {audit['invalid_action_label_count']}",
+            f"- False-positive challenges: {audit['false_positive_challenge_count']}",
             "",
-            "## Model-vs-Policy Gate",
+            "## 6. Reward Diagnostics",
             "",
-            f"- Status: {gate.get('training_gate_status', 'UNKNOWN')}",
-            f"- Reason: {gate.get('reason', 'n/a')}",
-            f"- Recommended next action: {gate.get('recommended_next_action', 'n/a')}",
+            f"- Samples: {reward['sample_count']}",
+            f"- Reward mean/std: {reward['reward_mean']:.3f} / {reward['reward_std']:.3f}",
+            f"- Zero-std groups: {reward['percent_zero_std_groups']:.1f}%",
+            f"- Invalid output rate: {reward['invalid_output_rate']:.3f}",
             "",
-            "## Evidence Planner Example",
+            "## 7. Safety Guardrail Explanation",
+            "",
+            f"- Policy: `{report['safety_guardrail']['policy']}`",
+            f"- {report['safety_guardrail']['explanation']}",
+            "",
+            "## 8. Evidence Planning Example",
             "",
         ]
     )
@@ -193,16 +255,35 @@ def write_judge_report(
     lines.extend(
         [
             "",
-            "## Safe Outcome Example",
+            "## 9. Memory + Risk Chain Example",
             "",
-            f"- Outcome: {report['safe_outcome_example']['outcome']}",
-            f"- Human review required: {report['safe_outcome_example']['human_review_required']}",
-            f"- Remediation steps: {len(report['safe_outcome_example']['remediation_steps'])}",
+            f"- Action chain: {' -> '.join(memory['action_chain'])}",
+            f"- Session risk: {memory['session_risk']:.3f}",
+            f"- Detected chains: {', '.join(memory['risky_chains'])}",
             "",
-            "## Memory/Risk Chain Example",
+            "## 10. Model-vs-Policy Gate",
             "",
-            f"- Session risk: {report['memory_risk_chain_example']['session_risk']:.3f}",
-            f"- Detected chains: {', '.join(report['memory_risk_chain_example']['risky_chains'])}",
+            f"- Status: {gate.get('training_gate_status', 'UNKNOWN')}",
+            f"- Reason: {gate.get('reason', 'n/a')}",
+            f"- Recommended next action: {gate.get('recommended_next_action', 'n/a')}",
+            "",
+            "## 11. GPU Training Handoff",
+            "",
+        ]
+    )
+    lines.extend(f"- {item}" for item in report["gpu_training_handoff"])
+    lines.extend(["", "## 12. Honest Limitations", ""])
+    lines.extend(f"- {item}" for item in report["honest_limitations"])
+    lines.extend(
+        [
+            "",
+            "## 13. Final Judge Claim",
+            "",
+            f"> {report['final_judge_claim']}",
+            "",
+            "## Replay Summary",
+            "",
+            f"- Replay scenarios passed: {report['replay_summary']['pass_count']}/{report['replay_summary']['scenario_count']}",
         ]
     )
     output_md.write_text("\n".join(lines), encoding="utf-8")

@@ -26,6 +26,8 @@ COMPILE_TARGETS = (
     "safe_outcome.py",
     "training/dataset_audit.py",
     "training/generate_judge_report.py",
+    "training/generate_replay_report.py",
+    "training/latency_determinism_check.py",
     "training/shadowops_training_common.py",
     "training/train_qwen3_grpo.py",
     "demo_replays.py",
