@@ -15,6 +15,7 @@ import contextlib
 import inspect
 import sys
 from pathlib import Path
+from xml.parsers.expat import model
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
@@ -495,6 +496,10 @@ def run_grpo_training(
         print("Skipping unsupported GRPOTrainer args:", ", ".join(dropped_trainer))
 
     before_snapshot = capture_trainable_snapshot(model)
+    # Fix for Unsloth + PEFT: GRPOTrainer expects warnings_issued dict
+    if not hasattr(model, "warnings_issued"):
+        model.warnings_issued = {}
+    model.warnings_issued["estimate_tokens"] = True
     trainer = TrainerClass(**trainer_kwargs)
 
     pre_metrics = evaluate_model_on_dataset(
