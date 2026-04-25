@@ -13,6 +13,7 @@ peft
 accelerate
 bitsandbytes
 datasets
+packaging>=23.0
 
 # OpenEnv Backend Server
 fastapi
