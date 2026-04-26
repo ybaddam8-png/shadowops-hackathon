@@ -30,13 +30,26 @@ def main():
         else:
             results.append((name, "FAIL", "File is missing or empty."))
             
-    # Conditional checks
+    # Model Evaluation Check
+    eval_report_path = backend_dir / "training" / "model_eval_report.json"
+    if eval_report_path.exists():
+        try:
+            report_data = json.loads(eval_report_path.read_text(encoding="utf-8"))
+            if report_data.get("model_metrics") is None:
+                results.append(("Trained Model Evaluation", "WARN", "The trained-model evaluation has not yet produced valid metrics in the standard local environment. Pending GPU Validation."))
+            else:
+                results.append(("Trained Model Evaluation", "PASS", "Valid GPU metrics found."))
+        except Exception as e:
+            results.append(("Trained Model Evaluation", "WARN", f"Failed to parse model_eval_report.json: {e}"))
+    else:
+        results.append(("Trained Model Evaluation", "WARN", "model_eval_report.json is missing. The trained-model evaluation has not yet produced valid metrics in the standard local environment."))
+
+    # Reward curve check
     reward_curve = plots_dir / "reward_curve.png"
-    if (backend_dir / "training" / "logs").exists() or reward_curve.exists():
-        if reward_curve.exists() and reward_curve.stat().st_size > 0:
-            results.append(("backend-ml/training/plots/reward_curve.png", "PASS", "File exists and is not empty."))
-        else:
-            results.append(("backend-ml/training/plots/reward_curve.png", "WARN", "Missing trained checkpoint metrics."))
+    if reward_curve.exists() and reward_curve.stat().st_size > 0:
+        results.append(("backend-ml/training/plots/reward_curve.png", "PASS", "File exists and is not empty."))
+    else:
+        results.append(("backend-ml/training/plots/reward_curve.png", "WARN", "Missing trained checkpoint metrics. Trained-model evidence will be added only when GPU evaluation artifacts exist."))
 
     # Generate MD report
     report_path = reports_dir / "submission_artifact_check_report.md"

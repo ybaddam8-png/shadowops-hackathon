@@ -8,6 +8,10 @@
 - Run label: full_eval_50_episodes
 - Scope note: FULL EVAL: 50 episodes (judge-facing run size).
 
+## Validation Note
+- **Validated Locally**: The Q-aware fallback and OpenEnv safety evaluation are valid and remain the basis for current claims.
+- **Pending GPU Validation**: The trained-model evaluation has not yet produced valid metrics in the standard local environment. Trained-model evidence will be added only when GPU evaluation artifacts exist. No trained-model comparison claims are made at this stage.
+
 ## Core Metrics
 
 | Metric | Value |

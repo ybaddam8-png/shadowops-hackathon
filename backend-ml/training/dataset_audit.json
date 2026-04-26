@@ -1,14 +1,11 @@
 {
   "train_sample_count": 500,
   "val_sample_count": 100,
-  "hard_negative_count": 40,
-  "duplicate_prompt_count": 0,
-  "train_val_overlap_count": 0,
   "action_distribution": {
     "train": {
-      "ALLOW": 189,
-      "FORK": 156,
-      "QUARANTINE": 67,
+      "ALLOW": 187,
+      "FORK": 157,
+      "QUARANTINE": 68,
       "BLOCK": 88
     },
     "val": {
@@ -17,17 +14,11 @@
       "FORK": 28,
       "QUARANTINE": 22
     },
-    "hard_negative": {
-      "ALLOW": 14,
-      "QUARANTINE": 10,
-      "BLOCK": 13,
-      "FORK": 3
-    },
     "train_pct": {
-      "ALLOW": 0.378,
+      "ALLOW": 0.374,
       "BLOCK": 0.176,
-      "FORK": 0.312,
-      "QUARANTINE": 0.134
+      "FORK": 0.314,
+      "QUARANTINE": 0.136
     },
     "val_pct": {
       "ALLOW": 0.35,
@@ -36,10 +27,10 @@
       "QUARANTINE": 0.22
     },
     "combined_pct": {
-      "ALLOW": 0.37333333333333335,
+      "ALLOW": 0.37,
       "BLOCK": 0.17166666666666666,
-      "FORK": 0.30666666666666664,
-      "QUARANTINE": 0.14833333333333334
+      "FORK": 0.30833333333333335,
+      "QUARANTINE": 0.15
     }
   },
   "benign_malicious_distribution": {
@@ -53,35 +44,29 @@
     }
   },
   "scenario_distribution": {
-    "BENIGN_CLEAN": 140,
-    "BENIGN_NOISY": 84,
-    "MALICIOUS_HARD": 88,
+    "BENIGN_CLEAN": 142,
+    "BENIGN_NOISY": 80,
+    "MALICIOUS_HARD": 89,
     "AMBIGUOUS": 144,
-    "MALICIOUS_SOFT": 144
-  },
-  "domain_distribution": {
-    "AWS": 203,
-    "GITHUB": 208,
-    "SOC": 189,
-    "github_ci": 14,
-    "pentest": 4,
-    "iam": 8,
-    "aws_s3": 9,
-    "network_firewall": 5
+    "MALICIOUS_SOFT": 145
   },
   "risk_type_distribution": {
-    "LOW": 224,
-    "CRITICAL": 129,
+    "LOW": 222,
+    "CRITICAL": 131,
     "MEDIUM": 144,
-    "HIGH": 103,
-    "medium": 13,
-    "critical": 12,
-    "high": 10,
-    "low": 5
+    "HIGH": 103
   },
-  "false_positive_challenge_count": 192,
+  "domain_distribution": {
+    "AWS": 205,
+    "GITHUB": 208,
+    "SOC": 187
+  },
+  "hard_negative_count": 40,
+  "false_positive_challenge_count": 159,
   "missing_label_count": 0,
   "invalid_action_label_count": 0,
+  "duplicate_prompt_count": 0,
+  "train_val_overlap_count": 0,
   "examples_per_action": {
     "ALLOW": [
       {
@@ -94,7 +79,7 @@
         "sample_id": "train-00001",
         "scenario_type": "BENIGN_NOISY",
         "severity": "LOW",
-        "payload": "Fast-track security group change: allow 192.168.1.32/32 for maintenance. Change #CR-104."
+        "payload": "Known automation account: mallory executing bulk role updates for internal compliance."
       },
       {
         "sample_id": "train-00002",

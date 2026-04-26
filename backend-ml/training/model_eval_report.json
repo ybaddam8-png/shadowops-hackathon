@@ -1,6 +1,6 @@
 {
-  "model_name_or_path": "training\\checkpoints\\qwen3_sft_grpo_adapter",
-  "checkpoint_path": "training\\checkpoints\\qwen3_sft_grpo_adapter",
+  "model_name_or_path": "shadowops_qwen3_1p7b_model",
+  "checkpoint_path": "shadowops_qwen3_1p7b_model",
   "eval_split": "validation",
   "sample_count": 100,
   "dataset_audit": {
@@ -12,7 +12,7 @@
   "q_aware_baseline": {
     "label": "q_aware",
     "sample_count": 100,
-    "exact_match": 0.93,
+    "exact_match": 0.99,
     "safety_accuracy": 1.0,
     "valid_action_rate": 1.0,
     "invalid_action_rate": 0.0,
@@ -21,17 +21,17 @@
     "unsafe_decision_rate": 0.0,
     "false_positive_rate": 0.0,
     "false_negative_rate": 0.0,
-    "reward_mean": 1.86648566,
-    "reward_std": 0.3292981702841733,
+    "reward_mean": 1.93683846,
+    "reward_std": 0.33417104399464115,
     "allow_precision": 1.0,
     "block_precision": 1.0,
-    "fork_precision": 0.8,
-    "quarantine_precision": 1.0,
+    "fork_precision": 1.0,
+    "quarantine_precision": 0.9565217391304348,
     "per_action_accuracy": {
       "ALLOW": 1.0,
       "BLOCK": 1.0,
-      "FORK": 1.0,
-      "QUARANTINE": 0.6818181818181818
+      "FORK": 0.9642857142857143,
+      "QUARANTINE": 1.0
     },
     "confusion_matrix": {
       "ALLOW": {
@@ -51,15 +51,15 @@
       "FORK": {
         "ALLOW": 0,
         "BLOCK": 0,
-        "FORK": 28,
-        "QUARANTINE": 0,
+        "FORK": 27,
+        "QUARANTINE": 1,
         "INVALID": 0
       },
       "QUARANTINE": {
         "ALLOW": 0,
         "BLOCK": 0,
-        "FORK": 7,
-        "QUARANTINE": 15,
+        "FORK": 0,
+        "QUARANTINE": 22,
         "INVALID": 0
       }
     },
@@ -67,23 +67,23 @@
     "action_distribution": {
       "ALLOW": 0.35,
       "BLOCK": 0.15,
-      "FORK": 0.35,
-      "QUARANTINE": 0.15
+      "FORK": 0.27,
+      "QUARANTINE": 0.23
     },
     "normalized_action_distribution": {
       "ALLOW": 0.35,
       "BLOCK": 0.15,
-      "FORK": 0.35,
-      "QUARANTINE": 0.15
+      "FORK": 0.27,
+      "QUARANTINE": 0.23
     },
     "invalid_output_count": 0,
     "multi_action_warnings": 0,
     "multi_action_warning_rate": 0.0,
-    "entropy": 1.8812908992306927,
+    "entropy": 1.9383346690254595,
     "reward_breakdown": {
       "exact_correct": 50,
-      "exact_conservative": 43,
-      "safe_conservative": 7
+      "exact_conservative": 49,
+      "minor_wrong": 1
     }
   },
   "delta_vs_q_aware": null,
@@ -96,5 +96,5 @@
   "training_gate_status": "FAIL",
   "training_gate_passed": false,
   "reason": "No model metrics are available; checkpoint was not loaded or evaluation failed.",
-  "model_load_error": "Model loading skipped by --skip-model-load."
+  "model_load_error": "Model stack unavailable. Check torch, datasets, transformers, trl, unsloth, CUDA, and checkpoint path."
 }

@@ -7,6 +7,10 @@
 - Checkpoint availability: False
 - Checkpoint note: grpo_model row exists but metrics are not available in this repository snapshot.
 
+## Validation Note
+- **Validated Locally**: The Q-aware fallback and OpenEnv safety evaluation are valid and remain the basis for current claims.
+- **Pending GPU Validation**: The trained-model evaluation has not yet produced valid metrics in the standard local environment. Trained-model evidence will be added only when GPU evaluation artifacts exist. No trained-model comparison claims are made at this stage.
+
 ## Aggregate Metrics
 
 | Metric | Baseline | Target/Serving | Delta (target-baseline) |
@@ -15,6 +19,12 @@
 | Safety accuracy | 0.850 | 1.000 | +0.150 |
 | Unsafe decision rate | 0.150 | 0.000 | -0.150 |
 | Reward mean | 0.784 | 0.725 | -0.059 |
+
+## Safety vs Reward Trade-Off
+
+- **Note on Reward vs Safety**: The `heuristic` baseline may occasionally have a higher `mean_reward_per_step` due to faster resolution times.
+- However, **Q-aware is considered safer** when its `unsafe_allow_rate = 0.000`. Unsafe allow is the primary failure mode in security automation and carries severe negative business impact.
+- Lower confidence scores in Q-aware do not necessarily mean failure; they often reflect **cautious uncertainty** on ambiguous payloads, which correctly triggers QUARANTINE instead of false-positive blocks or dangerous allows.
 
 ## Representative Scenarios
 
