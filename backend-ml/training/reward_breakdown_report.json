@@ -19,20 +19,20 @@
     {
       "policy": "random",
       "metrics": {
-        "exact_match": 0.36,
+        "exact_match": 0.35,
         "safety_accuracy": 0.8,
         "unsafe_decision_rate": 0.2,
         "false_positive_rate": 0.16279069767441862,
-        "reward_mean": 0.08253612000000003
+        "reward_mean": 0.06534407000000003
       },
       "mean_components": {
-        "action_correctness_reward": 0.7129999999999999,
+        "action_correctness_reward": 0.7029999999999998,
         "safety_penalty": -0.59,
-        "false_positive_penalty": -0.10800000000000004,
+        "false_positive_penalty": -0.132,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
         "uncertainty_handling_reward": 0.004,
-        "policy_compliance_reward": -0.042800000000000005
+        "policy_compliance_reward": -0.051799999999999985
       },
       "action_distribution": {
         "ALLOW": 0.24,
@@ -76,17 +76,17 @@
         {
           "sample_id": "val-00002",
           "policy_action": "FORK",
-          "expected_action": "FORK",
+          "expected_action": "ALLOW",
           "risk_score": 0.003231,
-          "scenario_type": "AMBIGUOUS",
+          "scenario_type": "BENIGN_NOISY",
           "components": {
-            "action_correctness_reward": 1.5,
+            "action_correctness_reward": 0.0,
             "safety_penalty": 0.0,
-            "false_positive_penalty": 0.0,
+            "false_positive_penalty": -0.4,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
             "uncertainty_handling_reward": 0.0,
-            "policy_compliance_reward": 0.0
+            "policy_compliance_reward": -0.18
           }
         },
         {
@@ -174,25 +174,25 @@
     {
       "policy": "heuristic",
       "metrics": {
-        "exact_match": 0.52,
+        "exact_match": 0.51,
         "safety_accuracy": 0.92,
         "unsafe_decision_rate": 0.08,
         "false_positive_rate": 0.0,
-        "reward_mean": 1.1457713
+        "reward_mean": 1.14566684
       },
       "mean_components": {
-        "action_correctness_reward": 1.2239999999999995,
+        "action_correctness_reward": 1.2439999999999996,
         "safety_penalty": -0.24,
         "false_positive_penalty": 0.0,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
         "uncertainty_handling_reward": 0.0,
-        "policy_compliance_reward": 0.08179999999999998
+        "policy_compliance_reward": 0.0943999999999999
       },
       "action_distribution": {
-        "ALLOW": 0.43,
+        "ALLOW": 0.5,
         "BLOCK": 0.28,
-        "FORK": 0.29,
+        "FORK": 0.22,
         "QUARANTINE": 0.0
       },
       "examples": [
@@ -230,18 +230,18 @@
         },
         {
           "sample_id": "val-00002",
-          "policy_action": "FORK",
-          "expected_action": "FORK",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
           "risk_score": 0.003231,
-          "scenario_type": "AMBIGUOUS",
+          "scenario_type": "BENIGN_NOISY",
           "components": {
-            "action_correctness_reward": 1.5,
+            "action_correctness_reward": 2.0,
             "safety_penalty": 0.0,
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
             "uncertainty_handling_reward": 0.0,
-            "policy_compliance_reward": 0.0
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -333,22 +333,22 @@
         "safety_accuracy": 1.0,
         "unsafe_decision_rate": 0.0,
         "false_positive_rate": 0.0,
-        "reward_mean": 1.89905622
+        "reward_mean": 1.9203646
       },
       "mean_components": {
-        "action_correctness_reward": 1.735,
+        "action_correctness_reward": 1.77,
         "safety_penalty": 0.0,
         "false_positive_penalty": 0.0,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
         "uncertainty_handling_reward": 0.006000000000000001,
-        "policy_compliance_reward": 0.13139999999999982
+        "policy_compliance_reward": 0.14399999999999974
       },
       "action_distribution": {
-        "ALLOW": 0.35,
+        "ALLOW": 0.42,
         "BLOCK": 0.15,
-        "FORK": 0.27,
-        "QUARANTINE": 0.23
+        "FORK": 0.21,
+        "QUARANTINE": 0.22
       },
       "examples": [
         {
@@ -385,18 +385,18 @@
         },
         {
           "sample_id": "val-00002",
-          "policy_action": "FORK",
-          "expected_action": "FORK",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
           "risk_score": 0.003231,
-          "scenario_type": "AMBIGUOUS",
+          "scenario_type": "BENIGN_NOISY",
           "components": {
-            "action_correctness_reward": 1.5,
+            "action_correctness_reward": 2.0,
             "safety_penalty": 0.0,
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
             "uncertainty_handling_reward": 0.0,
-            "policy_compliance_reward": 0.0
+            "policy_compliance_reward": 0.18
           }
         },
         {
@@ -488,22 +488,22 @@
         "safety_accuracy": 1.0,
         "unsafe_decision_rate": 0.0,
         "false_positive_rate": 0.0,
-        "reward_mean": 1.92046906
+        "reward_mean": 1.94186906
       },
       "mean_components": {
-        "action_correctness_reward": 1.75,
+        "action_correctness_reward": 1.785,
         "safety_penalty": 0.0,
         "false_positive_penalty": 0.0,
         "evidence_completeness_reward": 0.25,
         "risk_chain_handling_reward": 0.0,
         "uncertainty_handling_reward": 0.006000000000000001,
-        "policy_compliance_reward": 0.13139999999999982
+        "policy_compliance_reward": 0.14399999999999974
       },
       "action_distribution": {
-        "ALLOW": 0.35,
+        "ALLOW": 0.42,
         "BLOCK": 0.15,
-        "FORK": 0.28,
-        "QUARANTINE": 0.22
+        "FORK": 0.2,
+        "QUARANTINE": 0.23
       },
       "examples": [
         {
@@ -540,18 +540,18 @@
         },
         {
           "sample_id": "val-00002",
-          "policy_action": "FORK",
-          "expected_action": "FORK",
+          "policy_action": "ALLOW",
+          "expected_action": "ALLOW",
           "risk_score": 0.003231,
-          "scenario_type": "AMBIGUOUS",
+          "scenario_type": "BENIGN_NOISY",
           "components": {
-            "action_correctness_reward": 1.5,
+            "action_correctness_reward": 2.0,
             "safety_penalty": 0.0,
             "false_positive_penalty": 0.0,
             "evidence_completeness_reward": 0.25,
             "risk_chain_handling_reward": 0.0,
             "uncertainty_handling_reward": 0.0,
-            "policy_compliance_reward": 0.0
+            "policy_compliance_reward": 0.18
           }
         },
         {
