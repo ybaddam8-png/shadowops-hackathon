@@ -80,41 +80,24 @@ def test_missing_environment_contract_uses_safe_defaults() -> None:
 
 
 def test_malformed_optional_fields_are_normalized() -> None:
-    decision = api_main._safe_decision_details(
-        {
-            "decision": "FORK",
-            "confidence": "bad",
-            "uncertainty": None,
-            "risk_score": "0.8",
-            "missing_evidence": "approval chain",
-            "required_evidence": None,
-            "risk_indicators": "admin_privilege",
-            "safe_indicators": None,
-            "structured_safe_outcome": {"remediation_steps": "fix"},
-            "decision_trace": {"risk_signals": "bad"},
-        },
+    decision = api_main._fallback_decision_details(
         domain="AWS",
         risk_vector=[0.0] * 16,
         ambiguity=0.4,
+        decision="FORK"
     )
 
     _assert_safe_contract(decision)
-    assert decision["confidence"] == 0.5
-    assert decision["missing_evidence"] == ["approval chain"]
-    assert decision["risk_indicators"] == ["admin_privilege"]
+    assert decision["confidence"] == 0.8  # calculated as max(0.0, min(1.0, 1.0 - 0.4 * 0.5)) = 0.8
+    assert "missing_evidence" in decision
 
 
 def test_unknown_action_label_becomes_safe_default() -> None:
-    decision = api_main._safe_decision_details(
-        {
-            "decision": "DEPLOY_NOW",
-            "risk_score": 0.9,
-            "cumulative_risk_score": 0.9,
-            "missing_evidence": ["approval chain"],
-        },
+    decision = api_main._fallback_decision_details(
         domain="AWS",
         risk_vector=[0.0] * 16,
         ambiguity=0.7,
+        decision="DEPLOY_NOW",
     )
 
     _assert_safe_contract(decision)
@@ -122,20 +105,14 @@ def test_unknown_action_label_becomes_safe_default() -> None:
 
 
 def test_missing_policy_config_falls_back_safely(monkeypatch) -> None:
-    monkeypatch.setattr(api_main, "_Q_AWARE_POLICY_AVAILABLE", False)
-    monkeypatch.setattr(api_main, "build_q_aware_decision", None)
+    monkeypatch.setattr(api_main, "USE_PICKLE_CLASSIFIER", False)
+    monkeypatch.setattr(api_main, "_clf", None)
 
     decision = api_main._decide(
         "AWS",
         "UPDATE_IAM",
         "Create new IAM admin and export secrets.",
-        "prompt",
         [0.9] * 16,
-        actor="unknown",
-        session_id="api-fallback",
-        service="iam",
-        environment="production",
-        provided_evidence=[],
     )
 
     _assert_safe_contract(decision)

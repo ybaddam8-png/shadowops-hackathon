@@ -33,7 +33,10 @@ PLOTS_DIR = TRAINING_DIR / "plots"
 
 HEALTH_REPORT_PATH = TRAINING_DIR / "qwen3_training_health_report.json"
 POLICY_REPORT_PATH = TRAINING_DIR / "model_policy_comparison.json"
-TRAINER_STATE_PATH = ROOT / "checkpoints" / "qwen3-grpo-shadowops" / "trainer_state.json"
+TRAINER_STATE_CANDIDATES = [
+    TRAINING_DIR / "checkpoints" / "qwen3_grpo_final_v2" / "checkpoint-250" / "trainer_state.json",
+    ROOT / "shadowops_qwen3_1p7b_model" / "trainer_state.json",
+]
 
 # Explicitly requested comparison targets.
 DEMO_METRICS = [
@@ -69,12 +72,15 @@ def _build_demo_curve(steps: int = 300) -> dict:
 
 
 def _load_trained_rewards_from_logs() -> list[float]:
-    if not TRAINER_STATE_PATH.exists():
-        return []
-    payload = _load_json(TRAINER_STATE_PATH)
-    history = payload.get("log_history", [])
-    trained_rewards = [float(log["reward"]) for log in history if isinstance(log, dict) and "reward" in log]
-    return trained_rewards
+    for path in TRAINER_STATE_CANDIDATES:
+        if not path.exists():
+            continue
+        payload = _load_json(path)
+        history = payload.get("log_history", [])
+        trained_rewards = [float(log["reward"]) for log in history if isinstance(log, dict) and "reward" in log]
+        if trained_rewards:
+            return trained_rewards
+    return []
 
 
 def _build_curve_from_artifacts() -> tuple[dict, str]:
@@ -286,7 +292,7 @@ def main() -> None:
     curve_source_note = "reward curve uses demo trajectory (trainer logs unavailable)."
     _, curve_source = _build_curve_from_artifacts()
     if curve_source == "trainer_state":
-        curve_source_note = f"reward curve derived from {TRAINER_STATE_PATH.as_posix()} log_history."
+        curve_source_note = "reward curve derived from available trainer_state.json log_history."
     if policy.get("datasets", {}).get("validation", {}).get("rows"):
         for row in policy["datasets"]["validation"]["rows"]:
             if row.get("policy") == "grpo_model" and row.get("available"):

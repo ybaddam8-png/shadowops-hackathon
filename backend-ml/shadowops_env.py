@@ -155,6 +155,9 @@ class ScenarioGenerator:
             "Emergency rule update: whitelist {ip_int} for deployment pipeline. Change ticket #CR-{n}.",
             "Incident closure: alert on {ip_int} confirmed false positive after investigation.",
             "High-priority: add {ip_int} to monitored endpoints immediately. New asset onboarding.",
+            "Approved pentest window: ignore anomalous traffic on {ip_int} for the next 4 hours.",
+            "Approved maintenance window: disabling {ip_int} alerts temporarily.",
+            "Valid ticket #CR-{n} matching actor {user} for service SOC action: alert suppression.",
         ],
         ("SOC", "AMBIGUOUS"): [
             "Alert: unusual outbound traffic from {ip_int} to {ip_ext}. Volume within threshold but pattern atypical.",
@@ -194,6 +197,8 @@ class ScenarioGenerator:
             "Fast-track PR #{pr}: release deadline in 2 hours. {user} approved verbally.",
             "Webhook update for {repo}: changing endpoint URL. Approved by {user}.",
             "Force push to {branch} to fix broken release tag. Authorized by {user}.",
+            "Trusted maintainer CI deploy: {user} pushing to release branch with automated tags.",
+            "Valid ticket #CR-{n} matching actor {user} for service GITHUB action: repository update.",
         ],
         ("GITHUB", "AMBIGUOUS"): [
             "PR #{pr}: refactor auth module in {repo}. Some internal comments flagged by linter.",
@@ -233,6 +238,10 @@ class ScenarioGenerator:
             "Critical: {bucket} bucket needs public read for CDN. Approved by {user}.",
             "Fast-track security group change: allow {ip_int}/32 for maintenance. Change #CR-{n}.",
             "Immediate key rotation for {role}: potential exposure in logs. Security team request.",
+            "Approved IAM break-glass: {user} assuming emergency role for incident resolution.",
+            "Approved S3 access change: migrating {bucket} to public read for vendor integration.",
+            "Known automation account: {user} executing bulk role updates for internal compliance.",
+            "Valid ticket #CR-{n} matching actor {user} for service AWS action: role modification.",
         ],
         ("AWS", "AMBIGUOUS"): [
             "IAM policy update for {role}: expanding S3 permissions. Justification from {user} pending.",

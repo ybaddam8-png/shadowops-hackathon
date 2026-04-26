@@ -1,0 +1,168 @@
+{
+  "model_name": "unsloth/Qwen3-1.7B",
+  "train_sample_count": 500,
+  "val_sample_count": 100,
+  "base_model_metrics": {
+    "label": "raw_model_before_sft",
+    "sample_count": 100,
+    "exact_match": 0.04,
+    "safety_accuracy": 0.11,
+    "valid_action_rate": 0.21,
+    "invalid_action_rate": 0.79,
+    "invalid_output_rate": 0.79,
+    "parse_failure_rate": 0.79,
+    "unsafe_decision_rate": 0.89,
+    "false_positive_rate": 0.23255813953488372,
+    "false_negative_rate": 0.0,
+    "reward_mean": -1.89205183,
+    "reward_std": 1.2812752839160135,
+    "allow_precision": 1.0,
+    "block_precision": 0.15,
+    "fork_precision": 0.0,
+    "quarantine_precision": 0.0,
+    "per_action_accuracy": {
+      "ALLOW": 0.02857142857142857,
+      "BLOCK": 0.2,
+      "FORK": 0.0,
+      "QUARANTINE": 0.0
+    },
+    "confusion_matrix": {
+      "ALLOW": {
+        "ALLOW": 1,
+        "BLOCK": 8,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 26
+      },
+      "BLOCK": {
+        "ALLOW": 0,
+        "BLOCK": 3,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 12
+      },
+      "FORK": {
+        "ALLOW": 0,
+        "BLOCK": 7,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 21
+      },
+      "QUARANTINE": {
+        "ALLOW": 0,
+        "BLOCK": 2,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 20
+      }
+    },
+    "avg_completion_length": 3.56,
+    "action_distribution": {
+      "ALLOW": 0.01,
+      "BLOCK": 0.2,
+      "FORK": 0.0,
+      "QUARANTINE": 0.0
+    },
+    "normalized_action_distribution": {
+      "ALLOW": 0.01,
+      "BLOCK": 0.2,
+      "FORK": 0.0,
+      "QUARANTINE": 0.0
+    },
+    "invalid_output_count": 79,
+    "multi_action_warnings": 0,
+    "multi_action_warning_rate": 0.0,
+    "entropy": 0.5308241808752197,
+    "reward_breakdown": {
+      "exact_correct": 4,
+      "invalid_output": 79,
+      "unnecessary_block": 8,
+      "minor_wrong": 2,
+      "safe_conservative": 7
+    }
+  },
+  "sft_metrics": {
+    "label": "sft_model",
+    "sample_count": 100,
+    "exact_match": 0.01,
+    "safety_accuracy": 0.02,
+    "valid_action_rate": 0.05,
+    "invalid_action_rate": 0.95,
+    "invalid_output_rate": 0.95,
+    "parse_failure_rate": 0.95,
+    "unsafe_decision_rate": 0.98,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.05263157894736842,
+    "reward_mean": -2.51319255,
+    "reward_std": 0.6959584787720798,
+    "allow_precision": 0.2,
+    "block_precision": 0.0,
+    "fork_precision": 0.0,
+    "quarantine_precision": 0.0,
+    "per_action_accuracy": {
+      "ALLOW": 0.02857142857142857,
+      "BLOCK": 0.0,
+      "FORK": 0.0,
+      "QUARANTINE": 0.0
+    },
+    "confusion_matrix": {
+      "ALLOW": {
+        "ALLOW": 1,
+        "BLOCK": 0,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 34
+      },
+      "BLOCK": {
+        "ALLOW": 1,
+        "BLOCK": 0,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 14
+      },
+      "FORK": {
+        "ALLOW": 1,
+        "BLOCK": 0,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 27
+      },
+      "QUARANTINE": {
+        "ALLOW": 2,
+        "BLOCK": 0,
+        "FORK": 0,
+        "QUARANTINE": 0,
+        "INVALID": 20
+      }
+    },
+    "avg_completion_length": 3.55,
+    "action_distribution": {
+      "ALLOW": 0.05,
+      "BLOCK": 0.0,
+      "FORK": 0.0,
+      "QUARANTINE": 0.0
+    },
+    "normalized_action_distribution": {
+      "ALLOW": 0.05,
+      "BLOCK": 0.0,
+      "FORK": 0.0,
+      "QUARANTINE": 0.0
+    },
+    "invalid_output_count": 95,
+    "multi_action_warnings": 14,
+    "multi_action_warning_rate": 0.14,
+    "entropy": 0.21609640474436814,
+    "reward_breakdown": {
+      "invalid_output": 95,
+      "unsafe_allow_attack_cue": 3,
+      "minor_wrong": 1,
+      "exact_correct": 1
+    }
+  },
+  "lora_parameter_delta": {
+    "changed_trainable_tensors": 392,
+    "total_abs_delta": 22221.34467124939,
+    "total_l2_delta": 167.79022146761417
+  },
+  "output_dir": "training\\checkpoints\\qwen3_sft_adapter"
+}

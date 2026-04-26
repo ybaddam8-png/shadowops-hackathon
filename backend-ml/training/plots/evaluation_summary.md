@@ -2,7 +2,7 @@
 
 > Note: metrics below are **demo target values** for publication visuals because measured `grpo_model` metrics are not available in current repo artifacts.
 
-> Reward-curve source: reward curve uses demo trajectory (trainer logs unavailable).
+> Reward-curve source: reward curve derived from available trainer_state.json log_history.
 
 | Policy | Validation Accuracy | Avg Reward |
 | --- | ---: | ---: |

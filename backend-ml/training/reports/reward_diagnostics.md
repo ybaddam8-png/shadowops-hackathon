@@ -1,7 +1,7 @@
 # ShadowOps Reward Diagnostics
 
 - Samples: 100
-- Reward mean/std: -0.061 / 1.964
+- Reward mean/std: -0.058 / 1.974
 - Zero-std reward groups: 0.0%
 - Invalid output rate: 0.042
 

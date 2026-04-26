@@ -26,7 +26,7 @@
         "safety_accuracy": 0.8,
         "unsafe_decision_rate": 0.2,
         "false_positive_rate": 0.16279069767441862,
-        "reward_mean": 0.08253612000000003
+        "reward_mean": 0.08658879
       },
       {
         "policy": "Heuristic",
@@ -34,7 +34,7 @@
         "safety_accuracy": 0.92,
         "unsafe_decision_rate": 0.08,
         "false_positive_rate": 0.0,
-        "reward_mean": 1.1457713
+        "reward_mean": 1.18081626
       },
       {
         "policy": "Q-aware",
@@ -42,7 +42,7 @@
         "safety_accuracy": 1.0,
         "unsafe_decision_rate": 0.0,
         "false_positive_rate": 0.0,
-        "reward_mean": 1.89905622
+        "reward_mean": 1.93683846
       },
       {
         "policy": "Oracle",
@@ -50,20 +50,20 @@
         "safety_accuracy": 1.0,
         "unsafe_decision_rate": 0.0,
         "false_positive_rate": 0.0,
-        "reward_mean": 1.92046906
+        "reward_mean": 1.95846316
       }
     ],
     "oracle_check": {
       "passed": true,
-      "oracle_reward_mean": 1.92046906,
+      "oracle_reward_mean": 1.95846316,
       "inconsistency_count": 0,
       "output_path": "training\\oracle_inconsistency_examples.json"
     }
   },
   "reward_diagnostics": {
     "sample_count": 100,
-    "reward_mean": -0.06149112499999999,
-    "reward_std": 1.9643245485122947,
+    "reward_mean": -0.057721124166666665,
+    "reward_std": 1.9738048872914524,
     "percent_zero_std_groups": 0.0,
     "invalid_output_rate": 0.041666666666666664,
     "action_distribution": {
@@ -349,6 +349,9 @@
       "model_policy_comparison.md",
       "multistep_episode_report.json",
       "multistep_episode_report.md",
+      "openenv_behavior_comparison.json",
+      "openenv_behavior_comparison.md",
+      "openenv_episode_rewards.png",
       "openenv_loop_eval.json",
       "openenv_loop_eval.md",
       "oracle_gap_analysis.json",
@@ -358,7 +361,8 @@
       "reward_curve.png",
       "reward_curve_status.md",
       "reward_diagnostics.json",
-      "reward_diagnostics.md"
+      "reward_diagnostics.md",
+      "submission_artifact_check_report.md"
     ],
     "benchmark_policy_count": 4,
     "model_policy_datasets": [
@@ -366,8 +370,8 @@
       "validation"
     ],
     "openenv_loop": {
-      "episodes": 3,
-      "total_steps": 15,
+      "episodes": 50,
+      "total_steps": 250,
       "unsafe_allow_rate": 0.0
     }
   },

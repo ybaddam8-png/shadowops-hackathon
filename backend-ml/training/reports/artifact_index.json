@@ -9,6 +9,9 @@
     "model_policy_comparison.md",
     "multistep_episode_report.json",
     "multistep_episode_report.md",
+    "openenv_behavior_comparison.json",
+    "openenv_behavior_comparison.md",
+    "openenv_episode_rewards.png",
     "openenv_loop_eval.json",
     "openenv_loop_eval.md",
     "oracle_gap_analysis.json",
@@ -18,7 +21,8 @@
     "reward_curve.png",
     "reward_curve_status.md",
     "reward_diagnostics.json",
-    "reward_diagnostics.md"
+    "reward_diagnostics.md",
+    "submission_artifact_check_report.md"
   ],
   "benchmark_policy_count": 4,
   "model_policy_datasets": [
@@ -26,8 +30,8 @@
     "validation"
   ],
   "openenv_loop": {
-    "episodes": 3,
-    "total_steps": 15,
+    "episodes": 50,
+    "total_steps": 250,
     "unsafe_allow_rate": 0.0
   }
 }

@@ -1341,6 +1341,34 @@ def _reward_margin(sample: dict[str, Any], predicted_action: str) -> float:
     return round(margin, 6)
 
 
+def _risk_alignment_adjustment(sample: dict[str, Any], predicted_action: str) -> float:
+    """Small continuous term to reduce reward plateaus across similar samples."""
+
+    if predicted_action not in VALID_ACTION_SET:
+        return 0.0
+    risk = max(0.0, min(1.0, float(sample.get("risk_score", 0.0) or 0.0)))
+    targets = {
+        "ALLOW": 0.10,
+        "FORK": 0.45,
+        "QUARANTINE": 0.62,
+        "BLOCK": 0.82,
+    }
+    tolerance = {
+        "ALLOW": 0.30,
+        "FORK": 0.28,
+        "QUARANTINE": 0.24,
+        "BLOCK": 0.20,
+    }
+    target = targets[predicted_action]
+    tol = tolerance[predicted_action]
+    distance = abs(risk - target)
+    within = max(0.0, 1.0 - (distance / max(tol, 1e-6)))
+    bonus = 0.12 * within
+    overshoot = max(0.0, distance - tol)
+    penalty = -0.08 * min(1.0, overshoot / max(1.0 - tol, 1e-6))
+    return round(bonus + penalty, 6)
+
+
 def compute_shaped_reward(
     sample: dict[str, Any],
     predicted_action: Optional[str],
@@ -1380,6 +1408,8 @@ def compute_shaped_reward(
     else:
         reward = -0.5
         category = "minor_wrong"
+
+    reward += _risk_alignment_adjustment(sample, predicted_action)
 
     text = _sample_text(sample)
     if any(

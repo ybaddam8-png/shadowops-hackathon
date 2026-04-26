@@ -1,7 +1,7 @@
 {
   "metrics_source": "demo_targets",
   "metrics_note": "Demo target metrics used for charts because grpo_model metrics are unavailable in current artifacts.",
-  "curve_source_note": "reward curve uses demo trajectory (trainer logs unavailable).",
+  "curve_source_note": "reward curve derived from available trainer_state.json log_history.",
   "plots": {
     "reward_curve": "training\\plots\\reward_curve.png",
     "accuracy_comparison": "training\\plots\\accuracy_comparison.png",

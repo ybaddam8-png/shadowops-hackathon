@@ -1,108 +1,90 @@
 """
-main.py — ShadowOps FastAPI WebSocket Server
-=============================================
-WebSocket: ws://localhost:8000/ws
-REST:      GET /health | /state | /forensics | /reports | /health-scores
+main.py — ShadowOps FastAPI WebSocket Server.
 
-Changes:
-  - _mock_supervisor: 4-action output (ALLOW/BLOCK/FORK/QUARANTINE)
-  - _infer_llama: parses QUARANTINE token
-  - process_live_action response now includes ambiguity_score and
-    quarantine_hold fields from the updated env
+Stability-first runtime:
+  - default decision path uses pickle classifier
+  - optional LoRA explainer is isolated behind toggle
 """
 
-import json
 import asyncio
+import datetime
+import json
 import logging
+import pickle
+from pathlib import Path
+from typing import Any
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from shadowops_env import (
-    UniversalShadowEnv,
-    extract_features,
-    build_llama_prompt,
-    compute_ambiguity,
-    QUARANTINE_HOLD_STEPS,
-)
 from api.models import InboundMessage, OutboundMessage
+from shadowops_env import UniversalShadowEnv, build_llama_prompt, compute_ambiguity, extract_features
 
 try:
-    from training.shadowops_training_common import build_q_aware_decision, q_aware_demo_policy_action
-    _Q_AWARE_POLICY_AVAILABLE = True
-except Exception as exc:
-    build_q_aware_decision = None
-    q_aware_demo_policy_action = None
-    _Q_AWARE_POLICY_AVAILABLE = False
-    _Q_AWARE_POLICY_IMPORT_ERROR = str(exc)
-
-try:
-    from agent_memory import add_record, summarize_memory_context
+    from agent_memory import add_record
 except Exception:
     add_record = None
-    summarize_memory_context = None
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("shadowops")
 
-# ── Config ────────────────────────────────────────────────────
-USE_REAL_MODEL   = False
-LLAMA_MODEL_PATH = "./training/shadowops_model"
-DEMO_POLICY_NAME = "q_aware_demo_policy"
+# ── Stable toggles ─────────────────────────────────────────────
+USE_PICKLE_CLASSIFIER = True
+USE_LORA_EXPLAINER = False
+
+MODEL_PATH_CANDIDATES = [
+    "exports/model_fixed.pkl",
+    "../export/model_fixed.pkl",
+    "../export/model.pkl",
+]
+LORA_ADAPTER_PATH = "./shadowops_qwen3_1p7b_model"
 VALID_DECISIONS = {"ALLOW", "BLOCK", "FORK", "QUARANTINE"}
+FORENSICS_JSONL = Path("forensics.jsonl")
 
-# ── Llama loader ──────────────────────────────────────────────
-_llama_model = _llama_tokenizer = None
+app = FastAPI(title="ShadowOps API", version="3.2.0")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+env = UniversalShadowEnv(mode="live", seed=99)
+
+runtime_state: dict[str, Any] = {
+    "alive": True,
+    "ready": False,
+    "mode": "threshold_fallback",
+    "model_loaded": False,
+    "classifier_loaded": False,
+    "adapter_loaded": False,
+    "device": "cpu",
+    "startup_error": None,
+}
+
+_clf = None
+_labels = None
+_qwen_model = None
+_qwen_tokenizer = None
+_lora_model = None
+_lora_tokenizer = None
+_model_path_in_use = None
 
 
-def _load_llama():
-    global _llama_model, _llama_tokenizer
-    if _llama_model:
-        return
-    from unsloth import FastLanguageModel
-    _llama_model, _llama_tokenizer = FastLanguageModel.from_pretrained(
-        model_name=LLAMA_MODEL_PATH, max_seq_length=512,
-        dtype=None, load_in_4bit=True,
+def _append_forensics(event: dict[str, Any]) -> None:
+    try:
+        with FORENSICS_JSONL.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except Exception as exc:
+        log.warning("forensics append failed: %s", exc)
+
+
+def _risk_score(risk_vector: list[float]) -> float:
+    return float(
+        risk_vector[0] * 0.35
+        + risk_vector[1] * 0.25
+        + risk_vector[3] * 0.20
+        + risk_vector[6] * 0.20
     )
-    FastLanguageModel.for_inference(_llama_model)
 
 
-def _infer_llama(prompt: str) -> str:
-    import torch
-    inputs = _llama_tokenizer(prompt, return_tensors="pt").to("cuda")
-    with torch.no_grad():
-        out = _llama_model.generate(
-            **inputs, max_new_tokens=5,
-            temperature=0.01, do_sample=False,
-        )
-    decoded = _llama_tokenizer.decode(out[0], skip_special_tokens=True)
-    last    = decoded.strip().split()[-1].upper()
-    # Check exact match first (most common path)
-    if last in ("ALLOW", "BLOCK", "FORK", "QUARANTINE"):
-        return last
-    # Fallback: scan full decoded text in priority order
-    for w in ("QUARANTINE", "FORK", "BLOCK", "ALLOW"):
-        if w in decoded.upper():
-            return w
-    return "BLOCK"
-
-
-def _mock_supervisor(risk_vector: list, ambiguity: float) -> str:
-    """
-    4-action threshold fallback used only if the Q-aware demo policy fails.
-
-    Decision logic:
-      - High risk (>0.65)  → FORK   (deceive, don't alert attacker)
-      - Ambiguous (>0.40)  → QUARANTINE (hold 3 steps, gather context)
-      - Medium risk (>0.35)→ BLOCK
-      - Low risk           → ALLOW
-    """
-    risk = (
-        risk_vector[0] * 0.35 +
-        risk_vector[1] * 0.25 +
-        risk_vector[3] * 0.20 +
-        risk_vector[6] * 0.20
-    )
+def _threshold_decision(risk_vector: list[float], ambiguity: float) -> str:
+    risk = _risk_score(risk_vector)
     if risk > 0.65:
         return "FORK"
     if ambiguity > 0.40:
@@ -112,284 +94,209 @@ def _mock_supervisor(risk_vector: list, ambiguity: float) -> str:
     return "ALLOW"
 
 
-def _fallback_decision_details(domain: str, risk_vector: list, ambiguity: float, decision: str) -> dict:
-    risk_score = (
-        risk_vector[0] * 0.35 +
-        risk_vector[1] * 0.25 +
-        risk_vector[3] * 0.20 +
-        risk_vector[6] * 0.20
-    )
+def _fallback_decision_details(domain: str, risk_vector: list[float], ambiguity: float, decision: str) -> dict[str, Any]:
+    score = round(_risk_score(risk_vector), 3)
+    decision = str(decision or "QUARANTINE").upper()
+    if decision not in VALID_DECISIONS:
+        decision = "QUARANTINE"
     return {
         "decision": decision,
         "confidence": round(max(0.0, min(1.0, 1.0 - ambiguity * 0.5)), 3),
         "uncertainty": round(max(0.0, min(1.0, ambiguity)), 3),
-        "risk_score": round(float(risk_score), 3),
-        "cumulative_risk_score": round(float(risk_score), 3),
-        "cumulative_risk_reason": "Threshold fallback does not compute cumulative memory risk.",
+        "risk_score": score,
+        "cumulative_risk_score": score,
         "missing_evidence": [],
         "required_evidence": [],
-        "explanation": "Threshold fallback decision; Q-aware policy details unavailable.",
-        "safe_outcome": "Hold action until a valid supervisor decision is available.",
+        "explanation": "Stable fallback decision.",
+        "safe_outcome": "Decision generated with conservative runtime safeguards.",
+        "structured_safe_outcome": {"remediation_steps": "Manual review required."},
         "evidence_plan": [],
-        "structured_safe_outcome": {
-            "outcome": "Hold action until a valid supervisor decision is available.",
-            "remediation_steps": ["Request a valid supervisor decision before execution."],
-            "rollback_required": False,
-            "human_review_required": True,
-            "monitoring_required": False,
-            "explanation": "Fallback policy has no evidence planner context.",
-            "evidence_needed": [],
-            "allowed_next_actions": ["request valid supervisor decision"],
-        },
-        "decision_trace": {
-            "domain": domain or "unknown",
-            "risk_signals": [],
-            "safe_signals": [],
-            "cumulative_risk_score": round(float(risk_score), 3),
-            "memory_signals": [],
-            "missing_evidence": [],
-            "evidence_steps": [],
-            "final_decision": decision,
-            "safety_rationale": "Fallback policy returned a conservative supervisor decision.",
-        },
-        "memory_context": {},
-        "policy_name": "threshold_fallback_policy",
+        "decision_trace": {"final_decision": decision},
+        "policy_name": runtime_state["mode"],
         "domain": domain,
         "mitre_tactic": "Unknown",
         "mitre_technique": "Unknown",
-        "risk_indicators": [],
-        "safe_indicators": [],
     }
 
 
-def _as_list(value) -> list:
-    if value is None:
-        return []
-    if isinstance(value, list):
-        return value
-    if isinstance(value, (tuple, set)):
-        return list(value)
-    return [value]
+def _load_pickle_classifier() -> None:
+    global _clf, _labels, _qwen_model, _qwen_tokenizer, _model_path_in_use
+    if _clf is not None:
+        return
+    selected = None
+    for candidate in MODEL_PATH_CANDIDATES:
+        p = Path(candidate)
+        if p.exists():
+            selected = p
+            break
+    if selected is None:
+        raise FileNotFoundError(f"missing classifier artifact candidates: {MODEL_PATH_CANDIDATES}")
+    _model_path_in_use = str(selected)
+    with open(selected, "rb") as f:
+        data = pickle.load(f)
+    _clf = data["clf"]
+    _labels = data["labels"]
 
-
-def _as_dict(value) -> dict:
-    return value if isinstance(value, dict) else {}
-
-
-def _as_float(value, default: float = 0.0) -> float:
     try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
+        from unsloth import FastLanguageModel
+        import torch
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        runtime_state["device"] = device
+        _qwen_model, _qwen_tokenizer = FastLanguageModel.from_pretrained(
+            model_name="unsloth/Qwen3-1.7B",
+            max_seq_length=256,
+            load_in_4bit=(device == "cuda"),
+        )
+        if getattr(_qwen_tokenizer, "pad_token_id", None) is None:
+            _qwen_tokenizer.pad_token = _qwen_tokenizer.eos_token
+        FastLanguageModel.for_inference(_qwen_model)
+    except Exception as exc:
+        log.warning("Optional Qwen model import failed, running in fallback mode: %s", exc)
+        runtime_state["startup_error"] = str(exc)
 
 
-def _safe_decision_details(
-    details: dict,
-    *,
-    domain: str,
-    risk_vector: list,
-    ambiguity: float,
-) -> dict:
-    if not isinstance(details, dict):
-        details = _fallback_decision_details(domain, risk_vector, ambiguity, "QUARANTINE")
-
-    decision = str(details.get("decision") or details.get("action_taken") or "QUARANTINE").upper()
-    if decision not in VALID_DECISIONS:
-        decision = "QUARANTINE"
-
-    risk_score = _as_float(details.get("risk_score"), _as_float(details.get("cumulative_risk_score"), 0.0))
-    cumulative_risk = _as_float(details.get("cumulative_risk_score"), risk_score)
-    missing_evidence = [str(item) for item in _as_list(details.get("missing_evidence"))]
-    required_evidence = [str(item) for item in _as_list(details.get("required_evidence"))]
-    risk_indicators = [str(item) for item in _as_list(details.get("risk_indicators"))]
-    safe_indicators = [str(item) for item in _as_list(details.get("safe_indicators"))]
-    evidence_plan = [
-        item for item in _as_list(details.get("evidence_plan"))
-        if isinstance(item, dict)
+def _load_lora_explainer() -> None:
+    global _lora_model, _lora_tokenizer
+    if _lora_model is not None:
+        return
+    required = [
+        Path(LORA_ADAPTER_PATH) / "adapter_model.safetensors",
+        Path(LORA_ADAPTER_PATH) / "adapter_config.json",
     ]
-    safe_outcome = str(details.get("safe_outcome") or "Quarantine action until missing evidence is provided.")
-    structured_safe_outcome = _as_dict(details.get("structured_safe_outcome"))
-    structured_safe_outcome.setdefault("outcome", safe_outcome)
-    structured_safe_outcome.setdefault("remediation_steps", ["Collect required evidence before execution."])
-    structured_safe_outcome.setdefault("rollback_required", False)
-    structured_safe_outcome.setdefault("human_review_required", decision in {"FORK", "QUARANTINE", "BLOCK"})
-    structured_safe_outcome.setdefault("monitoring_required", decision in {"ALLOW", "FORK", "QUARANTINE"})
-    structured_safe_outcome.setdefault("explanation", "Safe defaults applied to supervisor response.")
-    structured_safe_outcome.setdefault("evidence_needed", [item.get("ask", "") for item in evidence_plan] or missing_evidence)
-    structured_safe_outcome.setdefault("allowed_next_actions", ["hold action", "collect missing evidence"])
-    if not isinstance(structured_safe_outcome.get("remediation_steps"), list):
-        structured_safe_outcome["remediation_steps"] = ["Collect required evidence before execution."]
-    if not isinstance(structured_safe_outcome.get("evidence_needed"), list):
-        structured_safe_outcome["evidence_needed"] = missing_evidence
-    if not isinstance(structured_safe_outcome.get("allowed_next_actions"), list):
-        structured_safe_outcome["allowed_next_actions"] = ["hold action", "collect missing evidence"]
-    decision_trace = _as_dict(details.get("decision_trace"))
-    decision_trace.setdefault("domain", str(details.get("domain") or domain or "unknown"))
-    decision_trace.setdefault("risk_signals", risk_indicators)
-    decision_trace.setdefault("safe_signals", safe_indicators)
-    decision_trace.setdefault("cumulative_risk_score", round(max(0.0, min(1.0, cumulative_risk)), 3))
-    memory_context = _as_dict(details.get("memory_context"))
-    memory_signals = list(memory_context.get("risky_chains", []))
-    decision_trace.setdefault("memory_signals", memory_signals)
-    decision_trace.setdefault("missing_evidence", missing_evidence)
-    decision_trace.setdefault(
-        "evidence_steps",
-        [
-            {
-                "step": item.get("step"),
-                "priority": item.get("priority"),
-                "ask": item.get("ask"),
-                "blocks_decision": item.get("blocks_decision", False),
-            }
-            for item in evidence_plan
-        ],
-    )
-    decision_trace.setdefault("final_decision", decision)
-    decision_trace.setdefault("safety_rationale", f"Safe outcome: {safe_outcome}")
-    if not isinstance(decision_trace.get("risk_signals"), list):
-        decision_trace["risk_signals"] = risk_indicators
-    if not isinstance(decision_trace.get("safe_signals"), list):
-        decision_trace["safe_signals"] = safe_indicators
-    if not isinstance(decision_trace.get("memory_signals"), list):
-        decision_trace["memory_signals"] = memory_signals
-    if not isinstance(decision_trace.get("missing_evidence"), list):
-        decision_trace["missing_evidence"] = missing_evidence
-    if not isinstance(decision_trace.get("evidence_steps"), list):
-        decision_trace["evidence_steps"] = []
+    missing = [str(p) for p in required if not p.exists()]
+    if missing:
+        raise FileNotFoundError(f"missing adapter files: {missing}")
 
-    return {
-        **details,
-        "decision": decision,
-        "confidence": round(max(0.0, min(1.0, _as_float(details.get("confidence"), 0.5))), 3),
-        "uncertainty": round(max(0.0, min(1.0, _as_float(details.get("uncertainty"), ambiguity))), 3),
-        "risk_score": round(max(0.0, min(1.0, risk_score)), 3),
-        "cumulative_risk_score": round(max(0.0, min(1.0, cumulative_risk)), 3),
-        "cumulative_risk_reason": str(details.get("cumulative_risk_reason") or "No cumulative risk reason provided."),
-        "missing_evidence": missing_evidence,
-        "required_evidence": required_evidence,
-        "explanation": str(details.get("explanation") or "Supervisor returned safe default decision details."),
-        "safe_outcome": safe_outcome,
-        "evidence_plan": evidence_plan,
-        "structured_safe_outcome": structured_safe_outcome,
-        "decision_trace": decision_trace,
-        "memory_context": memory_context,
-        "policy_name": str(details.get("policy_name") or DEMO_POLICY_NAME),
-        "domain": str(details.get("domain") or domain or "unknown"),
-        "mitre_tactic": str(details.get("mitre_tactic") or "Unknown"),
-        "mitre_technique": str(details.get("mitre_technique") or "Unknown"),
-        "risk_indicators": risk_indicators,
-        "safe_indicators": safe_indicators,
-    }
+    from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    import torch
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    runtime_state["device"] = device
+    base = AutoModelForCausalLM.from_pretrained("unsloth/Qwen3-1.7B")
+    _lora_tokenizer = AutoTokenizer.from_pretrained("unsloth/Qwen3-1.7B")
+    _lora_model = PeftModel.from_pretrained(base, LORA_ADAPTER_PATH)
+    _lora_model.to(device)
+    if getattr(_lora_tokenizer, "pad_token_id", None) is None:
+        _lora_tokenizer.pad_token = _lora_tokenizer.eos_token
 
 
-def _decide(
-    domain: str,
-    intent: str,
-    raw_payload: str,
-    prompt: str,
-    risk_vector: list,
-    *,
-    actor: str = "unknown",
-    session_id: str = "default",
-    service: str = "",
-    environment: str = "production",
-    provided_evidence: list | None = None,
-) -> dict:
+def _infer_classifier(text: str) -> str:
+    import torch
+
+    inputs = _qwen_tokenizer(text, return_tensors="pt", truncation=True, max_length=128)
+    if runtime_state["device"] == "cuda":
+        inputs = inputs.to("cuda")
+    with torch.no_grad():
+        h = _qwen_model(**inputs, output_hidden_states=True).hidden_states[-1]
+        mask = inputs["attention_mask"].unsqueeze(-1)
+        emb = ((h * mask).sum(1) / mask.sum(1)).float().cpu().numpy()
+    probs = _clf.predict_proba(emb)[0]
+    return str(_labels[int(probs.argmax())]).upper()
+
+
+def _warmup_runtime() -> None:
+    runtime_state["ready"] = False
+    runtime_state["startup_error"] = None
+    runtime_state["mode"] = "threshold_fallback"
+    try:
+        if USE_PICKLE_CLASSIFIER:
+            _load_pickle_classifier()
+            runtime_state["classifier_loaded"] = True
+            runtime_state["model_loaded"] = True
+            runtime_state["mode"] = "pickle_classifier"
+            log.info("classifier artifact loaded from %s", _model_path_in_use)
+        if USE_LORA_EXPLAINER:
+            _load_lora_explainer()
+            runtime_state["adapter_loaded"] = True
+            runtime_state["model_loaded"] = True
+            runtime_state["mode"] = "pickle_classifier+lora_explainer" if USE_PICKLE_CLASSIFIER else "lora_explainer"
+        runtime_state["ready"] = True
+        log.info("startup warmup success mode=%s device=%s", runtime_state["mode"], runtime_state["device"])
+    except Exception as exc:
+        runtime_state["startup_error"] = str(exc)
+        runtime_state["ready"] = False
+        log.exception("startup warmup failed; using threshold fallback: %s", exc)
+
+
+@app.on_event("startup")
+def _startup() -> None:
+    _warmup_runtime()
+
+
+def _decide(domain: str, intent: str, raw_payload: str, risk_vector: list[float]) -> dict[str, Any]:
     ambiguity = compute_ambiguity(risk_vector)
-    if USE_REAL_MODEL:
-        _load_llama()
-        model_decision = _infer_llama(prompt)
-        details = _fallback_decision_details(domain, risk_vector, ambiguity, model_decision)
-        details["policy_name"] = "llama_model"
-        return _safe_decision_details(details, domain=domain, risk_vector=risk_vector, ambiguity=ambiguity)
-    if _Q_AWARE_POLICY_AVAILABLE and build_q_aware_decision is not None:
-        try:
-            memory_context = (
-                summarize_memory_context(session_id)
-                if summarize_memory_context is not None
-                else None
-            )
-            details = build_q_aware_decision(
-                domain,
-                intent,
-                raw_payload,
-                risk_vector,
-                actor=actor,
-                session_id=session_id,
-                service=service or domain,
-                environment=environment,
-                provided_evidence=provided_evidence or [],
-                memory_context=memory_context,
-            )
-            return _safe_decision_details(details, domain=domain, risk_vector=risk_vector, ambiguity=ambiguity)
-        except Exception as exc:
-            log.warning("Q-aware demo policy failed; using threshold fallback: %s", exc)
-    details = _fallback_decision_details(domain, risk_vector, ambiguity, _mock_supervisor(risk_vector, ambiguity))
-    return _safe_decision_details(details, domain=domain, risk_vector=risk_vector, ambiguity=ambiguity)
+    text = f"{intent} {raw_payload}"
+    try:
+        if runtime_state["classifier_loaded"] and _clf is not None and _qwen_model is not None:
+            decision = _infer_classifier(text)
+            details = _fallback_decision_details(domain, risk_vector, ambiguity, decision)
+            details["policy_name"] = "pickle_classifier"
+            details["explanation"] = "Decision from stable classifier path."
+            return details
+    except Exception as exc:
+        log.warning("classifier inference failed, falling back: %s", exc)
+    decision = _threshold_decision(risk_vector, ambiguity)
+    details = _fallback_decision_details(domain, risk_vector, ambiguity, decision)
+    details["policy_name"] = "threshold_fallback"
+    return details
 
 
-def _process_inbound(payload: InboundMessage) -> dict:
-    domain      = payload.domain
-    intent      = payload.action.intent
+def _process_inbound(payload: InboundMessage) -> dict[str, Any]:
+    domain = payload.domain
+    intent = payload.action.intent
     raw_payload = payload.action.raw_payload
     risk_vector = extract_features(domain, intent, raw_payload)
-    prompt      = build_llama_prompt(domain, intent, raw_payload, risk_vector)
-    decision_details = _decide(
-        domain,
-        intent,
-        raw_payload,
-        prompt,
-        risk_vector,
-        actor=payload.actor,
-        session_id=payload.session_id,
-        service=payload.service or domain,
-        environment=payload.environment,
-        provided_evidence=payload.provided_evidence,
-    )
+    _ = build_llama_prompt(domain, intent, raw_payload, risk_vector)
+
+    decision_details = _decide(domain, intent, raw_payload, risk_vector)
     decision = decision_details["decision"]
     result = env.process_live_action(domain, intent, raw_payload, decision)
     result["supervisor_decision"].update(decision_details)
     result["supervisor_decision"]["action_taken"] = decision
     result["supervisor_decision"]["decision"] = decision
+
+    event = {
+        "ts": datetime.datetime.utcnow().isoformat() + "Z",
+        "domain": domain,
+        "intent": intent,
+        "decision": decision,
+        "policy_name": decision_details.get("policy_name"),
+        "risk_score": decision_details.get("risk_score", 0.0),
+        "session_id": payload.session_id,
+        "actor": payload.actor,
+    }
+    _append_forensics(event)
     if add_record is not None:
-        add_record({
-            "actor": payload.actor,
-            "session_id": payload.session_id,
-            "service": payload.service or domain,
-            "domain": domain,
-            "environment": payload.environment,
-            "timestamp": decision_details.get("timestamp", 0),
-            "decision": decision,
-            "risk_score": decision_details.get("risk_score", 0.0),
-            "action_summary": raw_payload,
-            "indicators": decision_details.get("risk_indicators", []),
-        })
+        add_record(event)
     return result
 
 
-# ── App ───────────────────────────────────────────────────────
-app = FastAPI(title="ShadowOps API", version="3.0.0")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-env = UniversalShadowEnv(mode="live", seed=99)
-
-# ── REST ──────────────────────────────────────────────────────
-
 @app.get("/health")
 def health():
-    return {"status": "ok", "model": "llama" if USE_REAL_MODEL else "mock",
-            "policy": "llama_model" if USE_REAL_MODEL else DEMO_POLICY_NAME,
-            "version": "3.0.0", "action_space": ["ALLOW", "BLOCK", "FORK", "QUARANTINE"]}
+    return {"status": "alive", "service": "shadowops-api", "version": "3.2.0"}
+
+
+@app.get("/ready")
+def ready():
+    model_ready = runtime_state["model_loaded"] and _qwen_model is not None
+    return {
+        "status": "ready" if runtime_state["ready"] else "not_ready",
+        "q_aware_ready": model_ready,
+        "model_ready": model_ready,
+        "fallback_ready": runtime_state["ready"],
+        "mode": runtime_state["mode"],
+        "classifier_loaded": runtime_state["classifier_loaded"],
+        "adapter_loaded": runtime_state["adapter_loaded"],
+        "device": runtime_state["device"],
+        "startup_errors": runtime_state.get("startup_error"),
+    }
 
 
 @app.get("/state")
 def get_state():
-    return JSONResponse(env.get_production_snapshot())
+    return JSONResponse(env.state())
 
 
 @app.get("/forensics")
@@ -403,21 +310,41 @@ def get_reports():
 
 
 @app.get("/health-scores")
-def get_health():
+def get_health_scores():
     return JSONResponse(env.get_health_scores())
 
 
 @app.post("/decision")
 def post_decision(payload: InboundMessage):
-    return JSONResponse(_process_inbound(payload))
+    try:
+        return JSONResponse(_process_inbound(payload))
+    except Exception as exc:
+        log.exception("decision route failure: %s", exc)
+        fallback = _fallback_decision_details(payload.domain, [0.0] * 16, 1.0, "QUARANTINE")
+        return JSONResponse(
+            {
+                "domain": payload.domain,
+                "worker_action": {
+                    "intent": payload.action.intent,
+                    "raw_payload": payload.action.raw_payload,
+                    "is_malicious": False,
+                },
+                "supervisor_decision": {
+                    "action_taken": fallback["decision"],
+                    "risk_vector": [0.0] * 16,
+                    "ambiguity_score": 1.0,
+                    "quarantine_steps_remaining": 0,
+                    **fallback,
+                },
+                "environment_state": {"is_shadow_active": False, "domain_data": {}},
+                "health_scores": {},
+                "quarantine_status": {},
+                "quarantine_hold": None,
+                "forensic_log": [],
+                "incident_report": None,
+            }
+        )
 
-
-@app.post("/simulate")
-def post_simulate(payload: InboundMessage):
-    return JSONResponse(_process_inbound(payload))
-
-
-# ── WebSocket ─────────────────────────────────────────────────
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -426,26 +353,9 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             raw = await websocket.receive_text()
-            try:
-                payload = InboundMessage(**json.loads(raw))
-            except Exception as e:
-                await websocket.send_json({"error": f"Bad payload: {e}"})
-                continue
-
-            domain      = payload.domain
-            intent      = payload.action.intent
-            raw_payload = payload.action.raw_payload
-            log.info("Inbound: %s | %s", domain, intent)
-
-            result   = _process_inbound(payload)
-            log.info("Decision: %s", result["supervisor_decision"]["decision"])
-            response = OutboundMessage(**result)
-
-            await asyncio.sleep(0.4)
+            payload = InboundMessage(**json.loads(raw))
+            response = OutboundMessage(**_process_inbound(payload))
+            await asyncio.sleep(0.2)
             await websocket.send_text(response.model_dump_json())
-
     except WebSocketDisconnect:
         log.info("Frontend disconnected")
-    except Exception as e:
-        log.error("WS error: %s", e)
-        await websocket.close()
